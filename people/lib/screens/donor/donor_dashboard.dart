@@ -1,0 +1,484 @@
+import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
+
+class DonorDashboard extends StatefulWidget {
+  const DonorDashboard({super.key});
+
+  @override
+  State<DonorDashboard> createState() => _DonorDashboardState();
+}
+
+class _DonorDashboardState extends State<DonorDashboard> {
+  int _currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildAppBar(),
+              Expanded(child: _buildContent()),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: _buildBottomNav(),
+    );
+  }
+
+  Widget _buildAppBar() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: AppTheme.donorGradient,
+            ),
+            child: const Icon(
+              Icons.volunteer_activism_rounded,
+              color: AppTheme.white,
+              size: 26,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Hello, Donor!',
+                  style: TextStyle(
+                    color: AppTheme.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  'Make a difference today',
+                  style: TextStyle(
+                    color: AppTheme.white.withOpacity(0.6),
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          _buildNotificationBell(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotificationBell() {
+    return Stack(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: AppTheme.white.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Icon(
+            Icons.notifications_outlined,
+            color: AppTheme.white,
+            size: 24,
+          ),
+        ),
+        Positioned(
+          right: 8,
+          top: 8,
+          child: Container(
+            width: 10,
+            height: 10,
+            decoration: const BoxDecoration(
+              color: AppTheme.accent,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildContent() {
+    switch (_currentIndex) {
+      case 0:
+        return _buildDashboardHome();
+      case 1:
+        return _buildPlaceholder('Discover NGOs', Icons.search_rounded);
+      case 2:
+        return _buildPlaceholder(
+          'Make Donation',
+          Icons.volunteer_activism_rounded,
+        );
+      case 3:
+        return _buildPlaceholder('History', Icons.history_rounded);
+      case 4:
+        return _buildPlaceholder('Profile', Icons.person_rounded);
+      default:
+        return _buildDashboardHome();
+    }
+  }
+
+  Widget _buildDashboardHome() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildImpactCard(),
+          const SizedBox(height: 24),
+          _buildDonationOptions(),
+          const SizedBox(height: 24),
+          _buildRecentActivity(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImpactCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.donorColor.withOpacity(0.3),
+            AppTheme.donorColor.withOpacity(0.1),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppTheme.donorColor.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Your Impact',
+            style: TextStyle(
+              color: AppTheme.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildImpactStat('₹25,000', 'Donated', Icons.attach_money),
+              _buildImpactStat('50+', 'Lives Helped', Icons.favorite),
+              _buildImpactStat('12', 'Donations', Icons.card_giftcard),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImpactStat(String value, String label, IconData icon) {
+    return Column(
+      children: [
+        Icon(icon, color: AppTheme.donorColor, size: 28),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: const TextStyle(
+            color: AppTheme.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            color: AppTheme.white.withOpacity(0.6),
+            fontSize: 11,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDonationOptions() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Ways to Help',
+          style: TextStyle(
+            color: AppTheme.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: _buildDonationCard(
+                'Money',
+                Icons.attach_money,
+                AppTheme.success,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildDonationCard(
+                'Clothes',
+                Icons.checkroom,
+                AppTheme.volunteerColor,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _buildDonationCard(
+                'Food',
+                Icons.restaurant,
+                AppTheme.gold,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildDonationCard(
+                'Other',
+                Icons.inventory_2,
+                AppTheme.info,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDonationCard(String title, IconData icon, Color color) {
+    return InkWell(
+      onTap: () {},
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 32),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              style: const TextStyle(
+                color: AppTheme.white,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecentActivity() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Recent Activity',
+          style: TextStyle(
+            color: AppTheme.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        _buildActivityItem(
+          'Donated ₹5,000',
+          'Hope Foundation',
+          Icons.attach_money,
+          AppTheme.success,
+          '2 days ago',
+        ),
+        _buildActivityItem(
+          'Clothes Donation',
+          '25 items',
+          Icons.checkroom,
+          AppTheme.volunteerColor,
+          '1 week ago',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActivityItem(
+    String title,
+    String subtitle,
+    IconData icon,
+    Color color,
+    String time,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppTheme.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: AppTheme.white.withOpacity(0.5),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            time,
+            style: TextStyle(
+              color: AppTheme.white.withOpacity(0.4),
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlaceholder(String title, IconData icon) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppTheme.donorColor.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: AppTheme.donorColor, size: 48),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            title,
+            style: const TextStyle(
+              color: AppTheme.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Coming Soon',
+            style: TextStyle(
+              color: AppTheme.white.withOpacity(0.5),
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomNav() {
+    final items = [
+      {'icon': Icons.dashboard_rounded, 'label': 'Home'},
+      {'icon': Icons.search_rounded, 'label': 'Discover'},
+      {'icon': Icons.volunteer_activism_rounded, 'label': 'Donate'},
+      {'icon': Icons.history_rounded, 'label': 'History'},
+      {'icon': Icons.person_rounded, 'label': 'Profile'},
+    ];
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.primaryDark,
+        border: Border(top: BorderSide(color: AppTheme.white.withOpacity(0.1))),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(items.length, (index) {
+              final isSelected = _currentIndex == index;
+              return InkWell(
+                onTap: () => setState(() => _currentIndex = index),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppTheme.donorColor.withOpacity(0.2)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        items[index]['icon'] as IconData,
+                        color: isSelected
+                            ? AppTheme.donorColor
+                            : AppTheme.white.withOpacity(0.5),
+                        size: 24,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        items[index]['label'] as String,
+                        style: TextStyle(
+                          color: isSelected
+                              ? AppTheme.donorColor
+                              : AppTheme.white.withOpacity(0.5),
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+  }
+}

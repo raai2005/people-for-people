@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "75175098524",
+    "project_id": "people-for-people-5569a",
+    "storage_bucket": "people-for-people-5569a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:75175098524:android:067d68312c0493ff935559",
+        "android_client_info": {
+          "package_name": "com.example.people"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEC7bDNNQMPJhJ2NEx3PiVD1TosPfyn0k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
