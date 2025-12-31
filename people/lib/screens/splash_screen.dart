@@ -267,7 +267,7 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Icon(
                     _donationIcons[index],
                     size: 24.0 + (index % 3) * 8.0,
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                   ),
                 ),
               ),
@@ -302,7 +302,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFE94560).withOpacity(0.5),
+                    color: const Color(0xFFE94560).withValues(alpha: 0.5),
                     blurRadius: 30,
                     spreadRadius: 10,
                   ),
@@ -318,7 +318,7 @@ class _SplashScreenState extends State<SplashScreen>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                         width: 3,
                       ),
                     ),
@@ -363,7 +363,7 @@ class _SplashScreenState extends State<SplashScreen>
                   letterSpacing: 4,
                   shadows: [
                     Shadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 10,
                       offset: const Offset(2, 2),
                     ),
@@ -377,7 +377,7 @@ class _SplashScreenState extends State<SplashScreen>
                 fontSize: 20,
                 fontWeight: FontWeight.w300,
                 fontStyle: FontStyle.italic,
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 letterSpacing: 2,
               ),
             ),
@@ -398,7 +398,7 @@ class _SplashScreenState extends State<SplashScreen>
                   letterSpacing: 4,
                   shadows: [
                     Shadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 10,
                       offset: const Offset(2, 2),
                     ),
@@ -422,8 +422,11 @@ class _SplashScreenState extends State<SplashScreen>
           margin: const EdgeInsets.symmetric(horizontal: 32),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(30),
-            color: Colors.white.withOpacity(0.1),
-            border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+            color: Colors.white.withValues(alpha: 0.1),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.2),
+              width: 1,
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -444,7 +447,7 @@ class _SplashScreenState extends State<SplashScreen>
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         letterSpacing: 0.5,
                       ),
                       textAlign: TextAlign.center,
@@ -464,7 +467,7 @@ class _SplashScreenState extends State<SplashScreen>
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w400,
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withValues(alpha: 0.6),
                   letterSpacing: 1.5,
                 ),
                 textAlign: TextAlign.center,
@@ -490,7 +493,7 @@ class _SplashScreenState extends State<SplashScreen>
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: LinearProgressIndicator(
-                    backgroundColor: Colors.white.withOpacity(0.2),
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
                     valueColor: AlwaysStoppedAnimation<Color>(
                       Color.lerp(
                         const Color(0xFFE94560),
@@ -510,7 +513,7 @@ class _SplashScreenState extends State<SplashScreen>
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w400,
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: 0.6),
               letterSpacing: 1.5,
             ),
           ),

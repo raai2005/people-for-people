@@ -1,5 +1,35 @@
 // User Role Enum
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 enum UserRole { ngo, donor, volunteer }
+
+// Verification Status Model
+class VerificationStatus {
+  final bool email;
+  final bool phone;
+  final bool governmentId;
+
+  VerificationStatus({
+    this.email = false,
+    this.phone = false,
+    this.governmentId = false,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {'email': email, 'phone': phone, 'governmentId': governmentId};
+  }
+
+  factory VerificationStatus.fromMap(Map<String, dynamic>? map) {
+    if (map == null) {
+      return VerificationStatus();
+    }
+    return VerificationStatus(
+      email: map['email'] ?? false,
+      phone: map['phone'] ?? false,
+      governmentId: map['governmentId'] ?? false,
+    );
+  }
+}
 
 // Base User class
 abstract class BaseUser {
@@ -12,6 +42,8 @@ abstract class BaseUser {
   final UserRole role;
   final bool isApproved;
   final DateTime createdAt;
+  final int profileCompletion;
+  final VerificationStatus verification;
 
   BaseUser({
     required this.id,
@@ -23,7 +55,10 @@ abstract class BaseUser {
     required this.role,
     this.isApproved = false,
     DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+    this.profileCompletion = 0,
+    VerificationStatus? verification,
+  }) : createdAt = createdAt ?? DateTime.now(),
+       verification = verification ?? VerificationStatus();
 }
 
 // NGO/Organisation Model
@@ -48,6 +83,8 @@ class NGOUser extends BaseUser {
     required this.headOfOrgIdUrl,
     super.isApproved,
     super.createdAt,
+    super.profileCompletion,
+    super.verification,
   }) : super(role: UserRole.ngo);
 
   Map<String, dynamic> toMap() {
@@ -61,6 +98,8 @@ class NGOUser extends BaseUser {
       'role': 'ngo',
       'isApproved': isApproved,
       'createdAt': createdAt.toIso8601String(),
+      'profileCompletion': profileCompletion,
+      'verification': verification.toMap(),
       'organizationName': organizationName,
       'address': address,
       'govtVerifiedDocUrl': govtVerifiedDocUrl,
@@ -70,6 +109,15 @@ class NGOUser extends BaseUser {
   }
 
   factory NGOUser.fromMap(Map<String, dynamic> map) {
+    DateTime? parsedCreatedAt;
+    if (map['createdAt'] != null) {
+      if (map['createdAt'] is Timestamp) {
+        parsedCreatedAt = (map['createdAt'] as Timestamp).toDate();
+      } else if (map['createdAt'] is String) {
+        parsedCreatedAt = DateTime.tryParse(map['createdAt']);
+      }
+    }
+
     return NGOUser(
       id: map['id'] ?? '',
       name: map['name'] ?? '',
@@ -83,9 +131,57 @@ class NGOUser extends BaseUser {
       headOfOrgId: map['headOfOrgId'] ?? '',
       headOfOrgIdUrl: map['headOfOrgIdUrl'] ?? '',
       isApproved: map['isApproved'] ?? false,
-      createdAt: map['createdAt'] != null
-          ? DateTime.parse(map['createdAt'])
-          : null,
+      createdAt: parsedCreatedAt,
+      profileCompletion: map['profileCompletion'] ?? 0,
+      verification: VerificationStatus.fromMap(map['verification']),
+    );
+  }
+}
+
+// Donor Profile Model
+class DonorProfile {
+  final String bio;
+  final String occupation;
+  final String location;
+  final String profileImage;
+  final List<String> badges;
+  final int donationCount;
+  final double rating;
+
+  DonorProfile({
+    this.bio = "",
+    this.occupation = "",
+    this.location = "",
+    this.profileImage = "",
+    this.badges = const [],
+    this.donationCount = 0,
+    this.rating = 0.0,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'bio': bio,
+      'occupation': occupation,
+      'location': location,
+      'profileImage': profileImage,
+      'badges': badges,
+      'donationCount': donationCount,
+      'rating': rating,
+    };
+  }
+
+  factory DonorProfile.fromMap(Map<String, dynamic>? map) {
+    if (map == null) {
+      return DonorProfile();
+    }
+    return DonorProfile(
+      bio: map['bio'] ?? "",
+      occupation: map['occupation'] ?? "",
+      location: map['location'] ?? "",
+      profileImage: map['profileImage'] ?? "",
+      badges: List<String>.from(map['badges'] ?? []),
+      donationCount: map['donationCount'] ?? 0,
+      rating: (map['rating'] ?? 0.0).toDouble(),
     );
   }
 }
@@ -93,6 +189,10 @@ class NGOUser extends BaseUser {
 // Donor Model
 class DonorUser extends BaseUser {
   final String qualification;
+  final String? profileImageUrl;
+  final String? bio;
+  final String? occupation;
+  final DonorProfile donorProfile;
 
   DonorUser({
     required super.id,
@@ -102,9 +202,16 @@ class DonorUser extends BaseUser {
     required super.location,
     required super.verifiedIdUrl,
     required this.qualification,
+    this.profileImageUrl,
+    this.bio,
+    this.occupation,
     super.isApproved,
     super.createdAt,
-  }) : super(role: UserRole.donor);
+    super.profileCompletion,
+    super.verification,
+    DonorProfile? donorProfile,
+  }) : donorProfile = donorProfile ?? DonorProfile(),
+       super(role: UserRole.donor);
 
   Map<String, dynamic> toMap() {
     return {
@@ -117,11 +224,26 @@ class DonorUser extends BaseUser {
       'role': 'donor',
       'isApproved': isApproved,
       'createdAt': createdAt.toIso8601String(),
+      'profileCompletion': profileCompletion,
+      'verification': verification.toMap(),
       'qualification': qualification,
+      'profileImageUrl': profileImageUrl,
+      'bio': bio,
+      'occupation': occupation,
+      'donorProfile': donorProfile.toMap(),
     };
   }
 
   factory DonorUser.fromMap(Map<String, dynamic> map) {
+    DateTime? parsedCreatedAt;
+    if (map['createdAt'] != null) {
+      if (map['createdAt'] is Timestamp) {
+        parsedCreatedAt = (map['createdAt'] as Timestamp).toDate();
+      } else if (map['createdAt'] is String) {
+        parsedCreatedAt = DateTime.tryParse(map['createdAt']);
+      }
+    }
+
     return DonorUser(
       id: map['id'] ?? '',
       name: map['name'] ?? '',
@@ -130,10 +252,14 @@ class DonorUser extends BaseUser {
       location: map['location'] ?? '',
       verifiedIdUrl: map['verifiedIdUrl'] ?? '',
       qualification: map['qualification'] ?? '',
+      profileImageUrl: map['profileImageUrl'],
+      bio: map['bio'],
+      occupation: map['occupation'],
       isApproved: map['isApproved'] ?? false,
-      createdAt: map['createdAt'] != null
-          ? DateTime.parse(map['createdAt'])
-          : null,
+      createdAt: parsedCreatedAt,
+      profileCompletion: map['profileCompletion'] ?? 0,
+      verification: VerificationStatus.fromMap(map['verification']),
+      donorProfile: DonorProfile.fromMap(map['donorProfile']),
     );
   }
 }
@@ -162,6 +288,8 @@ class VolunteerUser extends BaseUser {
     this.isAdminApproved = false,
     super.isApproved,
     super.createdAt,
+    super.profileCompletion,
+    super.verification,
   }) : super(role: UserRole.volunteer);
 
   Map<String, dynamic> toMap() {
@@ -175,6 +303,8 @@ class VolunteerUser extends BaseUser {
       'role': 'volunteer',
       'isApproved': isApproved,
       'createdAt': createdAt.toIso8601String(),
+      'profileCompletion': profileCompletion,
+      'verification': verification.toMap(),
       'qualification': qualification,
       'isWorkingInNGO': isWorkingInNGO,
       'ngoName': ngoName,
@@ -185,6 +315,15 @@ class VolunteerUser extends BaseUser {
   }
 
   factory VolunteerUser.fromMap(Map<String, dynamic> map) {
+    DateTime? parsedCreatedAt;
+    if (map['createdAt'] != null) {
+      if (map['createdAt'] is Timestamp) {
+        parsedCreatedAt = (map['createdAt'] as Timestamp).toDate();
+      } else if (map['createdAt'] is String) {
+        parsedCreatedAt = DateTime.tryParse(map['createdAt']);
+      }
+    }
+
     return VolunteerUser(
       id: map['id'] ?? '',
       name: map['name'] ?? '',
@@ -199,9 +338,9 @@ class VolunteerUser extends BaseUser {
       employeeId: map['employeeId'],
       isAdminApproved: map['isAdminApproved'] ?? false,
       isApproved: map['isApproved'] ?? false,
-      createdAt: map['createdAt'] != null
-          ? DateTime.parse(map['createdAt'])
-          : null,
+      createdAt: parsedCreatedAt,
+      profileCompletion: map['profileCompletion'] ?? 0,
+      verification: VerificationStatus.fromMap(map['verification']),
     );
   }
 }

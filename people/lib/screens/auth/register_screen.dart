@@ -314,7 +314,7 @@ class _RegisterScreenState extends State<RegisterScreen>
               colors: [AppTheme.primaryDark, AppTheme.primaryMedium],
             ),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: _roleColor.withOpacity(0.5)),
+            border: Border.all(color: _roleColor.withValues(alpha: 0.5)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -324,7 +324,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 height: 80,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppTheme.success.withOpacity(0.2),
+                  color: AppTheme.success.withValues(alpha: 0.2),
                 ),
                 child: const Icon(
                   Icons.check_circle,
@@ -348,7 +348,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                     ? 'Your account is pending admin approval. You will be notified once approved.'
                     : 'Your account has been created successfully. You can now login.',
                 style: TextStyle(
-                  color: AppTheme.white.withOpacity(0.7),
+                  color: AppTheme.white.withValues(alpha: 0.7),
                   fontSize: 14,
                 ),
                 textAlign: TextAlign.center,
@@ -358,10 +358,10 @@ class _RegisterScreenState extends State<RegisterScreen>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppTheme.warning.withOpacity(0.2),
+                    color: AppTheme.warning.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: AppTheme.warning.withOpacity(0.5),
+                      color: AppTheme.warning.withValues(alpha: 0.5),
                     ),
                   ),
                   child: Row(
@@ -459,7 +459,7 @@ class _RegisterScreenState extends State<RegisterScreen>
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppTheme.white.withOpacity(0.1),
+                color: AppTheme.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
@@ -476,7 +476,7 @@ class _RegisterScreenState extends State<RegisterScreen>
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
-                colors: [_roleColor, _roleColor.withOpacity(0.6)],
+                colors: [_roleColor, _roleColor.withValues(alpha: 0.6)],
               ),
             ),
             child: Icon(_roleIcon, color: AppTheme.white, size: 22),
@@ -497,7 +497,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 Text(
                   'Step ${_currentStep + 1} of $_totalSteps: ${_stepTitles[_currentStep]}',
                   style: TextStyle(
-                    color: AppTheme.white.withOpacity(0.6),
+                    color: AppTheme.white.withValues(alpha: 0.6),
                     fontSize: 12,
                   ),
                 ),
@@ -524,7 +524,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 borderRadius: BorderRadius.circular(2),
                 color: isCompleted || isCurrent
                     ? _roleColor
-                    : AppTheme.white.withOpacity(0.2),
+                    : AppTheme.white.withValues(alpha: 0.2),
               ),
             ),
           );
@@ -839,9 +839,9 @@ class _RegisterScreenState extends State<RegisterScreen>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: AppTheme.white.withOpacity(0.1),
+            color: AppTheme.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(15),
-            border: Border.all(color: AppTheme.white.withOpacity(0.2)),
+            border: Border.all(color: AppTheme.white.withValues(alpha: 0.2)),
           ),
           child: Row(
             children: [
@@ -851,7 +851,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 child: Text(
                   'Are you working in any NGO?',
                   style: TextStyle(
-                    color: AppTheme.white.withOpacity(0.9),
+                    color: AppTheme.white.withValues(alpha: 0.9),
                     fontSize: 14,
                   ),
                 ),
@@ -861,7 +861,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 onChanged: (value) {
                   setState(() => _isWorkingInNGO = value);
                 },
-                activeColor: _roleColor,
+                activeTrackColor: _roleColor,
               ),
             ],
           ),
@@ -971,7 +971,7 @@ class _RegisterScreenState extends State<RegisterScreen>
               _obscurePassword
                   ? Icons.visibility_off_outlined
                   : Icons.visibility_outlined,
-              color: AppTheme.white.withOpacity(0.6),
+              color: AppTheme.white.withValues(alpha: 0.6),
             ),
           ),
           validator: (value) {
@@ -1001,7 +1001,7 @@ class _RegisterScreenState extends State<RegisterScreen>
               _obscureConfirmPassword
                   ? Icons.visibility_off_outlined
                   : Icons.visibility_outlined,
-              color: AppTheme.white.withOpacity(0.6),
+              color: AppTheme.white.withValues(alpha: 0.6),
             ),
           ),
           validator: (value) {
@@ -1036,7 +1036,7 @@ class _RegisterScreenState extends State<RegisterScreen>
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: _roleColor.withOpacity(0.2),
+                  color: _roleColor.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: _roleColor, size: 24),
@@ -1063,9 +1063,9 @@ class _RegisterScreenState extends State<RegisterScreen>
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -1088,12 +1088,12 @@ class _RegisterScreenState extends State<RegisterScreen>
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppTheme.white.withOpacity(0.05),
+          color: AppTheme.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: _agreeToTerms
-                ? _roleColor.withOpacity(0.5)
-                : AppTheme.white.withOpacity(0.2),
+                ? _roleColor.withValues(alpha: 0.5)
+                : AppTheme.white.withValues(alpha: 0.2),
           ),
         ),
         child: Row(
@@ -1107,7 +1107,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 border: Border.all(
                   color: _agreeToTerms
                       ? _roleColor
-                      : AppTheme.white.withOpacity(0.5),
+                      : AppTheme.white.withValues(alpha: 0.5),
                   width: 2,
                 ),
               ),
@@ -1121,7 +1121,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 text: TextSpan(
                   text: 'I agree to the ',
                   style: TextStyle(
-                    color: AppTheme.white.withOpacity(0.7),
+                    color: AppTheme.white.withValues(alpha: 0.7),
                     fontSize: 13,
                   ),
                   children: [
@@ -1134,7 +1134,9 @@ class _RegisterScreenState extends State<RegisterScreen>
                     ),
                     TextSpan(
                       text: ' and ',
-                      style: TextStyle(color: AppTheme.white.withOpacity(0.7)),
+                      style: TextStyle(
+                        color: AppTheme.white.withValues(alpha: 0.7),
+                      ),
                     ),
                     TextSpan(
                       text: 'Privacy Policy',
@@ -1159,8 +1161,10 @@ class _RegisterScreenState extends State<RegisterScreen>
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppTheme.primaryDark.withOpacity(0.5),
-        border: Border(top: BorderSide(color: AppTheme.white.withOpacity(0.1))),
+        color: AppTheme.primaryDark.withValues(alpha: 0.5),
+        border: Border(
+          top: BorderSide(color: AppTheme.white.withValues(alpha: 0.1)),
+        ),
       ),
       child: Row(
         children: [
@@ -1174,7 +1178,9 @@ class _RegisterScreenState extends State<RegisterScreen>
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  side: BorderSide(color: AppTheme.white.withOpacity(0.3)),
+                  side: BorderSide(
+                    color: AppTheme.white.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -1201,7 +1207,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                   borderRadius: BorderRadius.circular(30),
                 ),
                 elevation: 8,
-                shadowColor: _roleColor.withOpacity(0.5),
+                shadowColor: _roleColor.withValues(alpha: 0.5),
               ),
               child: _isLoading
                   ? const SizedBox(

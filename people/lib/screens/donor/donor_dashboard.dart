@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
+import 'donor_profile_screen.dart';
 
 class DonorDashboard extends StatefulWidget {
   const DonorDashboard({super.key});
@@ -21,7 +22,8 @@ class _DonorDashboardState extends State<DonorDashboard> {
         child: SafeArea(
           child: Column(
             children: [
-              _buildAppBar(),
+              if (_currentIndex != 4)
+                _buildAppBar(), // Hide helper app bar for Profile which has its own header
               Expanded(child: _buildContent()),
             ],
           ),
@@ -65,7 +67,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
                 Text(
                   'Make a difference today',
                   style: TextStyle(
-                    color: AppTheme.white.withOpacity(0.6),
+                    color: AppTheme.white.withValues(alpha: 0.6),
                     fontSize: 13,
                   ),
                 ),
@@ -84,7 +86,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppTheme.white.withOpacity(0.1),
+            color: AppTheme.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: const Icon(
@@ -123,7 +125,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
       case 3:
         return _buildPlaceholder('History', Icons.history_rounded);
       case 4:
-        return _buildPlaceholder('Profile', Icons.person_rounded);
+        return const DonorProfileScreen();
       default:
         return _buildDashboardHome();
     }
@@ -151,12 +153,12 @@ class _DonorDashboardState extends State<DonorDashboard> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppTheme.donorColor.withOpacity(0.3),
-            AppTheme.donorColor.withOpacity(0.1),
+            AppTheme.donorColor.withValues(alpha: 0.3),
+            AppTheme.donorColor.withValues(alpha: 0.1),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.donorColor.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.donorColor.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,7 +201,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
         Text(
           label,
           style: TextStyle(
-            color: AppTheme.white.withOpacity(0.6),
+            color: AppTheme.white.withValues(alpha: 0.6),
             fontSize: 11,
           ),
         ),
@@ -270,9 +272,9 @@ class _DonorDashboardState extends State<DonorDashboard> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
+          color: color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withOpacity(0.3)),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Column(
           children: [
@@ -334,7 +336,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.white.withOpacity(0.05),
+        color: AppTheme.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -342,7 +344,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -363,7 +365,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: AppTheme.white.withOpacity(0.5),
+                    color: AppTheme.white.withValues(alpha: 0.5),
                     fontSize: 12,
                   ),
                 ),
@@ -373,7 +375,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
           Text(
             time,
             style: TextStyle(
-              color: AppTheme.white.withOpacity(0.4),
+              color: AppTheme.white.withValues(alpha: 0.4),
               fontSize: 11,
             ),
           ),
@@ -390,7 +392,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppTheme.donorColor.withOpacity(0.2),
+              color: AppTheme.donorColor.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: AppTheme.donorColor, size: 48),
@@ -408,7 +410,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
           Text(
             'Coming Soon',
             style: TextStyle(
-              color: AppTheme.white.withOpacity(0.5),
+              color: AppTheme.white.withValues(alpha: 0.5),
               fontSize: 16,
             ),
           ),
@@ -429,7 +431,9 @@ class _DonorDashboardState extends State<DonorDashboard> {
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.primaryDark,
-        border: Border(top: BorderSide(color: AppTheme.white.withOpacity(0.1))),
+        border: Border(
+          top: BorderSide(color: AppTheme.white.withValues(alpha: 0.1)),
+        ),
       ),
       child: SafeArea(
         child: Padding(
@@ -447,7 +451,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
                   ),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? AppTheme.donorColor.withOpacity(0.2)
+                        ? AppTheme.donorColor.withValues(alpha: 0.2)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -458,7 +462,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
                         items[index]['icon'] as IconData,
                         color: isSelected
                             ? AppTheme.donorColor
-                            : AppTheme.white.withOpacity(0.5),
+                            : AppTheme.white.withValues(alpha: 0.5),
                         size: 24,
                       ),
                       const SizedBox(height: 4),
@@ -467,7 +471,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
                         style: TextStyle(
                           color: isSelected
                               ? AppTheme.donorColor
-                              : AppTheme.white.withOpacity(0.5),
+                              : AppTheme.white.withValues(alpha: 0.5),
                           fontSize: 10,
                         ),
                       ),

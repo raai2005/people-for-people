@@ -80,7 +80,8 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
           Switch(
             value: _isApproved,
             onChanged: (val) => setState(() => _isApproved = val),
-            activeColor: AppTheme.volunteerColor,
+            activeTrackColor: AppTheme.volunteerColor,
+            activeThumbColor: AppTheme.white,
           ),
         ],
       ),
@@ -92,9 +93,9 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.warning.withOpacity(0.2),
+        color: AppTheme.warning.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.warning.withOpacity(0.5)),
+        border: Border.all(color: AppTheme.warning.withValues(alpha: 0.5)),
       ),
       child: Row(
         children: [
@@ -115,7 +116,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                 Text(
                   'Admin will review your application',
                   style: TextStyle(
-                    color: AppTheme.white.withOpacity(0.6),
+                    color: AppTheme.white.withValues(alpha: 0.6),
                     fontSize: 12,
                   ),
                 ),
@@ -137,7 +138,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
             Container(
               padding: const EdgeInsets.all(30),
               decoration: BoxDecoration(
-                color: AppTheme.warning.withOpacity(0.2),
+                color: AppTheme.warning.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.lock_clock, color: AppTheme.warning, size: 60),
@@ -156,7 +157,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
             Text(
               'Your volunteer account is under review. You will be notified once admin approves your application.',
               style: TextStyle(
-                color: AppTheme.white.withOpacity(0.6),
+                color: AppTheme.white.withValues(alpha: 0.6),
                 fontSize: 14,
               ),
               textAlign: TextAlign.center,
@@ -165,7 +166,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppTheme.white.withOpacity(0.05),
+                color: AppTheme.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -195,11 +196,11 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
               shape: BoxShape.circle,
               color: completed
                   ? AppTheme.success
-                  : AppTheme.white.withOpacity(0.1),
+                  : AppTheme.white.withValues(alpha: 0.1),
               border: Border.all(
                 color: completed
                     ? AppTheme.success
-                    : AppTheme.white.withOpacity(0.3),
+                    : AppTheme.white.withValues(alpha: 0.3),
               ),
             ),
             child: completed
@@ -212,7 +213,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
             style: TextStyle(
               color: completed
                   ? AppTheme.white
-                  : AppTheme.white.withOpacity(0.5),
+                  : AppTheme.white.withValues(alpha: 0.5),
               fontSize: 14,
             ),
           ),
@@ -260,12 +261,14 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppTheme.volunteerColor.withOpacity(0.3),
-            AppTheme.volunteerColor.withOpacity(0.1),
+            AppTheme.volunteerColor.withValues(alpha: 0.3),
+            AppTheme.volunteerColor.withValues(alpha: 0.1),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.volunteerColor.withOpacity(0.3)),
+        border: Border.all(
+          color: AppTheme.volunteerColor.withValues(alpha: 0.3),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -308,7 +311,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
         Text(
           label,
           style: TextStyle(
-            color: AppTheme.white.withOpacity(0.6),
+            color: AppTheme.white.withValues(alpha: 0.6),
             fontSize: 11,
           ),
         ),
@@ -365,16 +368,16 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.white.withOpacity(0.05),
+        color: AppTheme.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.white.withOpacity(0.1)),
+        border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 24),
@@ -397,7 +400,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                   children: [
                     Icon(
                       Icons.location_on,
-                      color: AppTheme.white.withOpacity(0.5),
+                      color: AppTheme.white.withValues(alpha: 0.5),
                       size: 12,
                     ),
                     const SizedBox(width: 4),
@@ -405,7 +408,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                       child: Text(
                         location,
                         style: TextStyle(
-                          color: AppTheme.white.withOpacity(0.5),
+                          color: AppTheme.white.withValues(alpha: 0.5),
                           fontSize: 12,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -419,7 +422,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -475,7 +478,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.white.withOpacity(0.05),
+        color: AppTheme.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -513,7 +516,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppTheme.volunteerColor.withOpacity(0.2),
+              color: AppTheme.volunteerColor.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: AppTheme.volunteerColor, size: 48),
@@ -531,7 +534,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
           Text(
             'Coming Soon',
             style: TextStyle(
-              color: AppTheme.white.withOpacity(0.5),
+              color: AppTheme.white.withValues(alpha: 0.5),
               fontSize: 16,
             ),
           ),
@@ -552,7 +555,9 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.primaryDark,
-        border: Border(top: BorderSide(color: AppTheme.white.withOpacity(0.1))),
+        border: Border(
+          top: BorderSide(color: AppTheme.white.withValues(alpha: 0.1)),
+        ),
       ),
       child: SafeArea(
         child: Padding(
@@ -575,7 +580,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                     ),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? AppTheme.volunteerColor.withOpacity(0.2)
+                          ? AppTheme.volunteerColor.withValues(alpha: 0.2)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -586,7 +591,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                           items[index]['icon'] as IconData,
                           color: isSelected
                               ? AppTheme.volunteerColor
-                              : AppTheme.white.withOpacity(0.5),
+                              : AppTheme.white.withValues(alpha: 0.5),
                           size: 24,
                         ),
                         const SizedBox(height: 4),
@@ -595,7 +600,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                           style: TextStyle(
                             color: isSelected
                                 ? AppTheme.volunteerColor
-                                : AppTheme.white.withOpacity(0.5),
+                                : AppTheme.white.withValues(alpha: 0.5),
                             fontSize: 10,
                           ),
                         ),

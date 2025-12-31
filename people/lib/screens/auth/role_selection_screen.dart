@@ -170,7 +170,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
             gradient: AppTheme.accentGradient,
             boxShadow: [
               BoxShadow(
-                color: AppTheme.accent.withOpacity(0.4),
+                color: AppTheme.accent.withValues(alpha: 0.4),
                 blurRadius: 20,
                 spreadRadius: 5,
               ),
@@ -205,7 +205,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
           'Select your role to continue',
           style: TextStyle(
             fontSize: 16,
-            color: AppTheme.white.withOpacity(0.7),
+            color: AppTheme.white.withValues(alpha: 0.7),
           ),
         ),
       ],
@@ -228,18 +228,18 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  (roleData['color'] as Color).withOpacity(0.3),
-                  (roleData['color'] as Color).withOpacity(0.1),
+                  (roleData['color'] as Color).withValues(alpha: 0.3),
+                  (roleData['color'] as Color).withValues(alpha: 0.1),
                 ],
               ),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: (roleData['color'] as Color).withOpacity(0.5),
+                color: (roleData['color'] as Color).withValues(alpha: 0.5),
                 width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: (roleData['color'] as Color).withOpacity(0.2),
+                  color: (roleData['color'] as Color).withValues(alpha: 0.2),
                   blurRadius: 15,
                   offset: const Offset(0, 8),
                 ),
@@ -256,7 +256,9 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
                     gradient: roleData['gradient'],
                     boxShadow: [
                       BoxShadow(
-                        color: (roleData['color'] as Color).withOpacity(0.4),
+                        color: (roleData['color'] as Color).withValues(
+                          alpha: 0.4,
+                        ),
                         blurRadius: 10,
                         spreadRadius: 2,
                       ),
@@ -288,7 +290,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
                         roleData['subtitle'],
                         style: TextStyle(
                           fontSize: 13,
-                          color: AppTheme.white.withOpacity(0.7),
+                          color: AppTheme.white.withValues(alpha: 0.7),
                         ),
                       ),
                     ],
@@ -301,7 +303,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
                   height: 40,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: AppTheme.white.withOpacity(0.1),
+                    color: AppTheme.white.withValues(alpha: 0.1),
                   ),
                   child: const Icon(
                     Icons.arrow_forward_ios_rounded,
@@ -326,14 +328,14 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
             Icon(
               Icons.favorite,
               size: 16,
-              color: AppTheme.accent.withOpacity(0.6),
+              color: AppTheme.accent.withValues(alpha: 0.6),
             ),
             const SizedBox(width: 8),
             Text(
               'Every Act of Kindness Matters',
               style: TextStyle(
                 fontSize: 12,
-                color: AppTheme.white.withOpacity(0.5),
+                color: AppTheme.white.withValues(alpha: 0.5),
                 letterSpacing: 1,
               ),
             ),
@@ -341,7 +343,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
             Icon(
               Icons.favorite,
               size: 16,
-              color: AppTheme.accent.withOpacity(0.6),
+              color: AppTheme.accent.withValues(alpha: 0.6),
             ),
           ],
         ),

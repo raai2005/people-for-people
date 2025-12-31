@@ -55,7 +55,7 @@ class _NGODashboardState extends State<NGODashboard> {
               gradient: AppTheme.ngoGradient,
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.ngoColor.withOpacity(0.3),
+                  color: AppTheme.ngoColor.withValues(alpha: 0.3),
                   blurRadius: 15,
                   spreadRadius: 2,
                 ),
@@ -83,7 +83,7 @@ class _NGODashboardState extends State<NGODashboard> {
                 Text(
                   'Welcome back, Organisation',
                   style: TextStyle(
-                    color: AppTheme.white.withOpacity(0.6),
+                    color: AppTheme.white.withValues(alpha: 0.6),
                     fontSize: 13,
                   ),
                 ),
@@ -96,7 +96,7 @@ class _NGODashboardState extends State<NGODashboard> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppTheme.white.withOpacity(0.1),
+                  color: AppTheme.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -243,9 +243,9 @@ class _NGODashboardState extends State<NGODashboard> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,7 +257,7 @@ class _NGODashboardState extends State<NGODashboard> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.2),
+                  color: color.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -284,7 +284,7 @@ class _NGODashboardState extends State<NGODashboard> {
           Text(
             title,
             style: TextStyle(
-              color: AppTheme.white.withOpacity(0.6),
+              color: AppTheme.white.withValues(alpha: 0.6),
               fontSize: 12,
             ),
           ),
@@ -344,16 +344,16 @@ class _NGODashboardState extends State<NGODashboard> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppTheme.white.withOpacity(0.1),
+          color: AppTheme.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.white.withOpacity(0.1)),
+          border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
         ),
         child: Column(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: color, size: 24),
@@ -362,7 +362,7 @@ class _NGODashboardState extends State<NGODashboard> {
             Text(
               title,
               style: TextStyle(
-                color: AppTheme.white.withOpacity(0.9),
+                color: AppTheme.white.withValues(alpha: 0.9),
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
               ),
@@ -437,16 +437,16 @@ class _NGODashboardState extends State<NGODashboard> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.white.withOpacity(0.05),
+        color: AppTheme.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.white.withOpacity(0.1)),
+        border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -467,7 +467,7 @@ class _NGODashboardState extends State<NGODashboard> {
                 Text(
                   time,
                   style: TextStyle(
-                    color: AppTheme.white.withOpacity(0.5),
+                    color: AppTheme.white.withValues(alpha: 0.5),
                     fontSize: 12,
                   ),
                 ),
@@ -544,9 +544,9 @@ class _NGODashboardState extends State<NGODashboard> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.white.withOpacity(0.05),
+        color: AppTheme.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.white.withOpacity(0.1)),
+        border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -563,7 +563,7 @@ class _NGODashboardState extends State<NGODashboard> {
           Text(
             description,
             style: TextStyle(
-              color: AppTheme.white.withOpacity(0.6),
+              color: AppTheme.white.withValues(alpha: 0.6),
               fontSize: 12,
             ),
           ),
@@ -572,7 +572,7 @@ class _NGODashboardState extends State<NGODashboard> {
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: progress,
-              backgroundColor: AppTheme.white.withOpacity(0.1),
+              backgroundColor: AppTheme.white.withValues(alpha: 0.1),
               valueColor: AlwaysStoppedAnimation<Color>(AppTheme.ngoColor),
               minHeight: 8,
             ),
@@ -584,7 +584,7 @@ class _NGODashboardState extends State<NGODashboard> {
               Text(
                 amount,
                 style: TextStyle(
-                  color: AppTheme.white.withOpacity(0.8),
+                  color: AppTheme.white.withValues(alpha: 0.8),
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                 ),
@@ -612,7 +612,7 @@ class _NGODashboardState extends State<NGODashboard> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppTheme.ngoColor.withOpacity(0.2),
+              color: AppTheme.ngoColor.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: AppTheme.ngoColor, size: 48),
@@ -630,7 +630,7 @@ class _NGODashboardState extends State<NGODashboard> {
           Text(
             'Coming Soon',
             style: TextStyle(
-              color: AppTheme.white.withOpacity(0.5),
+              color: AppTheme.white.withValues(alpha: 0.5),
               fontSize: 16,
             ),
           ),
@@ -643,7 +643,9 @@ class _NGODashboardState extends State<NGODashboard> {
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.primaryDark,
-        border: Border(top: BorderSide(color: AppTheme.white.withOpacity(0.1))),
+        border: Border(
+          top: BorderSide(color: AppTheme.white.withValues(alpha: 0.1)),
+        ),
       ),
       child: SafeArea(
         child: Padding(
@@ -662,7 +664,7 @@ class _NGODashboardState extends State<NGODashboard> {
                   ),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? AppTheme.ngoColor.withOpacity(0.2)
+                        ? AppTheme.ngoColor.withValues(alpha: 0.2)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -673,7 +675,7 @@ class _NGODashboardState extends State<NGODashboard> {
                         _navItems[index].icon,
                         color: isSelected
                             ? AppTheme.ngoColor
-                            : AppTheme.white.withOpacity(0.5),
+                            : AppTheme.white.withValues(alpha: 0.5),
                         size: 24,
                       ),
                       const SizedBox(height: 4),
@@ -682,7 +684,7 @@ class _NGODashboardState extends State<NGODashboard> {
                         style: TextStyle(
                           color: isSelected
                               ? AppTheme.ngoColor
-                              : AppTheme.white.withOpacity(0.5),
+                              : AppTheme.white.withValues(alpha: 0.5),
                           fontSize: 10,
                           fontWeight: isSelected
                               ? FontWeight.bold

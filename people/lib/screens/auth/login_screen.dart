@@ -213,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen>
                           icon: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: AppTheme.white.withOpacity(0.1),
+                              color: AppTheme.white.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Icon(
@@ -254,13 +254,11 @@ class _LoginScreenState extends State<LoginScreen>
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed: () {
-                            // TODO: Implement forgot password
-                          },
+                          onPressed: _showForgotPasswordDialog,
                           child: Text(
                             'Forgot Password?',
                             style: TextStyle(
-                              color: AppTheme.white.withOpacity(0.7),
+                              color: AppTheme.white.withValues(alpha: 0.7),
                               fontSize: 14,
                             ),
                           ),
@@ -299,11 +297,11 @@ class _LoginScreenState extends State<LoginScreen>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [_roleColor, _roleColor.withOpacity(0.6)],
+          colors: [_roleColor, _roleColor.withValues(alpha: 0.6)],
         ),
         boxShadow: [
           BoxShadow(
-            color: _roleColor.withOpacity(0.4),
+            color: _roleColor.withValues(alpha: 0.4),
             blurRadius: 25,
             spreadRadius: 5,
           ),
@@ -364,7 +362,7 @@ class _LoginScreenState extends State<LoginScreen>
                 _obscurePassword
                     ? Icons.visibility_off_outlined
                     : Icons.visibility_outlined,
-                color: AppTheme.white.withOpacity(0.6),
+                color: AppTheme.white.withValues(alpha: 0.6),
               ),
             ),
           ),
@@ -386,7 +384,7 @@ class _LoginScreenState extends State<LoginScreen>
             borderRadius: BorderRadius.circular(30),
           ),
           elevation: 8,
-          shadowColor: _roleColor.withOpacity(0.5),
+          shadowColor: _roleColor.withValues(alpha: 0.5),
         ),
         child: _isLoading
             ? const SizedBox(
@@ -420,20 +418,26 @@ class _LoginScreenState extends State<LoginScreen>
     return Row(
       children: [
         Expanded(
-          child: Container(height: 1, color: AppTheme.white.withOpacity(0.2)),
+          child: Container(
+            height: 1,
+            color: AppTheme.white.withValues(alpha: 0.2),
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'OR',
             style: TextStyle(
-              color: AppTheme.white.withOpacity(0.5),
+              color: AppTheme.white.withValues(alpha: 0.5),
               fontSize: 14,
             ),
           ),
         ),
         Expanded(
-          child: Container(height: 1, color: AppTheme.white.withOpacity(0.2)),
+          child: Container(
+            height: 1,
+            color: AppTheme.white.withValues(alpha: 0.2),
+          ),
         ),
       ],
     );
@@ -446,7 +450,7 @@ class _LoginScreenState extends State<LoginScreen>
         Text(
           "Don't have an account? ",
           style: TextStyle(
-            color: AppTheme.white.withOpacity(0.7),
+            color: AppTheme.white.withValues(alpha: 0.7),
             fontSize: 14,
           ),
         ),
@@ -462,6 +466,102 @@ class _LoginScreenState extends State<LoginScreen>
           ),
         ),
       ],
+    );
+  }
+
+  void _showForgotPasswordDialog() {
+    final emailController = TextEditingController(text: _emailController.text);
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E1E), // Dark background
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Reset Password',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Enter your email address to receive a password reset link.',
+              style: TextStyle(color: Colors.white70),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: emailController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Email',
+                labelStyle: const TextStyle(color: Colors.white60),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.3),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppTheme.donorColor),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white60),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (emailController.text.trim().isEmpty) return;
+
+              try {
+                // Show loading
+                showDialog(
+                  context: dialogContext,
+                  barrierDismissible: false,
+                  builder: (context) =>
+                      const Center(child: CircularProgressIndicator()),
+                );
+
+                await AuthService().resetPassword(emailController.text.trim());
+
+                if (dialogContext.mounted) {
+                  Navigator.pop(dialogContext); // Hide loading
+                  Navigator.pop(dialogContext); // Hide dialog
+                  _showErrorSnackBar(
+                    'Password reset email sent! Check your inbox.',
+                  );
+                }
+              } catch (e) {
+                if (dialogContext.mounted) {
+                  Navigator.pop(dialogContext); // Hide loading
+                  _showErrorSnackBar(
+                    e.toString().replaceAll('Exception: ', ''),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.donorColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text(
+              'Send Link',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

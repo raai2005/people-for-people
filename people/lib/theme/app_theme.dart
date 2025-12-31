@@ -45,19 +45,19 @@ class AppTheme {
   static LinearGradient ngoGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [ngoColor, ngoColor.withOpacity(0.7)],
+    colors: [ngoColor, ngoColor.withValues(alpha: 0.7)],
   );
 
   static LinearGradient donorGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [donorColor, donorColor.withOpacity(0.7)],
+    colors: [donorColor, donorColor.withValues(alpha: 0.7)],
   );
 
   static LinearGradient volunteerGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [volunteerColor, volunteerColor.withOpacity(0.7)],
+    colors: [volunteerColor, volunteerColor.withValues(alpha: 0.7)],
   );
 
   // Text Styles
@@ -111,17 +111,17 @@ class AppTheme {
       hintText: hint,
       prefixIcon: Icon(icon, color: accent),
       suffixIcon: suffixIcon,
-      labelStyle: TextStyle(color: white.withOpacity(0.8)),
-      hintStyle: TextStyle(color: white.withOpacity(0.4)),
+      labelStyle: TextStyle(color: white.withValues(alpha: 0.8)),
+      hintStyle: TextStyle(color: white.withValues(alpha: 0.4)),
       filled: true,
-      fillColor: white.withOpacity(0.1),
+      fillColor: white.withValues(alpha: 0.1),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),
-        borderSide: BorderSide(color: white.withOpacity(0.2)),
+        borderSide: BorderSide(color: white.withValues(alpha: 0.2)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),
-        borderSide: BorderSide(color: white.withOpacity(0.2)),
+        borderSide: BorderSide(color: white.withValues(alpha: 0.2)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),
@@ -146,24 +146,24 @@ class AppTheme {
     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
     elevation: 8,
-    shadowColor: accent.withOpacity(0.5),
+    shadowColor: accent.withValues(alpha: 0.5),
   );
 
   static ButtonStyle secondaryButton = OutlinedButton.styleFrom(
     foregroundColor: white,
     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-    side: BorderSide(color: white.withOpacity(0.5)),
+    side: BorderSide(color: white.withValues(alpha: 0.5)),
   );
 
   // Card Decoration
   static BoxDecoration cardDecoration = BoxDecoration(
-    color: white.withOpacity(0.1),
+    color: white.withValues(alpha: 0.1),
     borderRadius: BorderRadius.circular(20),
-    border: Border.all(color: white.withOpacity(0.2)),
+    border: Border.all(color: white.withValues(alpha: 0.2)),
     boxShadow: [
       BoxShadow(
-        color: black.withOpacity(0.2),
+        color: black.withValues(alpha: 0.2),
         blurRadius: 20,
         offset: const Offset(0, 10),
       ),
@@ -172,12 +172,12 @@ class AppTheme {
 
   // Glass Effect
   static BoxDecoration glassDecoration = BoxDecoration(
-    color: white.withOpacity(0.1),
+    color: white.withValues(alpha: 0.1),
     borderRadius: BorderRadius.circular(20),
-    border: Border.all(color: white.withOpacity(0.2)),
+    border: Border.all(color: white.withValues(alpha: 0.2)),
     boxShadow: [
       BoxShadow(
-        color: black.withOpacity(0.1),
+        color: black.withValues(alpha: 0.1),
         blurRadius: 10,
         offset: const Offset(0, 5),
       ),
