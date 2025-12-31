@@ -653,69 +653,333 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
     );
   }
 
-  // 5. Donation Analytics (Mock)
+  // 5. Donation History & Analytics
   Widget _buildDonationAnalyticsSection() {
+    final recentDonations = _getRecentDonations();
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: AppTheme.cardDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Donation Analytics', style: AppTheme.headingSmall),
-          const SizedBox(height: 16),
-          // Mock Stats
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatItem(
-                'Total Donations',
-                '₹ 12,500',
-                Icons.monetization_on,
+              const Text('Donation History', style: AppTheme.headingSmall),
+              TextButton(
+                onPressed: _showAllDonations,
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text(
+                  'View All',
+                  style: TextStyle(
+                    color: AppTheme.accent,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-              _buildStatItem('Donations', '15', Icons.volunteer_activism),
-              _buildStatItem('Impact', 'High', Icons.trending_up),
             ],
           ),
           const SizedBox(height: 16),
-          const Text(
-            '• Types of Donations: Money, Food, Clothes',
-            style: TextStyle(color: Colors.white70, fontSize: 13),
+          // Summary Stats
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppTheme.donorColor.withValues(alpha: 0.2),
+                  AppTheme.donorColor.withValues(alpha: 0.1),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppTheme.donorColor.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildCompactStat('₹25,000', 'Total', Icons.attach_money),
+                Container(
+                  width: 1,
+                  height: 40,
+                  color: AppTheme.white.withValues(alpha: 0.2),
+                ),
+                _buildCompactStat('15', 'Donations', Icons.card_giftcard),
+                Container(
+                  width: 1,
+                  height: 40,
+                  color: AppTheme.white.withValues(alpha: 0.2),
+                ),
+                _buildCompactStat('50+', 'Lives', Icons.favorite),
+              ],
+            ),
           ),
-          const SizedBox(height: 4),
-          const Text(
-            '• Impact Summary: Helped 50+ people',
-            style: TextStyle(color: Colors.white70, fontSize: 13),
+          const SizedBox(height: 16),
+          // Recent Donations List
+          ...recentDonations.map(
+            (donation) => _buildDonationHistoryItem(
+              donation['title'] as String,
+              donation['ngo'] as String,
+              donation['type'] as String,
+              donation['amount'] as String?,
+              donation['quantity'] as int?,
+              donation['date'] as String,
+              donation['status'] as String,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatItem(String label, String value, IconData icon) {
+  Widget _buildCompactStat(String value, String label, IconData icon) {
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: AppTheme.white.withValues(alpha: 0.05),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: AppTheme.donorColor, size: 24),
-        ),
-        const SizedBox(height: 8),
+        Icon(icon, color: AppTheme.donorColor, size: 20),
+        const SizedBox(height: 6),
         Text(
           value,
           style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: AppTheme.white,
             fontSize: 16,
+            fontWeight: FontWeight.bold,
           ),
         ),
         Text(
           label,
-          style: const TextStyle(color: Colors.white54, fontSize: 12),
+          style: TextStyle(
+            color: AppTheme.white.withValues(alpha: 0.6),
+            fontSize: 10,
+          ),
         ),
       ],
+    );
+  }
+
+  Widget _buildDonationHistoryItem(
+    String title,
+    String ngo,
+    String type,
+    String? amount,
+    int? quantity,
+    String date,
+    String status,
+  ) {
+    final typeColor = _getDonationTypeColor(type);
+    final typeIcon = _getDonationTypeIcon(type);
+    final statusColor = _getStatusColor(status);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppTheme.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
+      ),
+      child: Row(
+        children: [
+          // Type Icon
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: typeColor.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: typeColor.withValues(alpha: 0.3)),
+            ),
+            child: Icon(typeIcon, color: typeColor, size: 20),
+          ),
+          const SizedBox(width: 12),
+          // Details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppTheme.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.business_rounded,
+                      size: 12,
+                      color: AppTheme.white.withValues(alpha: 0.5),
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        ngo,
+                        style: TextStyle(
+                          color: AppTheme.white.withValues(alpha: 0.6),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today,
+                      size: 11,
+                      color: AppTheme.white.withValues(alpha: 0.4),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      date,
+                      style: TextStyle(
+                        color: AppTheme.white.withValues(alpha: 0.4),
+                        fontSize: 11,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: statusColor.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Text(
+                        status,
+                        style: TextStyle(
+                          color: statusColor,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Amount/Quantity
+          if (amount != null)
+            Text(
+              amount,
+              style: const TextStyle(
+                color: AppTheme.success,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            )
+          else if (quantity != null)
+            Text(
+              '$quantity',
+              style: TextStyle(
+                color: typeColor,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Color _getDonationTypeColor(String type) {
+    switch (type.toLowerCase()) {
+      case 'money':
+        return AppTheme.success;
+      case 'clothes':
+        return AppTheme.volunteerColor;
+      case 'food':
+        return AppTheme.gold;
+      case 'books':
+        return AppTheme.info;
+      case 'medical':
+        return AppTheme.accent;
+      default:
+        return AppTheme.donorColor;
+    }
+  }
+
+  IconData _getDonationTypeIcon(String type) {
+    switch (type.toLowerCase()) {
+      case 'money':
+        return Icons.attach_money;
+      case 'clothes':
+        return Icons.checkroom;
+      case 'food':
+        return Icons.restaurant;
+      case 'books':
+        return Icons.menu_book;
+      case 'medical':
+        return Icons.medical_services;
+      default:
+        return Icons.card_giftcard;
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return AppTheme.success;
+      case 'pending':
+        return AppTheme.warning;
+      case 'in progress':
+        return AppTheme.info;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  List<Map<String, dynamic>> _getRecentDonations() {
+    return [
+      {
+        'title': 'Monthly Donation',
+        'type': 'Money',
+        'ngo': 'Hope Foundation',
+        'amount': '₹5,000',
+        'date': 'Dec 28, 2024',
+        'status': 'Completed',
+      },
+      {
+        'title': 'Winter Clothes',
+        'type': 'Clothes',
+        'ngo': 'Care India',
+        'quantity': 25,
+        'date': 'Dec 25, 2024',
+        'status': 'In Progress',
+      },
+      {
+        'title': 'Food Donation',
+        'type': 'Food',
+        'ngo': 'Feeding India',
+        'quantity': 50,
+        'date': 'Dec 20, 2024',
+        'status': 'Completed',
+      },
+    ];
+  }
+
+  void _showAllDonations() {
+    // TODO: Navigate to full donation history or show modal
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Full donation history coming soon!'),
+        backgroundColor: AppTheme.info,
+      ),
     );
   }
 

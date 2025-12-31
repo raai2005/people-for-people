@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import 'donor_profile_screen.dart';
+import 'donor_donate_screen.dart';
 
 class DonorDashboard extends StatefulWidget {
   const DonorDashboard({super.key});
@@ -22,8 +23,8 @@ class _DonorDashboardState extends State<DonorDashboard> {
         child: SafeArea(
           child: Column(
             children: [
-              if (_currentIndex != 4)
-                _buildAppBar(), // Hide helper app bar for Profile which has its own header
+              if (_currentIndex != 2)
+                _buildAppBar(), // Hide app bar for Profile which has its own header
               Expanded(child: _buildContent()),
             ],
           ),
@@ -116,15 +117,8 @@ class _DonorDashboardState extends State<DonorDashboard> {
       case 0:
         return _buildDashboardHome();
       case 1:
-        return _buildPlaceholder('Discover NGOs', Icons.search_rounded);
+        return const DonorDonateScreen();
       case 2:
-        return _buildPlaceholder(
-          'Make Donation',
-          Icons.volunteer_activism_rounded,
-        );
-      case 3:
-        return _buildPlaceholder('History', Icons.history_rounded);
-      case 4:
         return const DonorProfileScreen();
       default:
         return _buildDashboardHome();
@@ -421,10 +415,8 @@ class _DonorDashboardState extends State<DonorDashboard> {
 
   Widget _buildBottomNav() {
     final items = [
-      {'icon': Icons.dashboard_rounded, 'label': 'Home'},
-      {'icon': Icons.search_rounded, 'label': 'Discover'},
+      {'icon': Icons.home_rounded, 'label': 'Home'},
       {'icon': Icons.volunteer_activism_rounded, 'label': 'Donate'},
-      {'icon': Icons.history_rounded, 'label': 'History'},
       {'icon': Icons.person_rounded, 'label': 'Profile'},
     ];
 
