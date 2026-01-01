@@ -126,7 +126,8 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
   }
 
   Widget _buildDiscoverNGOs() {
-    final ngos = _getMockNGOs();
+    // TODO: Fetch NGOs from Firestore
+    // final ngos = await FirebaseFirestore.instance.collection('ngos').get();
 
     return ListView(
       padding: const EdgeInsets.all(20),
@@ -169,17 +170,43 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
         // Categories
         _buildCategoriesSection(),
         const SizedBox(height: 24),
-        // NGO List
-        const Text(
-          'Featured NGOs',
-          style: TextStyle(
-            color: AppTheme.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+        // Empty State
+        Container(
+          padding: const EdgeInsets.all(40),
+          decoration: BoxDecoration(
+            color: AppTheme.white.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Center(
+            child: Column(
+              children: [
+                Icon(
+                  Icons.volunteer_activism_outlined,
+                  color: AppTheme.white.withValues(alpha: 0.3),
+                  size: 64,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'No NGOs Available',
+                  style: TextStyle(
+                    color: AppTheme.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'NGOs will appear here once added to the platform',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppTheme.white.withValues(alpha: 0.6),
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: 16),
-        ...ngos.map((ngo) => _buildNGOCard(ngo)),
       ],
     );
   }
@@ -585,46 +612,40 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
   }
 
   Widget _buildNGODropdown() {
-    final ngos = _getMockNGOs();
+    // TODO: Fetch NGOs from Firestore
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppTheme.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
       ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedNGO,
-          hint: Text(
-            'Choose an NGO',
-            style: TextStyle(color: AppTheme.white.withValues(alpha: 0.5)),
-          ),
-          isExpanded: true,
-          dropdownColor: AppTheme.primaryDark,
-          style: const TextStyle(color: AppTheme.white),
-          icon: Icon(
-            Icons.arrow_drop_down,
-            color: AppTheme.white.withValues(alpha: 0.5),
-          ),
-          items: ngos.map((ngo) {
-            return DropdownMenuItem<String>(
-              value: ngo['name'] as String,
-              child: Row(
-                children: [
-                  Icon(
-                    ngo['icon'] as IconData,
-                    color: ngo['color'] as Color,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Text(ngo['name'] as String),
-                ],
+      child: Center(
+        child: Column(
+          children: [
+            Icon(
+              Icons.info_outline,
+              color: AppTheme.white.withValues(alpha: 0.5),
+              size: 32,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'No NGOs available',
+              style: TextStyle(
+                color: AppTheme.white.withValues(alpha: 0.7),
+                fontSize: 14,
               ),
-            );
-          }).toList(),
-          onChanged: (value) => setState(() => _selectedNGO = value),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Please check the Discover tab',
+              style: TextStyle(
+                color: AppTheme.white.withValues(alpha: 0.5),
+                fontSize: 12,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -897,7 +918,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.7,
+        height: MediaQuery.of(context).size.height * 0.75,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -912,6 +933,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
         ),
         child: Column(
           children: [
+            // Handle
             Container(
               margin: const EdgeInsets.only(top: 12),
               width: 50,
@@ -921,18 +943,19 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
+            // Content
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header
+                    // NGO Name & Icon
                     Row(
                       children: [
                         Container(
-                          width: 80,
-                          height: 80,
+                          width: 70,
+                          height: 70,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
@@ -940,7 +963,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                                 (ngo['color'] as Color).withValues(alpha: 0.15),
                               ],
                             ),
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(18),
                             border: Border.all(
                               color: (ngo['color'] as Color).withValues(
                                 alpha: 0.4,
@@ -950,7 +973,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                           child: Icon(
                             ngo['icon'] as IconData,
                             color: ngo['color'] as Color,
-                            size: 40,
+                            size: 36,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -966,37 +989,189 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const SizedBox(height: 6),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.location_on,
-                                    size: 16,
-                                    color: AppTheme.white.withValues(
-                                      alpha: 0.6,
+                              const SizedBox(height: 4),
+                              if (ngo['verified'] == true)
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.verified,
+                                      color: AppTheme.success,
+                                      size: 16,
                                     ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    ngo['location'] as String,
-                                    style: TextStyle(
-                                      color: AppTheme.white.withValues(
-                                        alpha: 0.6,
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Verified NGO',
+                                      style: TextStyle(
+                                        color: AppTheme.success,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      fontSize: 14,
                                     ),
-                                  ),
-                                ],
-                              ),
+                                  ],
+                                ),
                             ],
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
-                    // About
+                    const SizedBox(height: 20),
+
+                    // Full Address
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppTheme.white.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppTheme.white.withValues(alpha: 0.1),
+                        ),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            color: AppTheme.accent,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Address',
+                                  style: TextStyle(
+                                    color: AppTheme.white,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  ngo['fullAddress'] as String? ??
+                                      ngo['location'] as String,
+                                  style: TextStyle(
+                                    color: AppTheme.white.withValues(
+                                      alpha: 0.7,
+                                    ),
+                                    fontSize: 13,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Stats Row (Rating, Donors, Projects)
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            (ngo['color'] as Color).withValues(alpha: 0.15),
+                            (ngo['color'] as Color).withValues(alpha: 0.05),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: (ngo['color'] as Color).withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildModalStat(
+                            Icons.star,
+                            ngo['rating'] as String,
+                            'Rating',
+                            AppTheme.gold,
+                          ),
+                          Container(
+                            width: 1,
+                            height: 40,
+                            color: AppTheme.white.withValues(alpha: 0.2),
+                          ),
+                          _buildModalStat(
+                            Icons.people,
+                            ngo['donors'] as String,
+                            'Donors',
+                            ngo['color'] as Color,
+                          ),
+                          Container(
+                            width: 1,
+                            height: 40,
+                            color: AppTheme.white.withValues(alpha: 0.2),
+                          ),
+                          _buildModalStat(
+                            Icons.volunteer_activism,
+                            ngo['projects'] as String,
+                            'Projects',
+                            AppTheme.info,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Deadline/Urgency (if available)
+                    if (ngo['deadline'] != null || ngo['urgency'] != null) ...[
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: AppTheme.warning.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppTheme.warning.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.access_time,
+                              color: AppTheme.warning,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (ngo['urgency'] != null)
+                                    Text(
+                                      'Urgency: ${ngo['urgency']}',
+                                      style: const TextStyle(
+                                        color: AppTheme.warning,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  if (ngo['deadline'] != null)
+                                    Text(
+                                      'Deadline: ${ngo['deadline']}',
+                                      style: TextStyle(
+                                        color: AppTheme.white.withValues(
+                                          alpha: 0.7,
+                                        ),
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+
+                    // About/Details
                     const Text(
-                      'About',
+                      'About This Cause',
                       style: TextStyle(
                         color: AppTheme.white,
                         fontSize: 16,
@@ -1012,35 +1187,36 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                         height: 1.6,
                       ),
                     ),
-                    const SizedBox(height: 24),
-                    // Stats
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildDetailStat(
-                            Icons.people,
-                            '${ngo['donors']}',
-                            'Donors',
-                          ),
-                        ),
-                        Expanded(
-                          child: _buildDetailStat(
-                            Icons.star,
-                            '${ngo['rating']}',
-                            'Rating',
-                          ),
-                        ),
-                        Expanded(
-                          child: _buildDetailStat(
-                            Icons.volunteer_activism,
-                            '${ngo['projects']}',
-                            'Projects',
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 20),
+
+                    // Accepted Donation Types
+                    const Text(
+                      'Accepted Donations',
+                      style: TextStyle(
+                        color: AppTheme.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children:
+                          (ngo['acceptedDonations'] as List<String>?)?.map((
+                            type,
+                          ) {
+                            return _buildDonationTypeChip(type);
+                          }).toList() ??
+                          [
+                            _buildDonationTypeChip('Money'),
+                            _buildDonationTypeChip('Clothes'),
+                            _buildDonationTypeChip('Food'),
+                          ],
                     ),
                     const SizedBox(height: 24),
-                    // Donate Button
+
+                    // Donate Now Button
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -1058,13 +1234,21 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
+                          elevation: 0,
                         ),
-                        child: const Text(
-                          'Donate Now',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.favorite, size: 20),
+                            const SizedBox(width: 10),
+                            const Text(
+                              'Donate Now',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -1078,16 +1262,21 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
     );
   }
 
-  Widget _buildDetailStat(IconData icon, String value, String label) {
+  Widget _buildModalStat(
+    IconData icon,
+    String value,
+    String label,
+    Color color,
+  ) {
     return Column(
       children: [
-        Icon(icon, color: AppTheme.donorColor, size: 24),
-        const SizedBox(height: 8),
+        Icon(icon, color: color, size: 22),
+        const SizedBox(height: 6),
         Text(
           value,
           style: const TextStyle(
             color: AppTheme.white,
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -1095,10 +1284,65 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
           label,
           style: TextStyle(
             color: AppTheme.white.withValues(alpha: 0.6),
-            fontSize: 12,
+            fontSize: 11,
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildDonationTypeChip(String type) {
+    Color color;
+    IconData icon;
+
+    switch (type.toLowerCase()) {
+      case 'money':
+        color = AppTheme.success;
+        icon = Icons.attach_money;
+        break;
+      case 'clothes':
+        color = AppTheme.volunteerColor;
+        icon = Icons.checkroom;
+        break;
+      case 'food':
+        color = AppTheme.gold;
+        icon = Icons.restaurant;
+        break;
+      case 'books':
+        color = AppTheme.info;
+        icon = Icons.menu_book;
+        break;
+      case 'medical':
+        color = AppTheme.accent;
+        icon = Icons.medical_services;
+        break;
+      default:
+        color = AppTheme.donorColor;
+        icon = Icons.card_giftcard;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 16),
+          const SizedBox(width: 6),
+          Text(
+            type,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1200,83 +1444,5 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
         ),
       ),
     );
-  }
-
-  List<Map<String, dynamic>> _getMockNGOs() {
-    return [
-      {
-        'name': 'Hope Foundation',
-        'category': 'Education',
-        'location': 'Mumbai, India',
-        'description':
-            'Providing quality education to underprivileged children across India.',
-        'fullDescription':
-            'Hope Foundation has been working since 2010 to provide quality education to underprivileged children. We run 50+ schools across India, providing free education, meals, and healthcare to over 10,000 students.',
-        'icon': Icons.school,
-        'color': AppTheme.info,
-        'verified': true,
-        'donors': '2.5K',
-        'rating': '4.8',
-        'projects': '50+',
-      },
-      {
-        'name': 'Care India',
-        'category': 'Health',
-        'location': 'Delhi, India',
-        'description':
-            'Healthcare services and medical support for rural communities.',
-        'fullDescription':
-            'Care India focuses on providing accessible healthcare to rural and underserved communities. We operate mobile clinics, health camps, and awareness programs reaching over 100,000 people annually.',
-        'icon': Icons.medical_services,
-        'color': AppTheme.accent,
-        'verified': true,
-        'donors': '3.2K',
-        'rating': '4.9',
-        'projects': '75+',
-      },
-      {
-        'name': 'Feeding India',
-        'category': 'Food',
-        'location': 'Bangalore, India',
-        'description': 'Fighting hunger by providing meals to those in need.',
-        'fullDescription':
-            'Feeding India works to eliminate hunger by collecting surplus food from restaurants and events, and distributing it to the hungry. We serve over 5,000 meals daily across 10 cities.',
-        'icon': Icons.restaurant,
-        'color': AppTheme.gold,
-        'verified': true,
-        'donors': '1.8K',
-        'rating': '4.7',
-        'projects': '30+',
-      },
-      {
-        'name': 'Green Earth',
-        'category': 'Environment',
-        'location': 'Pune, India',
-        'description':
-            'Environmental conservation and sustainability initiatives.',
-        'fullDescription':
-            'Green Earth is dedicated to environmental conservation through tree plantation drives, waste management programs, and sustainability education. We\'ve planted over 100,000 trees and cleaned 50+ water bodies.',
-        'icon': Icons.eco,
-        'color': AppTheme.success,
-        'verified': true,
-        'donors': '1.5K',
-        'rating': '4.6',
-        'projects': '40+',
-      },
-      {
-        'name': 'Shelter Home',
-        'category': 'Welfare',
-        'location': 'Chennai, India',
-        'description': 'Providing shelter and support to homeless individuals.',
-        'fullDescription':
-            'Shelter Home provides safe accommodation, food, and rehabilitation services to homeless individuals. We currently house 500+ people and provide vocational training for sustainable livelihoods.',
-        'icon': Icons.home,
-        'color': AppTheme.volunteerColor,
-        'verified': false,
-        'donors': '900',
-        'rating': '4.5',
-        'projects': '15+',
-      },
-    ];
   }
 }

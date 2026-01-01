@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../models/user_models.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
@@ -544,55 +545,615 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
 
   // Verification Methods
   Future<void> _verifyEmail() async {
-    // TODO: Implement email verification flow
-    // For now, just show a dialog
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        _showErrorSnackbar('No user logged in');
+        return;
+      }
+
+      // Check if email is already verified
+      await user.reload();
+      if (user.emailVerified) {
+        // Update Firestore
+        final authService = AuthService();
+        await authService.updateUserFields(user.uid, {
+          'verification.email': true,
+        });
+
+        // Reload current user data
+        await _loadUserData();
+
+        _showSuccessSnackbar('Email is already verified!');
+        return;
+      }
+
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: AppTheme.accent),
+        ),
+      );
+
+      // Send verification email
+      await user.sendEmailVerification();
+
+      // Close loading dialog
+      if (mounted) Navigator.pop(context);
+
+      // Show success dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: const Color(0xFF1E1E1E),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppTheme.accent.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.mark_email_read,
+                  color: AppTheme.accent,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Text('Verify Email', style: TextStyle(color: Colors.white)),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'A verification link has been sent to:',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.white.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppTheme.accent.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.email, color: AppTheme.accent, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        user.email ?? '',
+                        style: const TextStyle(
+                          color: AppTheme.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Please check your inbox and click the verification link. After verifying, click "Check Status" below.',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 13,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK', style: TextStyle(color: Colors.white70)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await _checkEmailVerificationStatus();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.accent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Check Status'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      // Close loading dialog if open
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      String errorMessage = 'Failed to send verification email';
+
+      if (e is FirebaseAuthException) {
+        switch (e.code) {
+          case 'too-many-requests':
+            errorMessage = 'Too many requests. Please try again later.';
+            break;
+          case 'user-disabled':
+            errorMessage = 'This account has been disabled.';
+            break;
+          default:
+            errorMessage = e.message ?? errorMessage;
+        }
+      }
+
+      _showErrorSnackbar(errorMessage);
+    }
+  }
+
+  Future<void> _checkEmailVerificationStatus() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        _showErrorSnackbar('No user logged in');
+        return;
+      }
+
+      // Show loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: AppTheme.accent),
+        ),
+      );
+
+      // Reload user to get latest verification status
+      await user.reload();
+      final updatedUser = FirebaseAuth.instance.currentUser;
+
+      // Close loading
+      if (mounted) Navigator.pop(context);
+
+      if (updatedUser?.emailVerified == true) {
+        // Update Firestore
+        final authService = AuthService();
+        await authService.updateUserFields(user.uid, {
+          'verification.email': true,
+        });
+
+        // Reload current user data
+        await _loadUserData();
+
+        _showSuccessSnackbar('Email verified successfully!');
+      } else {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: const Color(0xFF1E1E1E),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: const Row(
+              children: [
+                Icon(Icons.info_outline, color: AppTheme.warning),
+                SizedBox(width: 12),
+                Text('Not Verified Yet', style: TextStyle(color: Colors.white)),
+              ],
+            ),
+            content: const Text(
+              'Your email is not verified yet. Please check your inbox and click the verification link, then try again.',
+              style: TextStyle(color: Colors.white70),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'OK',
+                  style: TextStyle(color: AppTheme.accent),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await _verifyEmail(); // Resend email
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.accent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text('Resend Email'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading if open
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+      _showErrorSnackbar('Failed to check verification status');
+    }
+  }
+
+  void _showSuccessSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle, color: AppTheme.success),
+            const SizedBox(width: 12),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: AppTheme.success.withValues(alpha: 0.9),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: AppTheme.white),
+            const SizedBox(width: 12),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: AppTheme.error,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  Future<void> _verifyPhone() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        _showErrorSnackbar('No user logged in');
+        return;
+      }
+
+      // Get phone number from user data
+      if (_currentUser?.phone == null || _currentUser!.phone.isEmpty) {
+        _showErrorSnackbar(
+          'No phone number found. Please update your profile.',
+        );
+        return;
+      }
+
+      String phoneNumber = _currentUser!.phone;
+
+      // Ensure phone number has country code
+      if (!phoneNumber.startsWith('+')) {
+        phoneNumber = '+91$phoneNumber'; // Default to India, adjust as needed
+      }
+
+      // Show loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: AppTheme.accent),
+        ),
+      );
+
+      // Send OTP
+      await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          // Auto-verification (Android only)
+          try {
+            await user.updatePhoneNumber(credential);
+
+            // Update Firestore
+            final authService = AuthService();
+            await authService.updateUserFields(user.uid, {
+              'verification.phone': true,
+            });
+
+            // Close loading
+            if (mounted) Navigator.pop(context);
+
+            // Reload data
+            await _loadUserData();
+
+            _showSuccessSnackbar('Phone verified automatically!');
+          } catch (e) {
+            if (mounted) Navigator.pop(context);
+            _showErrorSnackbar('Auto-verification failed');
+          }
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          // Close loading
+          if (mounted) Navigator.pop(context);
+
+          String errorMessage = 'Verification failed';
+
+          switch (e.code) {
+            case 'invalid-phone-number':
+              errorMessage = 'Invalid phone number format';
+              break;
+            case 'too-many-requests':
+              errorMessage = 'Too many requests. Please try again later.';
+              break;
+            case 'quota-exceeded':
+              errorMessage = 'SMS quota exceeded. Please try again later.';
+              break;
+            default:
+              errorMessage = e.message ?? errorMessage;
+          }
+
+          _showErrorSnackbar(errorMessage);
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          // Close loading
+          if (mounted) Navigator.pop(context);
+
+          // Show OTP input dialog
+          _showOTPDialog(verificationId, phoneNumber);
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          // Auto-retrieval timeout
+          debugPrint('Auto-retrieval timeout: $verificationId');
+        },
+        timeout: const Duration(seconds: 60),
+      );
+    } catch (e) {
+      // Close loading if open
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+      _showErrorSnackbar('Failed to send OTP: ${e.toString()}');
+    }
+  }
+
+  void _showOTPDialog(String verificationId, String phoneNumber) {
+    final otpController = TextEditingController();
+
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF1E1E1E),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Verify Email',
-          style: TextStyle(color: Colors.white),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppTheme.accent.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.phone_android,
+                color: AppTheme.accent,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text('Verify Phone', style: TextStyle(color: Colors.white)),
+          ],
         ),
-        content: const Text(
-          'A verification link has been sent to your email address. Please check your inbox and click the link to verify.',
-          style: TextStyle(color: Colors.white70),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Enter the 6-digit code sent to:',
+              style: TextStyle(color: Colors.white70, fontSize: 14),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppTheme.accent.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.phone, color: AppTheme.accent, size: 16),
+                  const SizedBox(width: 8),
+                  Text(
+                    phoneNumber,
+                    style: const TextStyle(
+                      color: AppTheme.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: otpController,
+              keyboardType: TextInputType.number,
+              maxLength: 6,
+              style: const TextStyle(
+                color: AppTheme.white,
+                fontSize: 18,
+                letterSpacing: 8,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                hintText: '000000',
+                hintStyle: TextStyle(
+                  color: AppTheme.white.withValues(alpha: 0.3),
+                  letterSpacing: 8,
+                ),
+                counterText: '',
+                filled: true,
+                fillColor: AppTheme.white.withValues(alpha: 0.05),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: AppTheme.accent.withValues(alpha: 0.3),
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: AppTheme.accent.withValues(alpha: 0.3),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: AppTheme.accent,
+                    width: 2,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Didn\'t receive the code?',
+              style: TextStyle(color: Colors.white70, fontSize: 12),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _verifyPhone(); // Resend OTP
+              },
+              child: const Text(
+                'Resend OTP',
+                style: TextStyle(
+                  color: AppTheme.accent,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK', style: TextStyle(color: AppTheme.accent)),
+            onPressed: () {
+              otpController.dispose();
+              Navigator.pop(context);
+            },
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white70),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final code = otpController.text.trim();
+
+              if (code.length != 6) {
+                _showErrorSnackbar('Please enter a valid 6-digit code');
+                return;
+              }
+
+              // Close OTP dialog
+              Navigator.pop(context);
+
+              // Verify OTP
+              await _verifyOTP(verificationId, code);
+
+              otpController.dispose();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.accent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Verify'),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _verifyPhone() async {
-    // TODO: Implement phone verification flow
-    // For now, just show a dialog
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Verify Phone',
-          style: TextStyle(color: Colors.white),
+  Future<void> _verifyOTP(String verificationId, String smsCode) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        _showErrorSnackbar('No user logged in');
+        return;
+      }
+
+      // Show loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: AppTheme.accent),
         ),
-        content: const Text(
-          'An OTP has been sent to your phone number. Please enter the code to verify.',
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK', style: TextStyle(color: AppTheme.accent)),
-          ),
-        ],
-      ),
-    );
+      );
+
+      // Create credential
+      PhoneAuthCredential credential = PhoneAuthProvider.credential(
+        verificationId: verificationId,
+        smsCode: smsCode,
+      );
+
+      // Update phone number
+      await user.updatePhoneNumber(credential);
+
+      // Update Firestore
+      final authService = AuthService();
+      await authService.updateUserFields(user.uid, {
+        'verification.phone': true,
+      });
+
+      // Close loading
+      if (mounted) Navigator.pop(context);
+
+      // Reload data
+      await _loadUserData();
+
+      _showSuccessSnackbar('Phone verified successfully!');
+    } on FirebaseAuthException catch (e) {
+      // Close loading
+      if (mounted) Navigator.pop(context);
+
+      String errorMessage = 'Verification failed';
+
+      switch (e.code) {
+        case 'invalid-verification-code':
+          errorMessage = 'Invalid OTP code. Please try again.';
+          break;
+        case 'session-expired':
+          errorMessage = 'OTP expired. Please request a new code.';
+          break;
+        default:
+          errorMessage = e.message ?? errorMessage;
+      }
+
+      _showErrorSnackbar(errorMessage);
+    } catch (e) {
+      // Close loading
+      if (mounted) Navigator.pop(context);
+      _showErrorSnackbar('Failed to verify OTP');
+    }
   }
 
   // 4. Badges
@@ -704,19 +1265,22 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildCompactStat('₹25,000', 'Total', Icons.attach_money),
+                // TODO: Fetch from Firestore - user's total donated
+                _buildCompactStat('₹0', 'Total', Icons.attach_money),
                 Container(
                   width: 1,
                   height: 40,
                   color: AppTheme.white.withValues(alpha: 0.2),
                 ),
-                _buildCompactStat('15', 'Donations', Icons.card_giftcard),
+                // TODO: Fetch from Firestore - user's donation count
+                _buildCompactStat('0', 'Donations', Icons.card_giftcard),
                 Container(
                   width: 1,
                   height: 40,
                   color: AppTheme.white.withValues(alpha: 0.2),
                 ),
-                _buildCompactStat('50+', 'Lives', Icons.favorite),
+                // TODO: Fetch from Firestore - calculated impact
+                _buildCompactStat('0', 'Lives', Icons.favorite),
               ],
             ),
           ),
@@ -945,32 +1509,15 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
   }
 
   List<Map<String, dynamic>> _getRecentDonations() {
-    return [
-      {
-        'title': 'Monthly Donation',
-        'type': 'Money',
-        'ngo': 'Hope Foundation',
-        'amount': '₹5,000',
-        'date': 'Dec 28, 2024',
-        'status': 'Completed',
-      },
-      {
-        'title': 'Winter Clothes',
-        'type': 'Clothes',
-        'ngo': 'Care India',
-        'quantity': 25,
-        'date': 'Dec 25, 2024',
-        'status': 'In Progress',
-      },
-      {
-        'title': 'Food Donation',
-        'type': 'Food',
-        'ngo': 'Feeding India',
-        'quantity': 50,
-        'date': 'Dec 20, 2024',
-        'status': 'Completed',
-      },
-    ];
+    // TODO: Fetch from Firestore
+    // return await FirebaseFirestore.instance
+    //   .collection('donations')
+    //   .where('donorId', '==', currentUser.uid)
+    //   .orderBy('createdAt', descending: true)
+    //   .limit(3)
+    //   .get();
+
+    return []; // Empty - no mock data
   }
 
   void _showAllDonations() {

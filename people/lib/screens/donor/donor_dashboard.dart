@@ -169,9 +169,12 @@ class _DonorDashboardState extends State<DonorDashboard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildImpactStat('₹25,000', 'Donated', Icons.attach_money),
-              _buildImpactStat('50+', 'Lives Helped', Icons.favorite),
-              _buildImpactStat('12', 'Donations', Icons.card_giftcard),
+              // TODO: Fetch from Firestore - user's total donated amount
+              _buildImpactStat('₹0', 'Donated', Icons.attach_money),
+              // TODO: Fetch from Firestore - calculated impact
+              _buildImpactStat('0', 'Lives Helped', Icons.favorite),
+              // TODO: Fetch from Firestore - user's donation count
+              _buildImpactStat('0', 'Donations', Icons.card_giftcard),
             ],
           ),
         ],
@@ -301,115 +304,34 @@ class _DonorDashboardState extends State<DonorDashboard> {
           ),
         ),
         const SizedBox(height: 12),
-        _buildActivityItem(
-          'Donated ₹5,000',
-          'Hope Foundation',
-          Icons.attach_money,
-          AppTheme.success,
-          '2 days ago',
-        ),
-        _buildActivityItem(
-          'Clothes Donation',
-          '25 items',
-          Icons.checkroom,
-          AppTheme.volunteerColor,
-          '1 week ago',
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActivityItem(
-    String title,
-    String subtitle,
-    IconData icon,
-    Color color,
-    String time,
-  ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: color, size: 20),
+        // TODO: Fetch from Firestore - user's recent donations
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: AppTheme.white.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(12),
           ),
-          const SizedBox(width: 14),
-          Expanded(
+          child: Center(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: AppTheme.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+                Icon(
+                  Icons.history,
+                  color: AppTheme.white.withValues(alpha: 0.3),
+                  size: 48,
                 ),
+                const SizedBox(height: 12),
                 Text(
-                  subtitle,
+                  'No recent activity',
                   style: TextStyle(
-                    color: AppTheme.white.withValues(alpha: 0.5),
-                    fontSize: 12,
+                    color: AppTheme.white.withValues(alpha: 0.6),
+                    fontSize: 14,
                   ),
                 ),
               ],
             ),
           ),
-          Text(
-            time,
-            style: TextStyle(
-              color: AppTheme.white.withValues(alpha: 0.4),
-              fontSize: 11,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPlaceholder(String title, IconData icon) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: AppTheme.donorColor.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: AppTheme.donorColor, size: 48),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            title,
-            style: const TextStyle(
-              color: AppTheme.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Coming Soon',
-            style: TextStyle(
-              color: AppTheme.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
