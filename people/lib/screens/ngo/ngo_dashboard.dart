@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import 'ngo_profile_screen.dart';
+import '../../services/notification_service.dart';
+import '../common/notifications_screen.dart';
 
 class NGODashboard extends StatefulWidget {
   const NGODashboard({super.key});
@@ -94,29 +96,47 @@ class _NGODashboardState extends State<NGODashboard> {
           // Notification Bell
           Stack(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppTheme.white.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.notifications_outlined,
-                  color: AppTheme.white,
-                  size: 24,
-                ),
-              ),
-              Positioned(
-                right: 8,
-                top: 8,
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const NotificationsScreen(),
+                    ),
+                  );
+                },
                 child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: const BoxDecoration(
-                    color: AppTheme.accent,
-                    shape: BoxShape.circle,
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppTheme.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.notifications_outlined,
+                    color: AppTheme.white,
+                    size: 24,
                   ),
                 ),
+              ),
+              ValueListenableBuilder<bool>(
+                valueListenable:
+                    NotificationService.instance.hasUnreadNotifications,
+                builder: (context, hasUnread, child) {
+                  return hasUnread
+                      ? Positioned(
+                          right: 8,
+                          top: 8,
+                          child: Container(
+                            width: 10,
+                            height: 10,
+                            decoration: const BoxDecoration(
+                              color: AppTheme.accent,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink();
+                },
               ),
             ],
           ),
