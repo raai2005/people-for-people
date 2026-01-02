@@ -14,8 +14,8 @@ class NotificationsScreen extends StatelessWidget {
       NotificationService.instance.markAllAsRead();
     });
 
-    // Ideally, this list would come from a Provider or Stream
-    final notifications = getDummyNotifications();
+    // List from NotificationService
+    final notifications = NotificationService.instance.notifications;
 
     return Scaffold(
       backgroundColor: AppTheme.primaryDark,
