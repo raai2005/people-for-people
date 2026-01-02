@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
+import 'ngo_profile_screen.dart';
 
 class NGODashboard extends StatefulWidget {
   const NGODashboard({super.key});
@@ -12,10 +13,10 @@ class _NGODashboardState extends State<NGODashboard> {
   int _currentIndex = 0;
 
   final List<_NavItem> _navItems = [
-    _NavItem(icon: Icons.dashboard_rounded, label: 'Dashboard'),
-    _NavItem(icon: Icons.campaign_rounded, label: 'Campaigns'),
-    _NavItem(icon: Icons.inventory_2_rounded, label: 'Donations'),
-    _NavItem(icon: Icons.people_alt_rounded, label: 'Volunteers'),
+    _NavItem(icon: Icons.home_rounded, label: 'Home'),
+    _NavItem(icon: Icons.volunteer_activism_rounded, label: 'Donate'),
+    _NavItem(icon: Icons.add_circle_rounded, label: 'Create'),
+    _NavItem(icon: Icons.receipt_long_rounded, label: 'Transactions'),
     _NavItem(icon: Icons.person_rounded, label: 'Profile'),
   ];
 
@@ -129,16 +130,19 @@ class _NGODashboardState extends State<NGODashboard> {
       case 0:
         return _buildDashboardHome();
       case 1:
-        return _buildPlaceholder('Campaigns', Icons.campaign_rounded);
+        return _buildPlaceholder(
+          'NGO to NGO Donate',
+          Icons.volunteer_activism_rounded,
+        );
       case 2:
         return _buildPlaceholder(
-          'Donations Received',
-          Icons.inventory_2_rounded,
+          'Create Donation Request',
+          Icons.add_circle_rounded,
         );
       case 3:
-        return _buildPlaceholder('Volunteers', Icons.people_alt_rounded);
+        return _buildPlaceholder('Transactions', Icons.receipt_long_rounded);
       case 4:
-        return _buildPlaceholder('Profile', Icons.person_rounded);
+        return const NGOProfileScreen();
       default:
         return _buildDashboardHome();
     }

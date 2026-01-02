@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'auth/role_selection_screen.dart';
+import 'donor/donor_dashboard.dart';
+import 'ngo/ngo_dashboard.dart';
+import 'volunteer/volunteer_dashboard.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -158,17 +163,82 @@ class _SplashScreenState extends State<SplashScreen>
     }
   }
 
-  void _navigateToHome() {
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            const RoleSelectionScreen(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-        transitionDuration: const Duration(milliseconds: 800),
-      ),
-    );
+  Future<void> _navigateToHome() async {
+    try {
+      // Check if user is already logged in
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        // User is logged in, fetch their role from Firestore
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        if (userDoc.exists && mounted) {
+          final role = userDoc.data()?['role'] as String?;
+
+          Widget destination;
+          switch (role) {
+            case 'donor':
+              destination = const DonorDashboard();
+              break;
+            case 'ngo':
+              destination = const NGODashboard();
+              break;
+            case 'volunteer':
+              destination = const VolunteerDashboard();
+              break;
+            default:
+              // If role is not set or invalid, go to role selection
+              destination = const RoleSelectionScreen();
+          }
+
+          Navigator.of(context).pushReplacement(
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  destination,
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                    return FadeTransition(opacity: animation, child: child);
+                  },
+              transitionDuration: const Duration(milliseconds: 800),
+            ),
+          );
+          return;
+        }
+      }
+
+      // No user logged in, go to role selection
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const RoleSelectionScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+            transitionDuration: const Duration(milliseconds: 800),
+          ),
+        );
+      }
+    } catch (e) {
+      // On error, go to role selection
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const RoleSelectionScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+            transitionDuration: const Duration(milliseconds: 800),
+          ),
+        );
+      }
+    }
   }
 
   @override

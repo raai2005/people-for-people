@@ -61,13 +61,75 @@ abstract class BaseUser {
        verification = verification ?? VerificationStatus();
 }
 
+// NGO Profile Model
+class NGOProfile {
+  final String organizationName;
+  final String address;
+  final String bio;
+  final String planOfAction;
+  final String profileImage;
+  final List<String> certifications;
+  final int projectsCompleted;
+  final double rating;
+
+  NGOProfile({
+    this.organizationName = "",
+    this.address = "",
+    this.bio = "",
+    this.planOfAction = "",
+    this.profileImage = "",
+    this.certifications = const [],
+    this.projectsCompleted = 0,
+    this.rating = 0.0,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'organizationName': organizationName,
+      'address': address,
+      'bio': bio,
+      'planOfAction': planOfAction,
+      'profileImage': profileImage,
+      'certifications': certifications,
+      'projectsCompleted': projectsCompleted,
+      'rating': rating,
+    };
+  }
+
+  factory NGOProfile.fromMap(Map<String, dynamic>? map) {
+    if (map == null) {
+      return NGOProfile();
+    }
+    return NGOProfile(
+      organizationName: map['organizationName'] ?? "",
+      address: map['address'] ?? "",
+      bio: map['bio'] ?? "",
+      planOfAction: map['planOfAction'] ?? "",
+      profileImage: map['profileImage'] ?? "",
+      certifications: List<String>.from(map['certifications'] ?? []),
+      projectsCompleted: map['projectsCompleted'] ?? 0,
+      rating: (map['rating'] ?? 0.0).toDouble(),
+    );
+  }
+}
+
 // NGO/Organisation Model
 class NGOUser extends BaseUser {
   final String organizationName;
+  final String organizationPhone;
+  final String organizationEmail;
   final String address;
   final String govtVerifiedDocUrl;
-  final String headOfOrgId;
+  final String headOfOrgName;
+  final String headOfOrgEmail;
+  final String headOfOrgPhone;
+  final String? headOfOrgId; // Optional: No longer collected via text field
   final String headOfOrgIdUrl;
+  final String?
+  headOfOrgEmployeeId; // Optional: No longer collected via text field
+  final String? bio;
+  final String? profileImageUrl;
+  final NGOProfile ngoProfile;
 
   NGOUser({
     required super.id,
@@ -77,15 +139,25 @@ class NGOUser extends BaseUser {
     required super.location,
     required super.verifiedIdUrl,
     required this.organizationName,
+    required this.organizationPhone,
+    required this.organizationEmail,
     required this.address,
     required this.govtVerifiedDocUrl,
-    required this.headOfOrgId,
+    required this.headOfOrgName,
+    required this.headOfOrgEmail,
+    required this.headOfOrgPhone,
+    this.headOfOrgId,
     required this.headOfOrgIdUrl,
+    this.headOfOrgEmployeeId,
+    this.bio,
+    this.profileImageUrl,
     super.isApproved,
     super.createdAt,
     super.profileCompletion,
     super.verification,
-  }) : super(role: UserRole.ngo);
+    NGOProfile? ngoProfile,
+  }) : ngoProfile = ngoProfile ?? NGOProfile(),
+       super(role: UserRole.ngo);
 
   Map<String, dynamic> toMap() {
     return {
@@ -101,10 +173,19 @@ class NGOUser extends BaseUser {
       'profileCompletion': profileCompletion,
       'verification': verification.toMap(),
       'organizationName': organizationName,
+      'organizationPhone': organizationPhone,
+      'organizationEmail': organizationEmail,
       'address': address,
       'govtVerifiedDocUrl': govtVerifiedDocUrl,
+      'headOfOrgName': headOfOrgName,
+      'headOfOrgEmail': headOfOrgEmail,
+      'headOfOrgPhone': headOfOrgPhone,
       'headOfOrgId': headOfOrgId,
       'headOfOrgIdUrl': headOfOrgIdUrl,
+      'headOfOrgEmployeeId': headOfOrgEmployeeId,
+      'bio': bio,
+      'profileImageUrl': profileImageUrl,
+      'ngoProfile': ngoProfile.toMap(),
     };
   }
 
@@ -126,14 +207,23 @@ class NGOUser extends BaseUser {
       location: map['location'] ?? '',
       verifiedIdUrl: map['verifiedIdUrl'] ?? '',
       organizationName: map['organizationName'] ?? '',
+      organizationPhone: map['organizationPhone'] ?? '',
+      organizationEmail: map['organizationEmail'] ?? '',
       address: map['address'] ?? '',
       govtVerifiedDocUrl: map['govtVerifiedDocUrl'] ?? '',
+      headOfOrgName: map['headOfOrgName'] ?? '',
+      headOfOrgEmail: map['headOfOrgEmail'] ?? '',
+      headOfOrgPhone: map['headOfOrgPhone'] ?? '',
       headOfOrgId: map['headOfOrgId'] ?? '',
       headOfOrgIdUrl: map['headOfOrgIdUrl'] ?? '',
+      headOfOrgEmployeeId: map['headOfOrgEmployeeId'] ?? '',
+      bio: map['bio'],
+      profileImageUrl: map['profileImageUrl'],
       isApproved: map['isApproved'] ?? false,
       createdAt: parsedCreatedAt,
       profileCompletion: map['profileCompletion'] ?? 0,
       verification: VerificationStatus.fromMap(map['verification']),
+      ngoProfile: NGOProfile.fromMap(map['ngoProfile']),
     );
   }
 }
@@ -264,6 +354,50 @@ class DonorUser extends BaseUser {
   }
 }
 
+// Volunteer Profile Model
+class VolunteerProfile {
+  final String bio;
+  final String qualification;
+  final String profileImage;
+  final List<String> skills;
+  final int hoursVolunteered;
+  final double rating;
+
+  VolunteerProfile({
+    this.bio = "",
+    this.qualification = "",
+    this.profileImage = "",
+    this.skills = const [],
+    this.hoursVolunteered = 0,
+    this.rating = 0.0,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'bio': bio,
+      'qualification': qualification,
+      'profileImage': profileImage,
+      'skills': skills,
+      'hoursVolunteered': hoursVolunteered,
+      'rating': rating,
+    };
+  }
+
+  factory VolunteerProfile.fromMap(Map<String, dynamic>? map) {
+    if (map == null) {
+      return VolunteerProfile();
+    }
+    return VolunteerProfile(
+      bio: map['bio'] ?? "",
+      qualification: map['qualification'] ?? "",
+      profileImage: map['profileImage'] ?? "",
+      skills: List<String>.from(map['skills'] ?? []),
+      hoursVolunteered: map['hoursVolunteered'] ?? 0,
+      rating: (map['rating'] ?? 0.0).toDouble(),
+    );
+  }
+}
+
 // Volunteer Model
 class VolunteerUser extends BaseUser {
   final String qualification;
@@ -272,6 +406,9 @@ class VolunteerUser extends BaseUser {
   final String? ngoPhone;
   final String? employeeId;
   final bool isAdminApproved;
+  final String? bio;
+  final String? profileImageUrl;
+  final VolunteerProfile volunteerProfile;
 
   VolunteerUser({
     required super.id,
@@ -286,11 +423,15 @@ class VolunteerUser extends BaseUser {
     this.ngoPhone,
     this.employeeId,
     this.isAdminApproved = false,
+    this.bio,
+    this.profileImageUrl,
     super.isApproved,
     super.createdAt,
     super.profileCompletion,
     super.verification,
-  }) : super(role: UserRole.volunteer);
+    VolunteerProfile? volunteerProfile,
+  }) : volunteerProfile = volunteerProfile ?? VolunteerProfile(),
+       super(role: UserRole.volunteer);
 
   Map<String, dynamic> toMap() {
     return {
@@ -311,6 +452,9 @@ class VolunteerUser extends BaseUser {
       'ngoPhone': ngoPhone,
       'employeeId': employeeId,
       'isAdminApproved': isAdminApproved,
+      'bio': bio,
+      'profileImageUrl': profileImageUrl,
+      'volunteerProfile': volunteerProfile.toMap(),
     };
   }
 
@@ -337,10 +481,13 @@ class VolunteerUser extends BaseUser {
       ngoPhone: map['ngoPhone'],
       employeeId: map['employeeId'],
       isAdminApproved: map['isAdminApproved'] ?? false,
+      bio: map['bio'],
+      profileImageUrl: map['profileImageUrl'],
       isApproved: map['isApproved'] ?? false,
       createdAt: parsedCreatedAt,
       profileCompletion: map['profileCompletion'] ?? 0,
       verification: VerificationStatus.fromMap(map['verification']),
+      volunteerProfile: VolunteerProfile.fromMap(map['volunteerProfile']),
     );
   }
 }

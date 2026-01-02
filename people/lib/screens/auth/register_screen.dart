@@ -4,6 +4,8 @@ import '../../theme/app_theme.dart';
 import '../../models/user_models.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../services/auth_service.dart';
+import '../../services/file_picker_helper.dart';
+import '../../services/cloudinary_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   final UserRole selectedRole;
@@ -33,8 +35,12 @@ class _RegisterScreenState extends State<RegisterScreen>
 
   // NGO Specific Controllers
   final _orgNameController = TextEditingController();
+  final _orgPhoneController = TextEditingController();
+  final _orgEmailController = TextEditingController();
   final _addressController = TextEditingController();
-  final _headIdController = TextEditingController();
+  final _headOfOrgNameController = TextEditingController();
+  final _headOfOrgEmailController = TextEditingController();
+  final _headOfOrgPhoneController = TextEditingController();
 
   // Donor/Volunteer Specific Controllers
   final _qualificationController = TextEditingController();
@@ -80,8 +86,12 @@ class _RegisterScreenState extends State<RegisterScreen>
     _confirmPasswordController.dispose();
     _locationController.dispose();
     _orgNameController.dispose();
+    _orgPhoneController.dispose();
+    _orgEmailController.dispose();
     _addressController.dispose();
-    _headIdController.dispose();
+    _headOfOrgNameController.dispose();
+    _headOfOrgEmailController.dispose();
+    _headOfOrgPhoneController.dispose();
     _qualificationController.dispose();
     _ngoNameController.dispose();
     _ngoPhoneController.dispose();
@@ -125,7 +135,7 @@ class _RegisterScreenState extends State<RegisterScreen>
   List<String> get _stepTitles {
     switch (widget.selectedRole) {
       case UserRole.ngo:
-        return ['Basic Info', 'Organisation', 'Documents', 'Security'];
+        return ['Organisation Info', 'Head of Org', 'Documents', 'Security'];
       case UserRole.donor:
         return ['Basic Info', 'Details', 'Documents', 'Security'];
       case UserRole.volunteer:
@@ -135,33 +145,61 @@ class _RegisterScreenState extends State<RegisterScreen>
 
   int get _totalSteps => _stepTitles.length;
 
-  void _simulateFileUpload(String fieldName) {
-    // Simulate file selection
-    setState(() {
-      switch (fieldName) {
-        case 'verifiedId':
-          _verifiedIdFile =
-              'verified_id_${DateTime.now().millisecondsSinceEpoch}.pdf';
-          break;
-        case 'govtDoc':
-          _govtDocFile =
-              'govt_doc_${DateTime.now().millisecondsSinceEpoch}.pdf';
-          break;
-        case 'headId':
-          _headIdFile = 'head_id_${DateTime.now().millisecondsSinceEpoch}.pdf';
-          break;
-      }
-    });
+  Future<void> _uploadFile(String fieldName) async {
+    try {
+      // Show loading indicator
+      setState(() => _isLoading = true);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('File selected successfully!'),
-        backgroundColor: AppTheme.success,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        duration: const Duration(seconds: 1),
-      ),
-    );
+      // Pick document
+      final result = await FilePickerHelper.pickDocument();
+
+      if (result == null) {
+        setState(() => _isLoading = false);
+        return; // User cancelled
+      }
+
+      // Upload to Cloudinary
+      final cloudinaryService = CloudinaryService();
+      final uploadedUrl = await cloudinaryService.uploadDocument(
+        result.bytes,
+        result.filename,
+      );
+
+      // Update state with uploaded URL
+      setState(() {
+        switch (fieldName) {
+          case 'verifiedId':
+            _verifiedIdFile = uploadedUrl;
+            break;
+          case 'govtDoc':
+            _govtDocFile = uploadedUrl;
+            break;
+          case 'headId':
+            _headIdFile = uploadedUrl;
+            break;
+        }
+        _isLoading = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Document uploaded successfully!'),
+            backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        _showErrorSnackBar('Failed to upload document: ${e.toString()}');
+      }
+    }
   }
 
   void _nextStep() {
@@ -238,16 +276,22 @@ class _RegisterScreenState extends State<RegisterScreen>
         case UserRole.ngo:
           userDetails = NGOUser(
             id: '', // Will be set by AuthService
-            name: _nameController.text.trim(),
-            phone: _phoneController.text.trim(),
-            email: email,
+            name: _orgNameController.text.trim(), // Use org name
+            phone: _orgPhoneController.text.trim(), // Use org phone
+            email: email, // This will be org email from security step
             location: _locationController.text.trim(),
             verifiedIdUrl: _verifiedIdFile ?? '', // In real app, upload first
             organizationName: _orgNameController.text.trim(),
+            organizationPhone: _orgPhoneController.text.trim(),
+            organizationEmail: _orgEmailController.text.trim(),
             address: _addressController.text.trim(),
             govtVerifiedDocUrl: _govtDocFile ?? '',
-            headOfOrgId: _headIdController.text.trim(),
+            headOfOrgName: _headOfOrgNameController.text.trim(),
+            headOfOrgEmail: _headOfOrgEmailController.text.trim(),
+            headOfOrgPhone: _headOfOrgPhoneController.text.trim(),
+            headOfOrgId: '', // No longer collected via text field
             headOfOrgIdUrl: _headIdFile ?? '',
+            headOfOrgEmployeeId: '', // No longer collected via text field
           );
           break;
         case UserRole.donor:
@@ -548,9 +592,9 @@ class _RegisterScreenState extends State<RegisterScreen>
   Widget _buildNGOForm() {
     switch (_currentStep) {
       case 0:
-        return _buildBasicInfoStep();
-      case 1:
         return _buildNGOOrganisationStep();
+      case 1:
+        return _buildNGOHeadOfOrgStep();
       case 2:
         return _buildNGODocumentsStep();
       case 3:
@@ -596,8 +640,9 @@ class _RegisterScreenState extends State<RegisterScreen>
 
   // Common Basic Info Step
   Widget _buildBasicInfoStep() {
+    final isNGO = widget.selectedRole == UserRole.ngo;
     return _buildFormCard(
-      title: 'Personal Information',
+      title: isNGO ? 'Account Information' : 'Personal Information',
       icon: Icons.person_outline,
       children: [
         CustomTextField(
@@ -687,6 +732,44 @@ class _RegisterScreenState extends State<RegisterScreen>
         ),
         const SizedBox(height: 16),
         CustomTextField(
+          controller: _orgPhoneController,
+          label: 'Organisation Phone Number',
+          icon: Icons.phone_outlined,
+          hint: 'Enter organisation phone',
+          keyboardType: TextInputType.phone,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(10),
+          ],
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter organisation phone';
+            }
+            if (value.length < 10) {
+              return 'Please enter a valid phone number';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 16),
+        CustomTextField(
+          controller: _orgEmailController,
+          label: 'Organisation Email',
+          icon: Icons.email_outlined,
+          hint: 'Enter organisation email',
+          keyboardType: TextInputType.emailAddress,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter organisation email';
+            }
+            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+              return 'Please enter a valid email';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 16),
+        CustomTextField(
           controller: _addressController,
           label: 'Complete Address',
           icon: Icons.location_city_outlined,
@@ -701,13 +784,73 @@ class _RegisterScreenState extends State<RegisterScreen>
         ),
         const SizedBox(height: 16),
         CustomTextField(
-          controller: _headIdController,
-          label: 'Head of Organisation ID Number',
-          icon: Icons.badge_outlined,
-          hint: 'Enter Aadhaar/PAN number',
+          controller: _locationController,
+          label: 'City/Location',
+          icon: Icons.location_on_outlined,
+          hint: 'Enter city or area',
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Please enter ID number';
+              return 'Please enter location';
+            }
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+
+  // NGO Head of Organisation Step
+  Widget _buildNGOHeadOfOrgStep() {
+    return _buildFormCard(
+      title: 'Head of Organisation Details',
+      icon: Icons.person_outline,
+      children: [
+        CustomTextField(
+          controller: _headOfOrgNameController,
+          label: 'Head of Organisation Name',
+          icon: Icons.person_outlined,
+          hint: 'Enter full name',
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter head of organisation name';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 16),
+        CustomTextField(
+          controller: _headOfOrgEmailController,
+          label: 'Head of Organisation Email',
+          icon: Icons.email_outlined,
+          hint: 'Enter email address',
+          keyboardType: TextInputType.emailAddress,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter email';
+            }
+            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+              return 'Please enter a valid email';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 16),
+        CustomTextField(
+          controller: _headOfOrgPhoneController,
+          label: 'Head of Organisation Phone',
+          icon: Icons.phone_outlined,
+          hint: 'Enter phone number',
+          keyboardType: TextInputType.phone,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(10),
+          ],
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter phone number';
+            }
+            if (value.length < 10) {
+              return 'Please enter a valid phone number';
             }
             return null;
           },
@@ -732,21 +875,21 @@ class _RegisterScreenState extends State<RegisterScreen>
           label: 'Government Verified Organisation Document',
           icon: Icons.verified_outlined,
           fileName: _govtDocFile,
-          onTap: () => _simulateFileUpload('govtDoc'),
+          onTap: () => _uploadFile('govtDoc'),
         ),
         const SizedBox(height: 16),
         FileUploadField(
           label: 'Head of Organisation Government ID',
           icon: Icons.badge_outlined,
           fileName: _headIdFile,
-          onTap: () => _simulateFileUpload('headId'),
+          onTap: () => _uploadFile('headId'),
         ),
         const SizedBox(height: 16),
         FileUploadField(
           label: 'Verified ID Proof',
           icon: Icons.credit_card_outlined,
           fileName: _verifiedIdFile,
-          onTap: () => _simulateFileUpload('verifiedId'),
+          onTap: () => _uploadFile('verifiedId'),
         ),
       ],
     );
@@ -796,7 +939,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           label: 'Verified ID Proof (Aadhaar/PAN/Passport)',
           icon: Icons.credit_card_outlined,
           fileName: _verifiedIdFile,
-          onTap: () => _simulateFileUpload('verifiedId'),
+          onTap: () => _uploadFile('verifiedId'),
         ),
       ],
     );
@@ -945,7 +1088,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           label: 'Verified ID Proof (Aadhaar/PAN/Passport)',
           icon: Icons.credit_card_outlined,
           fileName: _verifiedIdFile,
-          onTap: () => _simulateFileUpload('verifiedId'),
+          onTap: () => _uploadFile('verifiedId'),
         ),
       ],
     );

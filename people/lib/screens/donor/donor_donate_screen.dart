@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
+import '../../services/donation_service.dart';
 
 class DonorDonateScreen extends StatefulWidget {
   const DonorDonateScreen({super.key});
@@ -13,9 +14,13 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
   late TabController _tabController;
   String _selectedDonationType = 'Money';
   String? _selectedNGO;
+  String? _selectedNGOId;
   final _amountController = TextEditingController();
   final _quantityController = TextEditingController();
   final _descriptionController = TextEditingController();
+
+  final DonationService _donationService = DonationService();
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -1346,103 +1351,184 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
     );
   }
 
-  void _submitDonation() {
+  Future<void> _submitDonation() async {
+    // Validation
     if (_selectedNGO == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select an NGO'),
-          backgroundColor: AppTheme.warning,
+          backgroundColor: AppTheme.error,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       return;
     }
 
-    if (_selectedDonationType == 'Money' && _amountController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter donation amount'),
-          backgroundColor: AppTheme.warning,
-        ),
-      );
-      return;
+    if (_selectedDonationType == 'Money') {
+      if (_amountController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please enter an amount'),
+            backgroundColor: AppTheme.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      final amount = double.tryParse(_amountController.text);
+      if (amount == null || amount <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please enter a valid amount'),
+            backgroundColor: AppTheme.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+    } else {
+      if (_quantityController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please enter a quantity'),
+            backgroundColor: AppTheme.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      final quantity = int.tryParse(_quantityController.text);
+      if (quantity == null || quantity <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please enter a valid quantity'),
+            backgroundColor: AppTheme.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
     }
 
-    if (_selectedDonationType != 'Money' && _quantityController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter quantity'),
-          backgroundColor: AppTheme.warning,
-        ),
-      );
-      return;
-    }
+    setState(() => _isSubmitting = true);
 
-    // Show success
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.primaryDark,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppTheme.success.withValues(alpha: 0.2),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.check_circle,
-                color: AppTheme.success,
-                size: 60,
-              ),
+    try {
+      // Use placeholder NGO ID (in production, this comes from selected NGO)
+      final ngoId = _selectedNGOId ?? 'placeholder_ngo_id';
+      final title = _selectedDonationType == 'Money'
+          ? 'Money Donation'
+          : '$_selectedDonationType Donation';
+
+      await _donationService.createDonation(
+        ngoId: ngoId,
+        ngoName: _selectedNGO!,
+        title: title,
+        type: _selectedDonationType,
+        description: _descriptionController.text.isNotEmpty
+            ? _descriptionController.text
+            : null,
+        amount: _selectedDonationType == 'Money'
+            ? double.parse(_amountController.text)
+            : null,
+        quantity: _selectedDonationType != 'Money'
+            ? int.parse(_quantityController.text)
+            : null,
+      );
+
+      setState(() => _isSubmitting = false);
+
+      if (mounted) {
+        // Show success dialog
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            backgroundColor: AppTheme.primaryDark,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-            const SizedBox(height: 20),
-            const Text(
-              'Donation Submitted!',
-              style: TextStyle(
-                color: AppTheme.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Thank you for your generous contribution!',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppTheme.white.withValues(alpha: 0.7),
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  // Reset form
-                  setState(() {
-                    _selectedNGO = null;
-                    _amountController.clear();
-                    _quantityController.clear();
-                    _descriptionController.clear();
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.success,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.success.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_circle,
+                    color: AppTheme.success,
+                    size: 48,
                   ),
                 ),
-                child: const Text('Done'),
-              ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Donation Submitted!',
+                  style: TextStyle(
+                    color: AppTheme.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Thank you for your generous contribution!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppTheme.white.withValues(alpha: 0.7),
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      setState(() {
+                        _selectedNGO = null;
+                        _selectedNGOId = null;
+                        _amountController.clear();
+                        _quantityController.clear();
+                        _descriptionController.clear();
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Check your donation in the History tab',
+                          ),
+                          backgroundColor: AppTheme.success,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.success,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Done'),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _isSubmitting = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to submit donation: ${e.toString()}'),
+            backgroundColor: AppTheme.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 }

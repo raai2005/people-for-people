@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
+import '../../services/donation_service.dart';
 
 class DonorHistoryScreen extends StatefulWidget {
   const DonorHistoryScreen({super.key});
@@ -13,10 +14,39 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
   late TabController _tabController;
   String _selectedFilter = 'All Time';
 
+  final DonationService _donationService = DonationService();
+  List<Map<String, dynamic>> _allDonations = [];
+  Map<String, dynamic> _stats = {};
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    _loadDonations();
+  }
+
+  Future<void> _loadDonations() async {
+    setState(() => _isLoading = true);
+    try {
+      final donations = await _donationService.getUserDonations();
+      final stats = await _donationService.getDonationStats();
+      setState(() {
+        _allDonations = donations;
+        _stats = stats;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load donations: $e'),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -103,6 +133,36 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
   }
 
   Widget _buildEnhancedStats() {
+    if (_isLoading) {
+      return Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppTheme.donorColor.withValues(alpha: 0.4),
+              AppTheme.donorColor.withValues(alpha: 0.15),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: AppTheme.donorColor.withValues(alpha: 0.4),
+            width: 1.5,
+          ),
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(color: AppTheme.donorColor),
+        ),
+      );
+    }
+
+    final totalAmount = _stats['totalAmount'] ?? 0.0;
+    final totalDonations = _stats['totalDonations'] ?? 0;
+    final livesHelped = (totalDonations * 3.5)
+        .round(); // Estimate: 3.5 lives per donation
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(24),
@@ -161,7 +221,7 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
               Expanded(
                 child: _buildEnhancedStatItem(
                   'Total Donated',
-                  '₹25,000',
+                  '₹${_formatNumber(totalAmount)}',
                   Icons.account_balance_wallet_rounded,
                   AppTheme.success,
                 ),
@@ -185,7 +245,7 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
               Expanded(
                 child: _buildEnhancedStatItem(
                   'Donations',
-                  '15',
+                  '$totalDonations',
                   Icons.volunteer_activism_rounded,
                   AppTheme.gold,
                 ),
@@ -209,7 +269,7 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
               Expanded(
                 child: _buildEnhancedStatItem(
                   'Lives Helped',
-                  '50+',
+                  livesHelped > 0 ? '$livesHelped+' : '0',
                   Icons.favorite_rounded,
                   AppTheme.accent,
                 ),
@@ -308,6 +368,12 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
   }
 
   Widget _buildDonationsList() {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppTheme.donorColor),
+      );
+    }
+
     return TabBarView(
       controller: _tabController,
       children: [
@@ -1060,99 +1126,30 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
     );
   }
 
-  // Mock Data
   List<Map<String, dynamic>> _getAllDonations() {
-    return [
-      {
-        'title': 'Monthly Donation',
-        'type': 'Money',
-        'ngo': 'Hope Foundation',
-        'amount': '₹5,000',
-        'date': 'Dec 28, 2024',
-        'status': 'Completed',
-        'description':
-            'Regular monthly donation to support education programs for underprivileged children.',
-      },
-      {
-        'title': 'Winter Clothes Drive',
-        'type': 'Clothes',
-        'ngo': 'Care India',
-        'quantity': 25,
-        'date': 'Dec 25, 2024',
-        'status': 'In Progress',
-        'description':
-            'Donated winter clothes including jackets, sweaters, and blankets for homeless people.',
-      },
-      {
-        'title': 'Food Donation',
-        'type': 'Food',
-        'ngo': 'Feeding India',
-        'quantity': 50,
-        'date': 'Dec 20, 2024',
-        'status': 'Completed',
-        'description': 'Provided meals for 50 people at a local shelter.',
-      },
-      {
-        'title': 'Medical Supplies',
-        'type': 'Medical',
-        'ngo': 'Health for All',
-        'amount': '₹3,000',
-        'date': 'Dec 15, 2024',
-        'status': 'Pending',
-        'description':
-            'Donated medical supplies including first aid kits and medicines.',
-      },
-      {
-        'title': 'Books for Children',
-        'type': 'Books',
-        'ngo': 'Read Foundation',
-        'quantity': 100,
-        'date': 'Dec 10, 2024',
-        'status': 'Completed',
-        'description':
-            'Donated educational books and storybooks for children in rural areas.',
-      },
-      {
-        'title': 'Emergency Relief',
-        'type': 'Money',
-        'ngo': 'Disaster Relief Fund',
-        'amount': '₹10,000',
-        'date': 'Dec 5, 2024',
-        'status': 'Completed',
-        'description': 'Emergency donation for flood relief efforts.',
-      },
-      {
-        'title': 'School Supplies',
-        'type': 'Books',
-        'ngo': 'Education First',
-        'quantity': 30,
-        'date': 'Nov 28, 2024',
-        'status': 'Completed',
-        'description': 'Notebooks, pens, and school bags for students.',
-      },
-      {
-        'title': 'Grocery Donation',
-        'type': 'Food',
-        'ngo': 'Community Kitchen',
-        'amount': '₹2,500',
-        'date': 'Nov 20, 2024',
-        'status': 'Cancelled',
-        'description': 'Monthly grocery donation cancelled due to logistics.',
-      },
-    ];
+    return _allDonations;
   }
 
   List<Map<String, dynamic>> _getMoneyDonations() {
-    return _getAllDonations().where((d) => d['type'] == 'Money').toList();
+    return _allDonations.where((d) => d['type'] == 'Money').toList();
   }
 
   List<Map<String, dynamic>> _getItemDonations() {
-    return _getAllDonations().where((d) => d['type'] != 'Money').toList();
+    return _allDonations.where((d) => d['type'] != 'Money').toList();
   }
 
   List<Map<String, dynamic>> _getPendingDonations() {
-    return _getAllDonations()
+    return _allDonations
         .where((d) => d['status'] == 'Pending' || d['status'] == 'In Progress')
         .toList();
+  }
+
+  String _formatNumber(num number) {
+    if (number >= 100000) {
+      return '${(number / 100000).toStringAsFixed(1)}L';
+    } else if (number >= 1000) {
+      return '${(number / 1000).toStringAsFixed(1)}K';
+    }
+    return number.toStringAsFixed(0);
   }
 }

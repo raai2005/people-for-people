@@ -1,0 +1,64 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user owns the resource
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    // Users collection rules (existing)
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
+    }
+    
+    // Donations collection rules
+    match /donations/{donationId} {
+      // Allow donors to create donations (must set their own donorId)
+      allow create: if isAuthenticated() && 
+                      request.resource.data.donorId == request.auth.uid &&
+                      request.resource.data.keys().hasAll(['donorId', 'ngoId', 'type', 'status', 'createdAt']);
+      
+      // Allow reading if:
+      // - User is the donor who made the donation
+      // - User is the NGO receiving the donation
+      allow read: if isAuthenticated() && 
+                    (resource.data.donorId == request.auth.uid || 
+                     resource.data.ngoId == request.auth.uid);
+      
+      // Allow donors to update their own pending donations
+      // (e.g., to cancel or modify before NGO accepts)
+      allow update: if isAuthenticated() && 
+                      resource.data.donorId == request.auth.uid &&
+                      resource.data.status == 'Pending';
+      
+      // Allow NGOs to update donations made to them
+      // (e.g., to change status, add feedback)
+      allow update: if isAuthenticated() && 
+                      resource.data.ngoId == request.auth.uid;
+      
+      // Only allow donors to delete their own pending donations
+      allow delete: if isAuthenticated() && 
+                      resource.data.donorId == request.auth.uid &&
+                      resource.data.status == 'Pending';
+    }
+    
+    // NGO profiles collection (if needed)
+    match /ngoProfiles/{ngoId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(ngoId);
+    }
+    
+    // Donor profiles collection (if needed)
+    match /donorProfiles/{donorId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(donorId);
+    }
+  }
+}
