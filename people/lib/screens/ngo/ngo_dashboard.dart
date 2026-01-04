@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import 'ngo_profile_screen.dart';
 import '../../services/notification_service.dart';
+import 'ngo_transactions_screen.dart';
 import '../common/notifications_screen.dart';
 
 class NGODashboard extends StatefulWidget {
@@ -189,7 +190,7 @@ class _NGODashboardState extends State<NGODashboard> {
           Icons.add_circle_rounded,
         );
       case 3:
-        return _buildPlaceholder('Transactions', Icons.receipt_long_rounded);
+        return const NGOTransactionsScreen();
       case 4:
         return const NGOProfileScreen();
       default:

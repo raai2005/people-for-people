@@ -1,0 +1,670 @@
+import 'package:flutter/material.dart';
+import '../../models/transaction_model.dart';
+import '../../theme/app_theme.dart';
+import '../common/public_volunteer_profile_screen.dart';
+
+class NGOTransactionsScreen extends StatefulWidget {
+  const NGOTransactionsScreen({super.key});
+
+  @override
+  State<NGOTransactionsScreen> createState() => _NGOTransactionsScreenState();
+}
+
+class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  List<Transaction> _transactions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _loadTransactions();
+  }
+
+  void _loadTransactions() {
+    // Mock data load
+    setState(() {
+      _transactions = Transaction.getMockTransactions();
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Custom Tab Bar
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          decoration: BoxDecoration(
+            color: AppTheme.white.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: TabBar(
+            controller: _tabController,
+            indicator: BoxDecoration(
+              color: AppTheme.ngoColor,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
+            tabs: const [
+              Tab(text: 'Incoming'),
+              Tab(text: 'Pending'),
+              Tab(text: 'Completed'),
+            ],
+            dividerColor: Colors.transparent,
+          ),
+        ),
+
+        // Tab View
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _buildIncomingList(),
+              _buildPendingList(),
+              _buildCompletedList(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildIncomingList() {
+    final incoming = _transactions
+        .where((t) => t.status == TransactionStatus.incoming)
+        .toList();
+
+    if (incoming.isEmpty) return _buildEmptyState('No new requests');
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(20),
+      itemCount: incoming.length,
+      itemBuilder: (context, index) {
+        final t = incoming[index];
+        return InkWell(
+          onTap: () => _showDonationDetails(t),
+          borderRadius: BorderRadius.circular(16),
+          child: _buildTransactionCard(
+            t,
+            // Visual indicator that it's clickable, maybe an arrow or just the card style
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDonationDetails(Transaction t) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: AppTheme.primaryDark,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Donation Details',
+                    style: TextStyle(
+                      color: AppTheme.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.white54,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              _buildDetailRow('Donor', t.donorName),
+              const SizedBox(height: 12),
+              _buildDetailRow('Item', t.itemName),
+              const SizedBox(height: 12),
+              _buildDetailRow('Quantity', t.quantity),
+              const SizedBox(height: 12),
+              _buildDetailRow(
+                'Delivery',
+                t.isDonorDelivering ? 'Donor will deliver' : 'Needs Volunteer',
+              ),
+              const SizedBox(height: 12),
+              _buildDetailRow(
+                'Date',
+                '${t.date.day}/${t.date.month}/${t.date.year}',
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    // Navigate to donor profile
+                    // For now, showing a snackbar as placeholder or simple dialog
+                    // In real app: Navigator.push(context, MaterialPageRoute(builder: (_) => PublicDonorProfile(name: t.donorName)));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('View Donor Profile coming soon'),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.person),
+                  label: const Text('View Donor Profile'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.ngoColor,
+                    side: const BorderSide(color: AppTheme.ngoColor),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        // Reject logic (remove from list for now)
+                        setState(() {
+                          _transactions.removeWhere((tr) => tr.id == t.id);
+                        });
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Donation rejected')),
+                        );
+                      },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.error,
+                        side: const BorderSide(color: AppTheme.error),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: const Text('Reject'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _updateStatus(
+                          t,
+                          t.isDonorDelivering
+                              ? TransactionStatus.pendingDelivery
+                              : TransactionStatus.needsVolunteer,
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Donation Accepted')),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.ngoColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: const Text('Accept'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(
+            label,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 14,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPendingList() {
+    final pending = _transactions.where((t) {
+      return t.status == TransactionStatus.pendingDelivery ||
+          t.status == TransactionStatus.needsVolunteer ||
+          t.status == TransactionStatus.volunteerAssigned;
+    }).toList();
+
+    if (pending.isEmpty) return _buildEmptyState('No pending deliveries');
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(20),
+      itemCount: pending.length,
+      itemBuilder: (context, index) {
+        final t = pending[index];
+        String statusText;
+        Color statusColor;
+        String? actionLabel;
+        VoidCallback? onAction;
+
+        if (t.status == TransactionStatus.pendingDelivery) {
+          statusText = 'Donor Delivering';
+          statusColor = AppTheme.gold;
+          actionLabel = 'Mark Received';
+          onAction = () => _updateStatus(t, TransactionStatus.completed);
+        } else if (t.status == TransactionStatus.needsVolunteer) {
+          statusText = 'Needs Volunteer';
+          statusColor = AppTheme.warning;
+          // In real app, this might open a dialog to assign/approve volunteer
+          actionLabel = 'Assign Volunteer';
+          onAction = () => _showVolunteerSelectionDialog(t);
+        } else {
+          statusText = 'Volunteer: ${t.volunteerName}';
+          statusColor = AppTheme.volunteerColor;
+          actionLabel = 'Mark Received';
+          onAction = () => _updateStatus(t, TransactionStatus.completed);
+        }
+
+        return _buildTransactionCard(
+          t,
+          statusTag: _buildStatusTag(statusText, statusColor),
+          actionLabel: actionLabel,
+          onAction: onAction,
+        );
+      },
+    );
+  }
+
+  Widget _buildCompletedList() {
+    final completed = _transactions
+        .where((t) => t.status == TransactionStatus.completed)
+        .toList();
+
+    if (completed.isEmpty) return _buildEmptyState('No completed transactions');
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(20),
+      itemCount: completed.length,
+      itemBuilder: (context, index) {
+        return _buildTransactionCard(
+          completed[index],
+          statusTag: _buildStatusTag('Completed', AppTheme.success),
+        );
+      },
+    );
+  }
+
+  void _updateStatus(Transaction t, TransactionStatus newStatus) {
+    setState(() {
+      final index = _transactions.indexWhere((tr) => tr.id == t.id);
+      if (index != -1) {
+        _transactions[index] = Transaction(
+          id: t.id,
+          donorName: t.donorName,
+          itemName: t.itemName,
+          quantity: t.quantity,
+          status: newStatus,
+          isDonorDelivering: t.isDonorDelivering,
+          volunteerId: t.volunteerId,
+          volunteerName: t.volunteerName,
+          date: t.date,
+        );
+      }
+    });
+  }
+
+  Widget _buildTransactionCard(
+    Transaction t, {
+    Widget? statusTag,
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.ngoColor.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.volunteer_activism,
+                      color: AppTheme.ngoColor,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        t.donorName,
+                        style: const TextStyle(
+                          color: AppTheme.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '${t.quantity} • ${t.itemName}',
+                        style: TextStyle(
+                          color: AppTheme.white.withValues(alpha: 0.7),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              if (statusTag != null) statusTag,
+            ],
+          ),
+          if (t.status == TransactionStatus.incoming) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppTheme.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                t.isDonorDelivering
+                    ? 'Donor will deliver'
+                    : 'Requires Volunteer',
+                style: TextStyle(
+                  color: AppTheme.white.withValues(alpha: 0.6),
+                  fontSize: 11,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+          ],
+          if (actionLabel != null) ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onAction,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.ngoColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: Text(actionLabel),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusTag(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(String message) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.inbox_outlined,
+            size: 48,
+            color: Colors.white.withValues(alpha: 0.2),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showVolunteerSelectionDialog(Transaction t) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: AppTheme.primaryDark,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Select Volunteer',
+                    style: TextStyle(
+                      color: AppTheme.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.white54,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '${t.interestedVolunteers.length} volunteers interested',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 20),
+              if (t.interestedVolunteers.isEmpty)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Text(
+                      'Waiting for volunteers to accept...',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.5),
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: t.interestedVolunteers.length,
+                    separatorBuilder: (context, index) =>
+                        Divider(color: Colors.white.withValues(alpha: 0.1)),
+                    itemBuilder: (context, index) {
+                      final vol = t.interestedVolunteers[index];
+                      return ListTile(
+                        onTap: () {
+                          Navigator.pop(context); // Close dialog
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  PublicVolunteerProfileScreen(volunteer: vol),
+                            ),
+                          ).then((_) {
+                            // Reshow dialog when returning if needed, or just let user click again.
+                            // For simplicity, we just return to list. User can click Assign again.
+                            // To improve UX, could reshow dialog here, but might feel jumpy.
+                            // Let's rely on user flow: Check profile -> Back -> Click Assign again -> Select.
+                            // Or better: keep dialog open? Cannot easily push on top of dialog context without closing it usually.
+
+                            // Actually, standard pattern:
+                            // 1. Click row -> Go to profile.
+                            // 2. Profile has "Select" or "Back".
+                            // If Profile is just for viewing, we pop back.
+                            // User has to click "Assign" again on the Item Card.
+                            // Wait, if we pop the dialog to show profile, the dialog is gone.
+                            // Let's just pop.
+                          });
+                        },
+                        contentPadding: EdgeInsets.zero,
+                        leading: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppTheme.volunteerColor.withValues(
+                              alpha: 0.2,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.person,
+                            color: AppTheme.volunteerColor,
+                            size: 20,
+                          ),
+                        ),
+                        title: Text(
+                          vol.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        subtitle: Row(
+                          children: [
+                            const Icon(
+                              Icons.star,
+                              color: AppTheme.gold,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              vol.rating.toString(),
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.7),
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                        trailing: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _assignVolunteer(t, vol);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.ngoColor,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                          ),
+                          child: const Text('Approve'),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _assignVolunteer(Transaction t, VolunteerPreview vol) {
+    setState(() {
+      final index = _transactions.indexWhere((tr) => tr.id == t.id);
+      if (index != -1) {
+        _transactions[index] = Transaction(
+          id: t.id,
+          donorName: t.donorName,
+          itemName: t.itemName,
+          quantity: t.quantity,
+          status: TransactionStatus.volunteerAssigned,
+          isDonorDelivering: false,
+          date: t.date,
+          volunteerId: vol.id,
+          volunteerName: vol.name,
+          interestedVolunteers: t.interestedVolunteers,
+        );
+      }
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Assigned ${vol.name} to pickup'),
+        backgroundColor: AppTheme.success,
+      ),
+    );
+  }
+}
