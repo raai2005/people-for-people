@@ -14,36 +14,65 @@ class NGODashboard extends StatefulWidget {
 class _NGODashboardState extends State<NGODashboard> {
   int _currentIndex = 0;
 
-  final List<_NavItem> _navItems = [
-    _NavItem(icon: Icons.home_rounded, label: 'Home'),
-    _NavItem(icon: Icons.volunteer_activism_rounded, label: 'Donate'),
-    _NavItem(icon: Icons.add_circle_rounded, label: 'Create'),
-    _NavItem(icon: Icons.receipt_long_rounded, label: 'Transactions'),
-    _NavItem(icon: Icons.person_rounded, label: 'Profile'),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true, // Allow body to extend behind the FAB
+      resizeToAvoidBottomInset: false,
       body: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
         child: SafeArea(
+          bottom: false, // Let content go behind bottom bar
           child: Column(
             children: [
               // App Bar
-              _buildAppBar(),
+              if (_currentIndex != 4) _buildAppBar(),
 
               // Content
               Expanded(child: _buildContent()),
+
+              // Add padding at the bottom for the BottomAppBar
+              const SizedBox(height: 80),
             ],
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => setState(() => _currentIndex = 2),
+        elevation: 4,
+        backgroundColor: _currentIndex == 2
+            ? AppTheme.ngoColor
+            : AppTheme.primaryDark,
+        shape: const CircleBorder(),
+        child: Icon(
+          Icons.add_circle,
+          size: 30,
+          color: _currentIndex == 2 ? AppTheme.white : AppTheme.ngoColor,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: _buildBottomNav(),
     );
   }
+
+  // ... existing app bar methods ...
+
+  // Keep _buildAppBar, _buildNotificationBell, _buildContent, _buildDashboardHome etc. as is.
+  // I will only include the changed methods to avoid context size explosion if I were using replace_file_content on the whole file,
+  // but since I am replacing the whole file content to be safe with the structure changes (adding FAB property to Scaffold), I need to be careful.
+  // Actually, I should probably use `multi_replace_file_content` or targeted `replace_file_content` if possible.
+  // The Scaffold is in `build`. The `_buildBottomNav` is at the end.
+  // Let's rewrite `build` and `_buildBottomNav` and remove `_navItems`.
+
+  // Wait, I can't easily remove `_navItems` field with `replace_file_content` unless I target it specifically.
+  // Let's stick to replacing `build` and `_buildBottomNav` and just ignore `_navItems` or remove it in a separate block if strictly necessary,
+  // but for a clean code I should remove it.
+
+  // Let's try to do it in one go if I can match the blocks.
+  // Or I can just overwrite the file from line 14 down to the end of the class. That's a lot of lines.
+  // Let's try targeted replacements.
 
   Widget _buildAppBar() {
     return Container(
@@ -664,72 +693,59 @@ class _NGODashboardState extends State<NGODashboard> {
   }
 
   Widget _buildBottomNav() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.primaryDark,
-        border: Border(
-          top: BorderSide(color: AppTheme.white.withValues(alpha: 0.1)),
-        ),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(_navItems.length, (index) {
-              final isSelected = _currentIndex == index;
-              return InkWell(
-                onTap: () => setState(() => _currentIndex = index),
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppTheme.ngoColor.withValues(alpha: 0.2)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        _navItems[index].icon,
-                        color: isSelected
-                            ? AppTheme.ngoColor
-                            : AppTheme.white.withValues(alpha: 0.5),
-                        size: 24,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _navItems[index].label,
-                        style: TextStyle(
-                          color: isSelected
-                              ? AppTheme.ngoColor
-                              : AppTheme.white.withValues(alpha: 0.5),
-                          fontSize: 10,
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }),
-          ),
+    return BottomAppBar(
+      shape: const CircularNotchedRectangle(),
+      notchMargin: 8.0,
+      color: AppTheme.primaryDark,
+      child: Container(
+        height: 60,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildNavItem(0, Icons.home_rounded, 'Home'),
+            _buildNavItem(1, Icons.volunteer_activism_rounded, 'Donate'),
+            const SizedBox(width: 48), // Space for FAB
+            _buildNavItem(3, Icons.receipt_long_rounded, 'Transactions'),
+            _buildNavItem(4, Icons.person_rounded, 'Profile'),
+          ],
         ),
       ),
     );
   }
-}
 
-class _NavItem {
-  final IconData icon;
-  final String label;
-
-  _NavItem({required this.icon, required this.label});
+  Widget _buildNavItem(int index, IconData icon, String label) {
+    final isSelected = _currentIndex == index;
+    return InkWell(
+      onTap: () => setState(() => _currentIndex = index),
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: isSelected
+                  ? AppTheme.ngoColor
+                  : AppTheme.white.withValues(alpha: 0.5),
+              size: 24,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected
+                    ? AppTheme.ngoColor
+                    : AppTheme.white.withValues(alpha: 0.5),
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

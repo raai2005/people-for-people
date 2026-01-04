@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../theme/app_theme.dart';
+import '../auth/role_selection_screen.dart';
 
 class VolunteerDashboard extends StatefulWidget {
   const VolunteerDashboard({super.key});
@@ -233,7 +235,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
       case 3:
         return _buildPlaceholder('My Tasks', Icons.checklist);
       case 4:
-        return _buildPlaceholder('Profile', Icons.person_rounded);
+        return _buildProfileContent();
       default:
         return _buildDashboardHome();
     }
@@ -610,6 +612,151 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                 ),
               );
             }),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileContent() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.all(30),
+            decoration: BoxDecoration(
+              color: AppTheme.volunteerColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: AppTheme.volunteerColor.withValues(alpha: 0.5),
+                width: 2,
+              ),
+            ),
+            child: const Icon(
+              Icons.person_rounded,
+              color: AppTheme.volunteerColor,
+              size: 60,
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Volunteer Profile',
+            style: TextStyle(
+              color: AppTheme.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          if (!_isApproved) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppTheme.warning.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppTheme.warning),
+              ),
+              child: const Text(
+                'Pending Approval',
+                style: TextStyle(
+                  color: AppTheme.warning,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 40),
+          // Statistics Summary
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppTheme.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildStat('15', 'Tasks', Icons.task_alt),
+                _buildStat('45h', 'Time', Icons.schedule),
+                _buildStat('4.8', 'Rating', Icons.star),
+              ],
+            ),
+          ),
+          const SizedBox(height: 40),
+          _buildLogoutButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              backgroundColor: AppTheme.primaryDark,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: const Row(
+                children: [
+                  Icon(Icons.logout_rounded, color: AppTheme.error),
+                  SizedBox(width: 12),
+                  Text('Logout', style: TextStyle(color: AppTheme.white)),
+                ],
+              ),
+              content: const Text(
+                'Are you sure you want to logout?',
+                style: TextStyle(color: Colors.white70),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await FirebaseAuth.instance.signOut();
+                    if (mounted) {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => const RoleSelectionScreen(),
+                        ),
+                        (route) => false,
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.error,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Logout'),
+                ),
+              ],
+            ),
+          );
+        },
+        icon: const Icon(Icons.logout_rounded),
+        label: const Text('Logout'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppTheme.error,
+          foregroundColor: AppTheme.white,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
           ),
         ),
       ),

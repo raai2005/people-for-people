@@ -6,6 +6,9 @@ import '../../services/auth_service.dart';
 import '../../services/cloudinary_service.dart';
 import '../../theme/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
+import '../auth/role_selection_screen.dart';
 
 class NGOProfileScreen extends StatefulWidget {
   const NGOProfileScreen({super.key});
@@ -24,6 +27,9 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
   bool _isLoading = true;
   bool _isEditing = false;
   bool _isUploadingImage = false;
+  bool _viewingAsPublic = false; // Toggle between private and public view
+  final List<String> _memories =
+      []; // Local state for memories (until backend update)
 
   // Controllers
   late TextEditingController _orgNameController;
@@ -550,6 +556,43 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(
+          _viewingAsPublic ? 'Organisation Profile' : 'My Profile',
+          style: const TextStyle(color: AppTheme.white),
+        ),
+        actions: [
+          // Toggle between private and public view
+          TextButton.icon(
+            onPressed: () {
+              setState(() => _viewingAsPublic = !_viewingAsPublic);
+            },
+            icon: Icon(
+              _viewingAsPublic ? Icons.lock_open : Icons.visibility,
+              color: AppTheme.accent,
+              size: 20,
+            ),
+            label: Text(
+              _viewingAsPublic ? 'My View' : 'Public View',
+              style: const TextStyle(
+                color: AppTheme.accent,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              backgroundColor: AppTheme.accent.withValues(alpha: 0.1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+        ],
+      ),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -562,32 +605,43 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
             const SizedBox(height: 20),
             _buildHeadOfOrgSection(),
             const SizedBox(height: 20),
-            _buildCompletionSection(),
-            const SizedBox(height: 20),
+            if (!_viewingAsPublic) ...[
+              _buildCompletionSection(),
+              const SizedBox(height: 20),
+            ],
             _buildStatisticsSection(),
             const SizedBox(height: 20),
-            _buildDocumentsSection(),
-            const SizedBox(height: 20),
-            _buildCertificationsSection(),
-
-            if (_isEditing) ...[
+            if (!_viewingAsPublic) ...[
+              _buildDocumentsSection(),
               const SizedBox(height: 20),
-              _buildCancelButton(),
+            ],
+            _buildCertificationsSection(),
+            const SizedBox(height: 20),
+            _buildMemoriesSection(),
+
+            if (!_viewingAsPublic) ...[
+              const SizedBox(height: 20),
+              _buildLogoutButton(),
             ],
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _isEditing
-            ? _saveProfile
-            : () => setState(() => _isEditing = true),
-        backgroundColor: AppTheme.ngoColor,
-        icon: Icon(_isEditing ? Icons.check : Icons.edit, color: Colors.white),
-        label: Text(
-          _isEditing ? 'Save Changes' : 'Edit Profile',
-          style: const TextStyle(color: Colors.white),
-        ),
-      ),
+      floatingActionButton: !_viewingAsPublic
+          ? FloatingActionButton.extended(
+              onPressed: _isEditing
+                  ? _saveProfile
+                  : () => setState(() => _isEditing = true),
+              backgroundColor: AppTheme.ngoColor,
+              icon: Icon(
+                _isEditing ? Icons.check : Icons.edit,
+                color: Colors.white,
+              ),
+              label: Text(
+                _isEditing ? 'Save Changes' : 'Edit Profile',
+                style: const TextStyle(color: Colors.white),
+              ),
+            )
+          : null,
     );
   }
 
@@ -1288,7 +1342,18 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Certifications', style: AppTheme.headingSmall),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Certifications', style: AppTheme.headingSmall),
+              if (!_viewingAsPublic)
+                IconButton(
+                  onPressed: _showCertificationUploadDialog,
+                  icon: const Icon(Icons.add_circle, color: AppTheme.ngoColor),
+                  tooltip: 'Add Certification',
+                ),
+            ],
+          ),
           const SizedBox(height: 16),
           if (certifications.isEmpty)
             Center(
@@ -1354,21 +1419,306 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
     );
   }
 
-  Widget _buildCancelButton() {
-    return Center(
-      child: TextButton(
-        onPressed: () {
-          setState(() {
-            _isEditing = false;
-            _populateControllers(); // Reset to original values
-          });
-        },
-        style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+  // 8. Memories Section
+  Widget _buildMemoriesSection() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: AppTheme.cardDecoration,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Memories & Photos', style: AppTheme.headingSmall),
+              if (!_viewingAsPublic)
+                IconButton(
+                  onPressed: _showMemoryUploadDialog,
+                  icon: const Icon(
+                    Icons.add_photo_alternate,
+                    color: AppTheme.accent,
+                  ),
+                  tooltip: 'Add Photo',
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (_memories.isEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.photo_library_outlined,
+                      size: 48,
+                      color: Colors.white.withValues(alpha: 0.3),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'No memories shared yet',
+                      style: AppTheme.bodyMedium.copyWith(
+                        color: Colors.white.withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemCount: _memories.length,
+              itemBuilder: (context, index) {
+                return Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.white.withValues(alpha: 0.1),
+                    image: DecorationImage(
+                      image: NetworkImage(_memories[index]),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                );
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
+  // Upload Dialogs
+  Future<void> _showCertificationUploadDialog() async {
+    final TextEditingController nameController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.primaryDark,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.workspace_premium, color: AppTheme.ngoColor),
+            SizedBox(width: 12),
+            Text('Add Certification', style: TextStyle(color: AppTheme.white)),
+          ],
         ),
-        child: const Text(
-          'Cancel',
-          style: TextStyle(color: Colors.white70, fontSize: 16),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Enter the name of the certification or award.',
+              style: TextStyle(color: Colors.white70, fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: nameController,
+              style: const TextStyle(color: AppTheme.white),
+              decoration: InputDecoration(
+                hintText: 'Certification Name',
+                hintStyle: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.5),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                filled: true,
+                fillColor: Colors.white.withValues(alpha: 0.05),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white70),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (nameController.text.isNotEmpty) {
+                // Update local state and backend
+                // Note: Ideally update backend here using updateUserFields
+                // For now, checking if we can update the list in Firestore
+                List<String> currentCerts = List.from(
+                  _currentUser!.ngoProfile.certifications,
+                );
+                currentCerts.add(nameController.text);
+
+                try {
+                  await _authService.updateUserFields(_currentUser!.id, {
+                    'ngoProfile.certifications': currentCerts,
+                  });
+                  await _loadUserData();
+                  if (mounted) Navigator.pop(context);
+                } catch (e) {
+                  if (mounted)
+                    _showErrorSnackbar('Failed to add certification');
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.ngoColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showMemoryUploadDialog() async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.primaryDark,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.add_photo_alternate, color: AppTheme.accent),
+            SizedBox(width: 12),
+            Text('Add Memory', style: TextStyle(color: AppTheme.white)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Upload a photo from your gallery.',
+              style: TextStyle(color: Colors.white70),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: () async {
+                try {
+                  final XFile? image = await _imagePicker.pickImage(
+                    source: ImageSource.gallery,
+                  );
+                  if (image != null) {
+                    Navigator.pop(context); // Close dialog
+                    setState(() => _isUploadingImage = true);
+
+                    // Upload logic
+                    final bytes = await image.readAsBytes();
+                    final url = await _cloudinaryService.uploadImage(
+                      bytes,
+                      image.name,
+                    );
+
+                    if (mounted) {
+                      setState(() {
+                        _memories.add(url);
+                        _isUploadingImage = false;
+                      });
+                      _showSuccessSnackbar('Memory added successfully!');
+                    }
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    setState(() => _isUploadingImage = false);
+                    _showErrorSnackbar('Failed to upload image');
+                  }
+                }
+              },
+              icon: const Icon(Icons.upload),
+              label: const Text('Select Image'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.accent,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white70),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              backgroundColor: AppTheme.primaryDark,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: const Row(
+                children: [
+                  Icon(Icons.logout_rounded, color: AppTheme.error),
+                  SizedBox(width: 12),
+                  Text('Logout', style: TextStyle(color: AppTheme.white)),
+                ],
+              ),
+              content: const Text(
+                'Are you sure you want to logout?',
+                style: TextStyle(color: Colors.white70),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await FirebaseAuth.instance.signOut();
+                    if (mounted) {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => const RoleSelectionScreen(),
+                        ),
+                        (route) => false,
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.error,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Logout'),
+                ),
+              ],
+            ),
+          );
+        },
+        icon: const Icon(Icons.logout_rounded),
+        label: const Text('Logout'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppTheme.error,
+          foregroundColor: AppTheme.white,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
         ),
       ),
     );

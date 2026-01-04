@@ -268,8 +268,18 @@ class _RegisterScreenState extends State<RegisterScreen>
 
     try {
       BaseUser userDetails;
-      final String email = _emailController.text.trim();
+      // Fix: NGO registration uses _orgEmailController, others use _emailController
+      final String email = widget.selectedRole == UserRole.ngo
+          ? _orgEmailController.text.trim()
+          : _emailController.text.trim();
+
       final String password = _passwordController.text.trim();
+
+      if (email.isEmpty) {
+        _showErrorSnackBar('Email address is missing');
+        setState(() => _isLoading = false);
+        return;
+      }
 
       // Create specific user model based on role
       switch (widget.selectedRole) {
@@ -335,7 +345,13 @@ class _RegisterScreenState extends State<RegisterScreen>
         _showRegistrationSuccessDialog();
       }
     } catch (e) {
-      _showErrorSnackBar(e.toString().replaceAll('Exception: ', ''));
+      debugPrint('Registration Error: $e');
+      // Show the full error message if possible, or a more descriptive fallback
+      String errorMessage = e.toString().replaceAll('Exception: ', '');
+      if (errorMessage.trim().isEmpty || errorMessage == 'Error') {
+        errorMessage = 'An unexpected error occurred. Please try again.';
+      }
+      _showErrorSnackBar(errorMessage);
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
