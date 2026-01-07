@@ -1278,83 +1278,102 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
 
   // 6. Documents Section
   Widget _buildDocumentsSection() {
+    final bool hasDocument = _currentUser!.govtVerifiedDocUrl.isNotEmpty;
+    final bool isVerified = _currentUser!.verification.governmentDoc;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: AppTheme.cardDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Documents', style: AppTheme.headingSmall),
+          const Text('NGO Certificate', style: AppTheme.headingSmall),
           const SizedBox(height: 16),
-          _buildDocumentLink(
-            'Government Verified Document',
-            _currentUser!.govtVerifiedDocUrl,
-            Icons.verified_user,
-          ),
-          const SizedBox(height: 12),
-          _buildDocumentLink(
-            'Organization Verified ID',
-            _currentUser!.verifiedIdUrl,
-            Icons.badge,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDocumentLink(String title, String url, IconData icon) {
-    final bool hasDocument = url.isNotEmpty;
-
-    return InkWell(
-      onTap: hasDocument ? () => _openDocument(url) : null,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: hasDocument
-              ? AppTheme.ngoColor.withValues(alpha: 0.1)
-              : AppTheme.lightGrey,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: hasDocument
-                ? AppTheme.ngoColor.withValues(alpha: 0.3)
-                : AppTheme.grey.withValues(alpha: 0.2),
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: hasDocument ? AppTheme.ngoColor : AppTheme.grey,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          InkWell(
+            onTap: hasDocument
+                ? () => _openDocument(_currentUser!.govtVerifiedDocUrl)
+                : null,
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: hasDocument
+                    ? AppTheme.ngoColor.withValues(alpha: 0.1)
+                    : AppTheme.lightGrey,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: hasDocument
+                      ? AppTheme.ngoColor.withValues(alpha: 0.3)
+                      : AppTheme.grey.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Row(
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: AppTheme.primaryDark,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
+                  Icon(
+                    Icons.verified_user,
+                    color: hasDocument ? AppTheme.ngoColor : AppTheme.grey,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Government Verified Document',
+                          style: TextStyle(
+                            color: AppTheme.primaryDark,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          hasDocument ? 'Tap to view' : 'Not uploaded',
+                          style: TextStyle(
+                            color: hasDocument
+                                ? AppTheme.ngoColor
+                                : Colors.grey,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    hasDocument ? 'Tap to view' : 'Not uploaded',
-                    style: TextStyle(
-                      color: hasDocument ? AppTheme.ngoColor : Colors.grey,
-                      fontSize: 11,
+                  if (hasDocument) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isVerified
+                            ? AppTheme.success.withValues(alpha: 0.1)
+                            : AppTheme.warning.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        isVerified ? 'Verified' : 'Pending',
+                        style: TextStyle(
+                          color: isVerified
+                              ? AppTheme.success
+                              : AppTheme.warning,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    const Icon(
+                      Icons.open_in_new,
+                      color: AppTheme.ngoColor,
+                      size: 18,
+                    ),
+                  ],
                 ],
               ),
             ),
-            if (hasDocument)
-              const Icon(Icons.open_in_new, color: AppTheme.ngoColor, size: 18),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

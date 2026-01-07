@@ -371,7 +371,7 @@ class _NGODashboardState extends State<NGODashboard> {
         const Text(
           'Overview',
           style: TextStyle(
-            color: AppTheme.white,
+            color: AppTheme.primaryDark,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -382,20 +382,20 @@ class _NGODashboardState extends State<NGODashboard> {
             Expanded(
               child: _buildStatCard(
                 'Total Donations',
-                '₹1,25,000',
+                '₹0',
                 Icons.attach_money,
                 AppTheme.success,
-                '+12%',
+                '--',
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: _buildStatCard(
                 'Active Volunteers',
-                '45',
+                '0',
                 Icons.people_alt_rounded,
                 AppTheme.volunteerColor,
-                '+5',
+                '--',
               ),
             ),
           ],
@@ -406,20 +406,20 @@ class _NGODashboardState extends State<NGODashboard> {
             Expanded(
               child: _buildStatCard(
                 'Campaigns',
-                '8',
+                '0',
                 Icons.campaign_rounded,
                 AppTheme.gold,
-                '3 Active',
+                '0 Active',
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: _buildStatCard(
                 'Beneficiaries',
-                '230',
+                '0',
                 Icons.favorite,
                 AppTheme.accent,
-                '+28',
+                '--',
               ),
             ),
           ],
@@ -555,47 +555,20 @@ class _NGODashboardState extends State<NGODashboard> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         decoration: BoxDecoration(
-          color: isLocked ? AppTheme.lightGrey : AppTheme.white,
+          color: AppTheme.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppTheme.borderGrey),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Stack(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: isLocked
-                        ? AppTheme.grey.withValues(alpha: 0.1)
-                        : color.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    icon,
-                    color: isLocked ? AppTheme.grey : color,
-                    size: 22,
-                  ),
-                ),
-                if (isLocked)
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: const BoxDecoration(
-                        color: AppTheme.warning,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.lock,
-                        size: 10,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-              ],
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 22),
             ),
             const SizedBox(height: 10),
             SizedBox(
@@ -603,8 +576,8 @@ class _NGODashboardState extends State<NGODashboard> {
               child: Center(
                 child: Text(
                   title,
-                  style: TextStyle(
-                    color: isLocked ? AppTheme.grey : AppTheme.primaryDark,
+                  style: const TextStyle(
+                    color: AppTheme.primaryDark,
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                   ),
@@ -620,6 +593,9 @@ class _NGODashboardState extends State<NGODashboard> {
   }
 
   Widget _buildRecentDonations() {
+    // TODO: Replace with actual data from Firestore
+    final List donations = []; // Empty for now
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -644,9 +620,39 @@ class _NGODashboardState extends State<NGODashboard> {
           ],
         ),
         const SizedBox(height: 12),
-        _buildDonationItem('John Doe', '₹5,000', 'Money', '2 hours ago'),
-        _buildDonationItem('Sarah Smith', '50 Items', 'Clothes', '5 hours ago'),
-        _buildDonationItem('Anonymous', '₹10,000', 'Money', 'Yesterday'),
+        if (donations.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppTheme.lightGrey,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.volunteer_activism_outlined,
+                    color: AppTheme.grey,
+                    size: 40,
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'No donations yet',
+                    style: TextStyle(
+                      color: AppTheme.primaryDark,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Donations will appear here',
+                    style: TextStyle(color: AppTheme.grey, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -743,6 +749,9 @@ class _NGODashboardState extends State<NGODashboard> {
   }
 
   Widget _buildActiveCampaigns() {
+    // TODO: Replace with actual data from Firestore
+    final List campaigns = []; // Empty for now
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -767,18 +776,35 @@ class _NGODashboardState extends State<NGODashboard> {
           ],
         ),
         const SizedBox(height: 12),
-        _buildCampaignCard(
-          'Winter Clothes Drive',
-          'Help provide warm clothes for the homeless',
-          0.65,
-          '₹32,500 / ₹50,000',
-        ),
-        _buildCampaignCard(
-          'Food for All',
-          'Daily meals for underprivileged children',
-          0.80,
-          '₹40,000 / ₹50,000',
-        ),
+        if (campaigns.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppTheme.lightGrey,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Column(
+                children: [
+                  Icon(Icons.campaign_outlined, color: AppTheme.grey, size: 40),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'No active campaigns',
+                    style: TextStyle(
+                      color: AppTheme.primaryDark,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Create a campaign to get started',
+                    style: TextStyle(color: AppTheme.grey, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          ),
       ],
     );
   }
