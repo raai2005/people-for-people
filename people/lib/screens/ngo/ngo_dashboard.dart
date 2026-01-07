@@ -6,6 +6,7 @@ import '../../services/auth_service.dart';
 import '../../models/user_models.dart';
 import 'ngo_transactions_screen.dart';
 import '../common/notifications_screen.dart';
+import 'ngo_donate_screen.dart';
 
 class NGODashboard extends StatefulWidget {
   const NGODashboard({super.key});
@@ -45,7 +46,7 @@ class _NGODashboardState extends State<NGODashboard> {
     return percent;
   }
 
-  bool get _isVerified => _completionPercent >= 70;
+  bool get _isVerified => true; // TEMP: Enabled for preview
 
   void _showVerificationRequiredModal() {
     showDialog(
@@ -321,11 +322,22 @@ class _NGODashboardState extends State<NGODashboard> {
       case 0:
         return _buildDashboardHome();
       case 1:
-        return _buildPlaceholder(
-          'NGO to NGO Donate',
-          Icons.volunteer_activism_rounded,
-        );
+        if (!_isVerified) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _showVerificationRequiredModal();
+            setState(() => _currentIndex = 0);
+          });
+          return _buildDashboardHome();
+        }
+        return const NGODonateScreen();
       case 2:
+        if (!_isVerified) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _showVerificationRequiredModal();
+            setState(() => _currentIndex = 0);
+          });
+          return _buildDashboardHome();
+        }
         return _buildPlaceholder(
           'Create Donation Request',
           Icons.add_circle_rounded,
