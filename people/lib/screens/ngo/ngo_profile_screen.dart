@@ -981,21 +981,27 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
   Widget _buildCompletionSection() {
     final bool emailVerified = _currentUser!.verification.email;
     final bool phoneVerified = _currentUser!.verification.phone;
-    final bool govtVerified = _currentUser!.verification.governmentId;
-    final bool docUploaded = _currentUser!.govtVerifiedDocUrl.isNotEmpty;
+    final bool govtIdVerified = _currentUser!.verification.governmentId;
+    final bool govtDocVerified = _currentUser!.verification.governmentDoc;
 
-    int completedSteps = 0;
-    if (emailVerified) completedSteps++;
-    if (phoneVerified) completedSteps++;
-    if (govtVerified) completedSteps++;
-    if (docUploaded) completedSteps++;
+    // Calculate completion percentage:
+    // Email verified: 15%
+    // Phone verified: 15%
+    // Govt ID of HOO verified by admin: 25%
+    // Govt doc verified by admin: 25%
+    // Total possible: 80%
+    int completionPercent = 0;
+    if (emailVerified) completionPercent += 15;
+    if (phoneVerified) completionPercent += 15;
+    if (govtIdVerified) completionPercent += 25;
+    if (govtDocVerified) completionPercent += 25;
 
-    double completion = (completedSteps / 4);
+    double completion = completionPercent / 100;
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: AppTheme.cardDecoration.copyWith(
-        border: completion < 0.7
+        border: completionPercent < 70
             ? Border.all(color: AppTheme.warning.withValues(alpha: 0.5))
             : null,
       ),
@@ -1024,13 +1030,13 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                       value: completion,
                       strokeWidth: 8,
                       backgroundColor: AppTheme.grey.withValues(alpha: 0.2),
-                      color: completion >= 0.7
+                      color: completionPercent >= 70
                           ? AppTheme.success
                           : AppTheme.warning,
                     ),
                     Center(
                       child: Text(
-                        '${(completion * 100).toInt()}%',
+                        '$completionPercent%',
                         style: const TextStyle(
                           color: AppTheme.primaryDark,
                           fontWeight: FontWeight.bold,
@@ -1047,18 +1053,24 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildCheckItemWithButton(
-                      'Email Verified',
+                      'Email Verified (15%)',
                       emailVerified,
                       onVerify: emailVerified ? null : _verifyEmail,
                     ),
                     _buildCheckItemWithButton(
-                      'Phone Verified',
+                      'Phone Verified (15%)',
                       phoneVerified,
                       onVerify: phoneVerified ? null : _verifyPhone,
                     ),
-                    _buildCheckItem('Govt ID Verified (Admin)', govtVerified),
-                    _buildCheckItem('Govt Document Uploaded', docUploaded),
-                    if (completion < 0.7)
+                    _buildAdminVerifyItem(
+                      'Govt ID of HOO (25%)',
+                      govtIdVerified,
+                    ),
+                    _buildAdminVerifyItem(
+                      'Govt Document (25%)',
+                      govtDocVerified,
+                    ),
+                    if (completionPercent < 70)
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text(
@@ -1072,6 +1084,45 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAdminVerifyItem(String label, bool isVerified) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(
+            isVerified ? Icons.check_circle : Icons.radio_button_unchecked,
+            size: 16,
+            color: isVerified ? AppTheme.success : Colors.grey,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(color: AppTheme.primaryDark, fontSize: 13),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: isVerified
+                  ? AppTheme.success.withValues(alpha: 0.1)
+                  : AppTheme.warning.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              isVerified ? 'Verified' : 'Pending',
+              style: TextStyle(
+                color: isVerified ? AppTheme.success : AppTheme.warning,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),

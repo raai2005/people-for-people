@@ -8,15 +8,22 @@ class VerificationStatus {
   final bool email;
   final bool phone;
   final bool governmentId;
+  final bool governmentDoc;
 
   VerificationStatus({
     this.email = false,
     this.phone = false,
     this.governmentId = false,
+    this.governmentDoc = false,
   });
 
   Map<String, dynamic> toMap() {
-    return {'email': email, 'phone': phone, 'governmentId': governmentId};
+    return {
+      'email': email,
+      'phone': phone,
+      'governmentId': governmentId,
+      'governmentDoc': governmentDoc,
+    };
   }
 
   factory VerificationStatus.fromMap(Map<String, dynamic>? map) {
@@ -27,6 +34,7 @@ class VerificationStatus {
       email: map['email'] ?? false,
       phone: map['phone'] ?? false,
       governmentId: map['governmentId'] ?? false,
+      governmentDoc: map['governmentDoc'] ?? false,
     );
   }
 }

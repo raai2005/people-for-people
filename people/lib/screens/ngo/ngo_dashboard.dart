@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import 'ngo_profile_screen.dart';
 import '../../services/notification_service.dart';
+import '../../services/auth_service.dart';
+import '../../models/user_models.dart';
 import 'ngo_transactions_screen.dart';
 import '../common/notifications_screen.dart';
 
@@ -14,6 +16,174 @@ class NGODashboard extends StatefulWidget {
 
 class _NGODashboardState extends State<NGODashboard> {
   int _currentIndex = 0;
+  final AuthService _authService = AuthService();
+  NGOUser? _currentUser;
+  int _completionPercent = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final user = await _authService.getUserProfile() as NGOUser?;
+    if (user != null && mounted) {
+      setState(() {
+        _currentUser = user;
+        _completionPercent = _calculateCompletion(user);
+      });
+    }
+  }
+
+  int _calculateCompletion(NGOUser user) {
+    int percent = 0;
+    if (user.verification.email) percent += 15;
+    if (user.verification.phone) percent += 15;
+    if (user.verification.governmentId) percent += 25;
+    if (user.verification.governmentDoc) percent += 25;
+    return percent;
+  }
+
+  bool get _isVerified => _completionPercent >= 70;
+
+  void _showVerificationRequiredModal() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppTheme.warning.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.lock_outline,
+                color: AppTheme.warning,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Verification Required',
+              style: TextStyle(
+                color: AppTheme.primaryDark,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Your profile is $_completionPercent% complete.',
+              style: const TextStyle(
+                color: AppTheme.primaryDark,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'To access this feature, you need at least 70% profile completion:',
+              style: TextStyle(color: AppTheme.grey, fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            _buildRequirementItem(
+              'Verify your email address',
+              _currentUser?.verification.email ?? false,
+            ),
+            _buildRequirementItem(
+              'Verify your phone number',
+              _currentUser?.verification.phone ?? false,
+            ),
+            _buildRequirementItem(
+              'Wait for admin to verify Govt ID',
+              _currentUser?.verification.governmentId ?? false,
+            ),
+            _buildRequirementItem(
+              'Wait for admin to verify Govt Doc',
+              _currentUser?.verification.governmentDoc ?? false,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.info.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.info_outline, color: AppTheme.info, size: 18),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Complete email & phone verification, then wait for admin approval.',
+                      style: TextStyle(color: AppTheme.info, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close', style: TextStyle(color: AppTheme.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              setState(() => _currentIndex = 4); // Go to profile
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.ngoColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Go to Profile',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRequirementItem(String text, bool isComplete) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(
+            isComplete ? Icons.check_circle : Icons.radio_button_unchecked,
+            size: 16,
+            color: isComplete ? AppTheme.success : AppTheme.grey,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: isComplete ? AppTheme.success : AppTheme.primaryDark,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -339,6 +509,7 @@ class _NGODashboardState extends State<NGODashboard> {
                 'Create Campaign',
                 Icons.add_circle_outline,
                 AppTheme.ngoColor,
+                isRestricted: true,
               ),
             ),
             const SizedBox(width: 12),
@@ -347,6 +518,7 @@ class _NGODashboardState extends State<NGODashboard> {
                 'Request Volunteers',
                 Icons.person_add_alt_1_outlined,
                 AppTheme.volunteerColor,
+                isRestricted: true,
               ),
             ),
             const SizedBox(width: 12),
@@ -363,27 +535,67 @@ class _NGODashboardState extends State<NGODashboard> {
     );
   }
 
-  Widget _buildActionCard(String title, IconData icon, Color color) {
+  Widget _buildActionCard(
+    String title,
+    IconData icon,
+    Color color, {
+    bool isRestricted = false,
+  }) {
+    final isLocked = isRestricted && !_isVerified;
+
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        if (isLocked) {
+          _showVerificationRequiredModal();
+        } else {
+          // TODO: Handle action
+        }
+      },
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         decoration: BoxDecoration(
-          color: AppTheme.white,
+          color: isLocked ? AppTheme.lightGrey : AppTheme.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppTheme.borderGrey),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 22),
+            Stack(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: isLocked
+                        ? AppTheme.grey.withValues(alpha: 0.1)
+                        : color.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    color: isLocked ? AppTheme.grey : color,
+                    size: 22,
+                  ),
+                ),
+                if (isLocked)
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: const BoxDecoration(
+                        color: AppTheme.warning,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.lock,
+                        size: 10,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 10),
             SizedBox(
@@ -391,8 +603,8 @@ class _NGODashboardState extends State<NGODashboard> {
               child: Center(
                 child: Text(
                   title,
-                  style: const TextStyle(
-                    color: AppTheme.primaryDark,
+                  style: TextStyle(
+                    color: isLocked ? AppTheme.grey : AppTheme.primaryDark,
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                   ),
@@ -714,8 +926,17 @@ class _NGODashboardState extends State<NGODashboard> {
 
   Widget _buildNavItem(int index, IconData icon, String label) {
     final isSelected = _currentIndex == index;
+    // Check if this is a restricted feature (index 1 = Donate, index 2 = Create Request)
+    final isRestricted = (index == 1 || index == 2) && !_isVerified;
+
     return InkWell(
-      onTap: () => setState(() => _currentIndex = index),
+      onTap: () {
+        if (isRestricted) {
+          _showVerificationRequiredModal();
+        } else {
+          setState(() => _currentIndex = index);
+        }
+      },
       borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -723,17 +944,31 @@ class _NGODashboardState extends State<NGODashboard> {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              color: isSelected ? AppTheme.ngoColor : AppTheme.grey,
-              size: label.isEmpty ? 28 : 24,
+            Stack(
+              children: [
+                Icon(
+                  icon,
+                  color: isRestricted
+                      ? AppTheme.grey.withValues(alpha: 0.5)
+                      : (isSelected ? AppTheme.ngoColor : AppTheme.grey),
+                  size: label.isEmpty ? 28 : 24,
+                ),
+                if (isRestricted)
+                  Positioned(
+                    right: -2,
+                    top: -2,
+                    child: Icon(Icons.lock, size: 12, color: AppTheme.warning),
+                  ),
+              ],
             ),
             if (label.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? AppTheme.ngoColor : AppTheme.grey,
+                  color: isRestricted
+                      ? AppTheme.grey.withValues(alpha: 0.5)
+                      : (isSelected ? AppTheme.ngoColor : AppTheme.grey),
                   fontSize: 10,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
