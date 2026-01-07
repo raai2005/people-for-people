@@ -43,7 +43,7 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           decoration: BoxDecoration(
-            color: AppTheme.white.withValues(alpha: 0.1),
+            color: AppTheme.primaryDark,
             borderRadius: BorderRadius.circular(12),
           ),
           child: TabBar(
@@ -106,7 +106,7 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: AppTheme.primaryDark,
+        backgroundColor: AppTheme.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -120,7 +120,7 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
                   const Text(
                     'Donation Details',
                     style: TextStyle(
-                      color: AppTheme.white,
+                      color: AppTheme.primaryDark,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -129,7 +129,7 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(
                       Icons.close,
-                      color: Colors.white54,
+                      color: AppTheme.grey,
                       size: 20,
                     ),
                   ),
@@ -237,17 +237,14 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
           width: 80,
           child: Text(
             label,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 14,
-            ),
+            style: TextStyle(color: AppTheme.grey, fontSize: 14),
           ),
         ),
         Expanded(
           child: Text(
             value,
             style: const TextStyle(
-              color: Colors.white,
+              color: AppTheme.primaryDark,
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
@@ -352,9 +349,16 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.white.withValues(alpha: 0.05),
+        color: AppTheme.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
+        border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -383,17 +387,14 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
                       Text(
                         t.donorName,
                         style: const TextStyle(
-                          color: AppTheme.white,
+                          color: AppTheme.primaryDark,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
                         '${t.quantity} • ${t.itemName}',
-                        style: TextStyle(
-                          color: AppTheme.white.withValues(alpha: 0.7),
-                          fontSize: 12,
-                        ),
+                        style: TextStyle(color: AppTheme.grey, fontSize: 12),
                       ),
                     ],
                   ),
@@ -415,9 +416,9 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
                     ? 'Donor will deliver'
                     : 'Requires Volunteer',
                 style: TextStyle(
-                  color: AppTheme.white.withValues(alpha: 0.6),
                   fontSize: 11,
                   fontStyle: FontStyle.italic,
+                  color: AppTheme.grey,
                 ),
               ),
             ),
@@ -472,16 +473,10 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
           Icon(
             Icons.inbox_outlined,
             size: 48,
-            color: Colors.white.withValues(alpha: 0.2),
+            color: AppTheme.grey.withValues(alpha: 0.2),
           ),
           const SizedBox(height: 16),
-          Text(
-            message,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 14,
-            ),
-          ),
+          Text(message, style: TextStyle(color: AppTheme.grey, fontSize: 14)),
         ],
       ),
     );
@@ -491,7 +486,7 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: AppTheme.primaryDark,
+        backgroundColor: AppTheme.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -505,7 +500,7 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
                   const Text(
                     'Select Volunteer',
                     style: TextStyle(
-                      color: AppTheme.white,
+                      color: AppTheme.primaryDark,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -514,7 +509,7 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(
                       Icons.close,
-                      color: Colors.white54,
+                      color: AppTheme.grey,
                       size: 20,
                     ),
                   ),
@@ -523,10 +518,7 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
               const SizedBox(height: 8),
               Text(
                 '${t.interestedVolunteers.length} volunteers interested',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.6),
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: AppTheme.grey, fontSize: 14),
               ),
               const SizedBox(height: 20),
               if (t.interestedVolunteers.isEmpty)
@@ -536,7 +528,7 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
                     child: Text(
                       'Waiting for volunteers to accept...',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: AppTheme.grey,
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -548,7 +540,7 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
                     shrinkWrap: true,
                     itemCount: t.interestedVolunteers.length,
                     separatorBuilder: (context, index) =>
-                        Divider(color: Colors.white.withValues(alpha: 0.1)),
+                        Divider(color: AppTheme.grey.withValues(alpha: 0.1)),
                     itemBuilder: (context, index) {
                       final vol = t.interestedVolunteers[index];
                       return ListTile(
@@ -595,7 +587,7 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
                         title: Text(
                           vol.name,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: AppTheme.primaryDark,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -610,7 +602,7 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
                             Text(
                               vol.rating.toString(),
                               style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.7),
+                                color: AppTheme.grey,
                                 fontSize: 12,
                               ),
                             ),

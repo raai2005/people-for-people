@@ -81,7 +81,7 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        gradient: AppTheme.donorGradient,
+                        color: AppTheme.donorColor,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(
@@ -138,22 +138,18 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
         margin: const EdgeInsets.symmetric(horizontal: 20),
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppTheme.donorColor.withValues(alpha: 0.4),
-              AppTheme.donorColor.withValues(alpha: 0.15),
-            ],
-          ),
+          color: AppTheme.donorColor,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: AppTheme.donorColor.withValues(alpha: 0.4),
-            width: 1.5,
-          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.donorColor.withValues(alpha: 0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         child: const Center(
-          child: CircularProgressIndicator(color: AppTheme.donorColor),
+          child: CircularProgressIndicator(color: AppTheme.white),
         ),
       );
     }
@@ -167,22 +163,11 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppTheme.donorColor.withValues(alpha: 0.4),
-            AppTheme.donorColor.withValues(alpha: 0.15),
-          ],
-        ),
+        color: AppTheme.donorColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppTheme.donorColor.withValues(alpha: 0.4),
-          width: 1.5,
-        ),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.donorColor.withValues(alpha: 0.2),
+            color: AppTheme.donorColor.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -230,17 +215,7 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
                 width: 1,
                 height: 60,
                 margin: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      AppTheme.white.withValues(alpha: 0.3),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
+                color: AppTheme.white.withValues(alpha: 0.3),
               ),
               Expanded(
                 child: _buildEnhancedStatItem(
@@ -254,17 +229,7 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
                 width: 1,
                 height: 60,
                 margin: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      AppTheme.white.withValues(alpha: 0.3),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
+                color: AppTheme.white.withValues(alpha: 0.3),
               ),
               Expanded(
                 child: _buildEnhancedStatItem(
@@ -334,7 +299,7 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          gradient: AppTheme.donorGradient,
+          color: AppTheme.donorColor,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
@@ -456,22 +421,15 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppTheme.white.withValues(alpha: 0.08),
-              AppTheme.white.withValues(alpha: 0.04),
-            ],
-          ),
+          color: AppTheme.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: AppTheme.white.withValues(alpha: 0.15),
+            color: AppTheme.grey.withValues(alpha: 0.15),
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -493,25 +451,11 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
                       Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              typeColor.withValues(alpha: 0.3),
-                              typeColor.withValues(alpha: 0.15),
-                            ],
-                          ),
+                          color: typeColor.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: typeColor.withValues(alpha: 0.4),
+                            color: typeColor.withValues(alpha: 0.3),
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: typeColor.withValues(alpha: 0.2),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
                         ),
                         child: Icon(typeIcon, color: typeColor, size: 26),
                       ),
@@ -564,15 +508,7 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
                   const SizedBox(height: 16),
                   Container(
                     height: 1,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          AppTheme.white.withValues(alpha: 0.15),
-                          Colors.transparent,
-                        ],
-                      ),
-                    ),
+                    color: AppTheme.grey.withValues(alpha: 0.15),
                   ),
                   const SizedBox(height: 16),
                   // Bottom Info
@@ -618,12 +554,7 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                AppTheme.success.withValues(alpha: 0.2),
-                                AppTheme.success.withValues(alpha: 0.1),
-                              ],
-                            ),
+                            color: AppTheme.success.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: AppTheme.success.withValues(alpha: 0.3),
@@ -713,21 +644,9 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            color.withValues(alpha: 0.25),
-            color.withValues(alpha: 0.15),
-          ],
-        ),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.15),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -790,17 +709,10 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.75,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppTheme.primaryDark,
-              AppTheme.primaryDark.withValues(alpha: 0.95),
-            ],
-          ),
+          color: AppTheme.white,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           border: Border.all(
-            color: AppTheme.white.withValues(alpha: 0.1),
+            color: AppTheme.grey.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -827,16 +739,9 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            _getTypeColor(
-                              donation['type'] as String,
-                            ).withValues(alpha: 0.2),
-                            _getTypeColor(
-                              donation['type'] as String,
-                            ).withValues(alpha: 0.1),
-                          ],
-                        ),
+                        color: _getTypeColor(
+                          donation['type'] as String,
+                        ).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: _getTypeColor(

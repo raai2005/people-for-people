@@ -189,7 +189,7 @@ class _LoginScreenState extends State<LoginScreen>
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
+        color: AppTheme.white, // Replaced gradient with solid white
         child: SafeArea(
           child: FadeTransition(
             opacity: _fadeAnimation,
@@ -213,12 +213,14 @@ class _LoginScreenState extends State<LoginScreen>
                           icon: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: AppTheme.white.withValues(alpha: 0.1),
+                              color: AppTheme.primaryDark.withValues(
+                                alpha: 0.05,
+                              ),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Icon(
                               Icons.arrow_back_ios_new_rounded,
-                              color: AppTheme.white,
+                              color: AppTheme.primaryDark,
                               size: 20,
                             ),
                           ),
@@ -258,7 +260,7 @@ class _LoginScreenState extends State<LoginScreen>
                           child: Text(
                             'Forgot Password?',
                             style: TextStyle(
-                              color: AppTheme.white.withValues(alpha: 0.7),
+                              color: AppTheme.grey,
                               fontSize: 14,
                             ),
                           ),
@@ -294,11 +296,7 @@ class _LoginScreenState extends State<LoginScreen>
       height: 100,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [_roleColor, _roleColor.withValues(alpha: 0.6)],
-        ),
+        color: _roleColor,
         boxShadow: [
           BoxShadow(
             color: _roleColor.withValues(alpha: 0.4),
@@ -314,7 +312,7 @@ class _LoginScreenState extends State<LoginScreen>
   Widget _buildLoginForm() {
     return Container(
       padding: const EdgeInsets.all(24),
-      decoration: AppTheme.glassDecoration,
+      decoration: AppTheme.cardDecoration, // Updated to card decoration
       child: Column(
         children: [
           // Email Field
@@ -362,7 +360,7 @@ class _LoginScreenState extends State<LoginScreen>
                 _obscurePassword
                     ? Icons.visibility_off_outlined
                     : Icons.visibility_outlined,
-                color: AppTheme.white.withValues(alpha: 0.6),
+                color: AppTheme.grey,
               ),
             ),
           ),
@@ -420,23 +418,20 @@ class _LoginScreenState extends State<LoginScreen>
         Expanded(
           child: Container(
             height: 1,
-            color: AppTheme.white.withValues(alpha: 0.2),
+            color: AppTheme.grey.withValues(alpha: 0.2),
           ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'OR',
-            style: TextStyle(
-              color: AppTheme.white.withValues(alpha: 0.5),
-              fontSize: 14,
-            ),
+            style: TextStyle(color: AppTheme.grey, fontSize: 14),
           ),
         ),
         Expanded(
           child: Container(
             height: 1,
-            color: AppTheme.white.withValues(alpha: 0.2),
+            color: AppTheme.grey.withValues(alpha: 0.2),
           ),
         ),
       ],
@@ -450,7 +445,7 @@ class _LoginScreenState extends State<LoginScreen>
         Text(
           "Don't have an account? ",
           style: TextStyle(
-            color: AppTheme.white.withValues(alpha: 0.7),
+            color: AppTheme.primaryDark.withValues(alpha: 0.7),
             fontSize: 14,
           ),
         ),
@@ -492,15 +487,15 @@ class _LoginScreenState extends State<LoginScreen>
             const SizedBox(height: 20),
             TextField(
               controller: emailController,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppTheme.primaryDark),
               decoration: InputDecoration(
                 labelText: 'Email',
-                labelStyle: const TextStyle(color: Colors.white60),
+                labelStyle: const TextStyle(color: AppTheme.grey),
+                filled: true,
+                fillColor: AppTheme.grey.withValues(alpha: 0.1),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: Colors.white.withValues(alpha: 0.3),
-                  ),
+                  borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -513,10 +508,7 @@ class _LoginScreenState extends State<LoginScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white60),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: AppTheme.grey)),
           ),
           ElevatedButton(
             onPressed: () async {

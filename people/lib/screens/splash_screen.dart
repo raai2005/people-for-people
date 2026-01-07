@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import '../theme/app_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'auth/role_selection_screen.dart';
@@ -258,19 +259,7 @@ class _SplashScreenState extends State<SplashScreen>
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1A1A2E),
-              Color(0xFF16213E),
-              Color(0xFF0F3460),
-              Color(0xFF533483),
-            ],
-            stops: [0.0, 0.3, 0.6, 1.0],
-          ),
-        ),
+        color: AppTheme.white, // Solid white background
         child: SafeArea(
           child: Stack(
             children: [
@@ -337,7 +326,7 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Icon(
                     _donationIcons[index],
                     size: 24.0 + (index % 3) * 8.0,
-                    color: Colors.white.withValues(alpha: 0.3),
+                    color: AppTheme.primaryDark.withValues(alpha: 0.1),
                   ),
                 ),
               ),
@@ -357,49 +346,23 @@ class _SplashScreenState extends State<SplashScreen>
           child: Transform.rotate(
             angle: _logoRotation.value,
             child: Container(
-              width: 140,
-              height: 140,
+              width: 120,
+              height: 120,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFFE94560),
-                    Color(0xFFFF6B6B),
-                    Color(0xFFFFE66D),
-                  ],
-                ),
+                color: AppTheme.primaryDark,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFE94560).withValues(alpha: 0.5),
-                    blurRadius: 30,
-                    spreadRadius: 10,
+                    color: AppTheme.primaryDark.withValues(alpha: 0.2),
+                    blurRadius: 24,
+                    spreadRadius: 4,
                   ),
                 ],
               ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Outer ring
-                  Container(
-                    width: 130,
-                    height: 130,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.3),
-                        width: 3,
-                      ),
-                    ),
-                  ),
-                  // Inner icon
-                  const Icon(
-                    Icons.people_alt_rounded,
-                    size: 65,
-                    color: Colors.white,
-                  ),
-                ],
+              child: const Icon(
+                Icons.favorite_rounded,
+                size: 56,
+                color: AppTheme.white,
               ),
             ),
           ),
@@ -416,64 +379,23 @@ class _SplashScreenState extends State<SplashScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ShaderMask(
-              shaderCallback: (bounds) => const LinearGradient(
-                colors: [
-                  Color(0xFFFFFFFF),
-                  Color(0xFFFFE66D),
-                  Color(0xFFE94560),
-                ],
-              ).createShader(bounds),
-              child: Text(
-                'PEOPLE',
-                style: TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                  letterSpacing: 4,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      blurRadius: 10,
-                      offset: const Offset(2, 2),
-                    ),
-                  ],
-                ),
-              ),
-            ),
             Text(
-              'for',
+              'People',
               style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w300,
-                fontStyle: FontStyle.italic,
-                color: Colors.white.withValues(alpha: 0.8),
-                letterSpacing: 2,
+                fontSize: 32,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.primaryDark,
+                letterSpacing: -0.5,
               ),
             ),
-            ShaderMask(
-              shaderCallback: (bounds) => const LinearGradient(
-                colors: [
-                  Color(0xFFE94560),
-                  Color(0xFFFFE66D),
-                  Color(0xFFFFFFFF),
-                ],
-              ).createShader(bounds),
-              child: Text(
-                'PEOPLE',
-                style: TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                  letterSpacing: 4,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      blurRadius: 10,
-                      offset: const Offset(2, 2),
-                    ),
-                  ],
-                ),
+            const SizedBox(height: 2),
+            Text(
+              'for People',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w300,
+                color: AppTheme.primaryDark.withValues(alpha: 0.7),
+                letterSpacing: -0.5,
               ),
             ),
           ],
@@ -488,61 +410,21 @@ class _SplashScreenState extends State<SplashScreen>
       child: FadeTransition(
         opacity: _taglineOpacity,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          margin: const EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          margin: const EdgeInsets.symmetric(horizontal: 40),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30),
-            color: Colors.white.withValues(alpha: 0.1),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.2),
-              width: 1,
-            ),
+            borderRadius: BorderRadius.circular(24),
+            color: AppTheme.lightGrey,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.favorite,
-                    color: Color(0xFFE94560),
-                    size: 16,
-                  ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      'Every Act of Kindness Matters',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white.withValues(alpha: 0.9),
-                        letterSpacing: 0.5,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Icon(
-                    Icons.favorite,
-                    color: Color(0xFFE94560),
-                    size: 16,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'Food • Clothes • Money • Hope',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white.withValues(alpha: 0.6),
-                  letterSpacing: 1.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+          child: Text(
+            'Every act of kindness matters',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: AppTheme.grey,
+              letterSpacing: 0.2,
+            ),
+            textAlign: TextAlign.center,
           ),
         ),
       ),
@@ -556,35 +438,24 @@ class _SplashScreenState extends State<SplashScreen>
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
-            width: 180,
-            child: AnimatedBuilder(
-              animation: _pulseController,
-              builder: (context, child) {
-                return ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    backgroundColor: Colors.white.withValues(alpha: 0.2),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Color.lerp(
-                        const Color(0xFFE94560),
-                        const Color(0xFFFFE66D),
-                        _pulseController.value,
-                      )!,
-                    ),
-                    minHeight: 4,
-                  ),
-                );
-              },
+            width: 160,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                backgroundColor: AppTheme.lightGrey,
+                valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryDark),
+                minHeight: 3,
+              ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Text(
-            'Connecting Hearts...',
+            'Loading...',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w400,
-              color: Colors.white.withValues(alpha: 0.6),
-              letterSpacing: 1.5,
+              color: AppTheme.grey,
+              letterSpacing: 0.5,
             ),
           ),
         ],

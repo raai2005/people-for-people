@@ -24,7 +24,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
       'subtitle': 'Register your organisation to receive donations',
       'icon': Icons.business_rounded,
       'color': AppTheme.ngoColor,
-      'gradient': AppTheme.ngoGradient,
     },
     {
       'role': UserRole.donor,
@@ -32,7 +31,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
       'subtitle': 'Contribute food, clothes, money or resources',
       'icon': Icons.volunteer_activism_rounded,
       'color': AppTheme.donorColor,
-      'gradient': AppTheme.donorGradient,
     },
     {
       'role': UserRole.volunteer,
@@ -40,7 +38,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
       'subtitle': 'Help connect donors with those in need',
       'icon': Icons.people_alt_rounded,
       'color': AppTheme.volunteerColor,
-      'gradient': AppTheme.volunteerGradient,
     },
   ];
 
@@ -121,10 +118,11 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.white, // Explicit white background
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
+        // decoration: const BoxDecoration(gradient: AppTheme.primaryGradient), // Removed gradient
         child: SafeArea(
           child: FadeTransition(
             opacity: _fadeAnimation,
@@ -163,50 +161,43 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
       children: [
         // Logo
         Container(
-          width: 80,
-          height: 80,
+          width: 72,
+          height: 72,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: AppTheme.accentGradient,
+            color: AppTheme.primaryDark,
             boxShadow: [
               BoxShadow(
-                color: AppTheme.accent.withValues(alpha: 0.4),
-                blurRadius: 20,
-                spreadRadius: 5,
+                color: AppTheme.primaryDark.withValues(alpha: 0.15),
+                blurRadius: 16,
+                spreadRadius: 2,
               ),
             ],
           ),
           child: const Icon(
-            Icons.people_alt_rounded,
-            size: 40,
+            Icons.favorite_rounded,
+            size: 32,
             color: AppTheme.white,
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 24),
 
         // Title
-        ShaderMask(
-          shaderCallback: (bounds) =>
-              AppTheme.accentGradient.createShader(bounds),
-          child: const Text(
-            'PEOPLEforPEOPLE',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              letterSpacing: 2,
-            ),
+        const Text(
+          'People for People',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: AppTheme.primaryDark,
+            letterSpacing: -0.5,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
 
         // Subtitle
         Text(
-          'Select your role to continue',
-          style: TextStyle(
-            fontSize: 16,
-            color: AppTheme.white.withValues(alpha: 0.7),
-          ),
+          'How would you like to contribute?',
+          style: TextStyle(fontSize: 15, color: AppTheme.grey),
         ),
       ],
     );
@@ -214,60 +205,37 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
 
   Widget _buildRoleCard(Map<String, dynamic> roleData, int index) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () => _onRoleSelected(roleData['role']),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  (roleData['color'] as Color).withValues(alpha: 0.3),
-                  (roleData['color'] as Color).withValues(alpha: 0.1),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(20),
+              color: AppTheme.white,
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: (roleData['color'] as Color).withValues(alpha: 0.5),
-                width: 1.5,
+                color: AppTheme.borderGrey,
+                width: 1,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: (roleData['color'] as Color).withValues(alpha: 0.2),
-                  blurRadius: 15,
-                  offset: const Offset(0, 8),
-                ),
-              ],
             ),
             child: Row(
               children: [
                 // Icon Container
                 Container(
-                  width: 60,
-                  height: 60,
+                  width: 52,
+                  height: 52,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: roleData['gradient'],
-                    boxShadow: [
-                      BoxShadow(
-                        color: (roleData['color'] as Color).withValues(
-                          alpha: 0.4,
-                        ),
-                        blurRadius: 10,
-                        spreadRadius: 2,
-                      ),
-                    ],
+                    color: (roleData['color'] as Color).withValues(alpha: 0.1),
                   ),
                   child: Icon(
                     roleData['icon'],
-                    size: 28,
-                    color: AppTheme.white,
+                    size: 24,
+                    color: roleData['color'] as Color,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -280,36 +248,25 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
                       Text(
                         roleData['title'],
                         style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.primaryDark,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3),
                       Text(
                         roleData['subtitle'],
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppTheme.white.withValues(alpha: 0.7),
-                        ),
+                        style: TextStyle(fontSize: 13, color: AppTheme.grey),
                       ),
                     ],
                   ),
                 ),
 
                 // Arrow
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppTheme.white.withValues(alpha: 0.1),
-                  ),
-                  child: const Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    size: 18,
-                    color: AppTheme.white,
-                  ),
+                Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 20,
+                  color: AppTheme.grey,
                 ),
               ],
             ),
@@ -320,34 +277,13 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
   }
 
   Widget _buildFooter() {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.favorite,
-              size: 16,
-              color: AppTheme.accent.withValues(alpha: 0.6),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Every Act of Kindness Matters',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppTheme.white.withValues(alpha: 0.5),
-                letterSpacing: 1,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Icon(
-              Icons.favorite,
-              size: 16,
-              color: AppTheme.accent.withValues(alpha: 0.6),
-            ),
-          ],
-        ),
-      ],
+    return Text(
+      'Making a difference, together',
+      style: TextStyle(
+        fontSize: 12,
+        color: AppTheme.grey.withValues(alpha: 0.7),
+        letterSpacing: 0.3,
+      ),
     );
   }
 }

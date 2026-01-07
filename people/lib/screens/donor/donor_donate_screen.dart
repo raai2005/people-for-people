@@ -61,7 +61,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              gradient: AppTheme.donorGradient,
+              color: AppTheme.donorColor,
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
@@ -78,7 +78,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                 Text(
                   'Make a Donation',
                   style: TextStyle(
-                    color: AppTheme.white,
+                    color: AppTheme.primaryDark,
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
@@ -86,7 +86,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                 SizedBox(height: 4),
                 Text(
                   'Support causes you care about',
-                  style: TextStyle(color: Colors.white60, fontSize: 13),
+                  style: TextStyle(color: AppTheme.grey, fontSize: 13),
                 ),
               ],
             ),
@@ -101,14 +101,14 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppTheme.white.withValues(alpha: 0.08),
+        color: AppTheme.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
+        border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
       ),
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          gradient: AppTheme.donorGradient,
+          color: AppTheme.donorColor,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
@@ -118,8 +118,8 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
             ),
           ],
         ),
-        labelColor: AppTheme.white,
-        unselectedLabelColor: AppTheme.white.withValues(alpha: 0.5),
+        labelColor: AppTheme.white, // Keep white for selected tab (gradient bg)
+        unselectedLabelColor: AppTheme.grey,
         labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         dividerColor: Colors.transparent,
         tabs: const [
@@ -141,27 +141,20 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: AppTheme.white.withValues(alpha: 0.08),
+            color: AppTheme.white,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
+            border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
           ),
           child: Row(
             children: [
-              Icon(
-                Icons.search_rounded,
-                color: AppTheme.white.withValues(alpha: 0.5),
-                size: 22,
-              ),
+              Icon(Icons.search_rounded, color: AppTheme.grey, size: 22),
               const SizedBox(width: 12),
               Expanded(
                 child: TextField(
-                  style: const TextStyle(color: AppTheme.white),
+                  style: const TextStyle(color: AppTheme.primaryDark),
                   decoration: InputDecoration(
                     hintText: 'Search NGOs by name or cause...',
-                    hintStyle: TextStyle(
-                      color: AppTheme.white.withValues(alpha: 0.4),
-                      fontSize: 14,
-                    ),
+                    hintStyle: TextStyle(color: AppTheme.grey, fontSize: 14),
                     border: InputBorder.none,
                     isDense: true,
                     contentPadding: EdgeInsets.zero,
@@ -194,7 +187,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                 const Text(
                   'No NGOs Available',
                   style: TextStyle(
-                    color: AppTheme.white,
+                    color: AppTheme.primaryDark,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -203,10 +196,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                 Text(
                   'NGOs will appear here once added to the platform',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: AppTheme.white.withValues(alpha: 0.6),
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: AppTheme.grey, fontSize: 14),
                 ),
               ],
             ),
@@ -234,7 +224,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
         const Text(
           'Categories',
           style: TextStyle(
-            color: AppTheme.white,
+            color: AppTheme.primaryDark,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -262,9 +252,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [color.withValues(alpha: 0.2), color.withValues(alpha: 0.1)],
-        ),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
@@ -289,16 +277,16 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppTheme.white.withValues(alpha: 0.08),
-            AppTheme.white.withValues(alpha: 0.04),
-          ],
-        ),
+        color: AppTheme.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.white.withValues(alpha: 0.15)),
+        border: Border.all(color: AppTheme.grey.withValues(alpha: 0.15)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -317,15 +305,10 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            (ngo['color'] as Color).withValues(alpha: 0.3),
-                            (ngo['color'] as Color).withValues(alpha: 0.15),
-                          ],
-                        ),
+                        color: (ngo['color'] as Color).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: (ngo['color'] as Color).withValues(alpha: 0.4),
+                          color: (ngo['color'] as Color).withValues(alpha: 0.3),
                         ),
                       ),
                       child: Icon(
@@ -343,7 +326,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                           Text(
                             ngo['name'] as String,
                             style: const TextStyle(
-                              color: AppTheme.white,
+                              color: AppTheme.primaryDark,
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
@@ -413,7 +396,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                 Text(
                   ngo['description'] as String,
                   style: TextStyle(
-                    color: AppTheme.white.withValues(alpha: 0.7),
+                    color: AppTheme.grey,
                     fontSize: 13,
                     height: 1.4,
                   ),
@@ -440,15 +423,9 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
   Widget _buildNGOStat(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 14, color: AppTheme.white.withValues(alpha: 0.5)),
+        Icon(icon, size: 14, color: AppTheme.grey),
         const SizedBox(width: 4),
-        Text(
-          text,
-          style: TextStyle(
-            color: AppTheme.white.withValues(alpha: 0.6),
-            fontSize: 12,
-          ),
-        ),
+        Text(text, style: TextStyle(color: AppTheme.grey, fontSize: 12)),
       ],
     );
   }
@@ -461,7 +438,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
         const Text(
           'Select Donation Type',
           style: TextStyle(
-            color: AppTheme.white,
+            color: AppTheme.primaryDark,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -473,7 +450,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
         const Text(
           'Select NGO',
           style: TextStyle(
-            color: AppTheme.white,
+            color: AppTheme.primaryDark,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -486,7 +463,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
           const Text(
             'Enter Amount',
             style: TextStyle(
-              color: AppTheme.white,
+              color: AppTheme.primaryDark,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -499,7 +476,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
           const Text(
             'Enter Quantity',
             style: TextStyle(
-              color: AppTheme.white,
+              color: AppTheme.primaryDark,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -512,7 +489,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
         const Text(
           'Add Description (Optional)',
           style: TextStyle(
-            color: AppTheme.white,
+            color: AppTheme.primaryDark,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -568,20 +545,14 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              gradient: isSelected
-                  ? LinearGradient(
-                      colors: [
-                        (type['color'] as Color).withValues(alpha: 0.3),
-                        (type['color'] as Color).withValues(alpha: 0.15),
-                      ],
-                    )
-                  : null,
-              color: isSelected ? null : AppTheme.white.withValues(alpha: 0.05),
+              color: isSelected
+                  ? (type['color'] as Color).withValues(alpha: 0.15)
+                  : AppTheme.lightGrey,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isSelected
                     ? (type['color'] as Color).withValues(alpha: 0.5)
-                    : AppTheme.white.withValues(alpha: 0.1),
+                    : AppTheme.grey.withValues(alpha: 0.1),
                 width: isSelected ? 2 : 1,
               ),
             ),
@@ -590,18 +561,14 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
               children: [
                 Icon(
                   type['icon'] as IconData,
-                  color: isSelected
-                      ? type['color'] as Color
-                      : AppTheme.white.withValues(alpha: 0.6),
+                  color: isSelected ? type['color'] as Color : AppTheme.grey,
                   size: 20,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   type['name'] as String,
                   style: TextStyle(
-                    color: isSelected
-                        ? type['color'] as Color
-                        : AppTheme.white.withValues(alpha: 0.6),
+                    color: isSelected ? type['color'] as Color : AppTheme.grey,
                     fontSize: 13,
                     fontWeight: isSelected
                         ? FontWeight.bold
@@ -622,18 +589,14 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.white.withValues(alpha: 0.08),
+        color: AppTheme.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
+        border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
       ),
       child: Center(
         child: Column(
           children: [
-            Icon(
-              Icons.info_outline,
-              color: AppTheme.white.withValues(alpha: 0.5),
-              size: 32,
-            ),
+            Icon(Icons.info_outline, color: AppTheme.grey, size: 32),
             const SizedBox(height: 12),
             Text(
               'No NGOs available',
@@ -660,9 +623,9 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: AppTheme.white.withValues(alpha: 0.08),
+        color: AppTheme.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
+        border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
       ),
       child: TextField(
         controller: _amountController,
@@ -675,7 +638,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
         decoration: InputDecoration(
           prefixIcon: const Icon(Icons.currency_rupee, color: AppTheme.success),
           hintText: '0',
-          hintStyle: TextStyle(color: AppTheme.white.withValues(alpha: 0.3)),
+          hintStyle: TextStyle(color: AppTheme.grey.withValues(alpha: 0.5)),
           border: InputBorder.none,
         ),
       ),
@@ -717,9 +680,9 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: AppTheme.white.withValues(alpha: 0.08),
+        color: AppTheme.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
+        border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
       ),
       child: TextField(
         controller: _quantityController,
@@ -735,7 +698,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
             color: _getDonationTypeColor(_selectedDonationType),
           ),
           hintText: 'Number of items',
-          hintStyle: TextStyle(color: AppTheme.white.withValues(alpha: 0.3)),
+          hintStyle: TextStyle(color: AppTheme.grey.withValues(alpha: 0.5)),
           border: InputBorder.none,
         ),
       ),
@@ -746,17 +709,17 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.white.withValues(alpha: 0.08),
+        color: AppTheme.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
+        border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
       ),
       child: TextField(
         controller: _descriptionController,
         maxLines: 4,
-        style: const TextStyle(color: AppTheme.white),
+        style: const TextStyle(color: AppTheme.primaryDark),
         decoration: InputDecoration(
           hintText: 'Add details about your donation...',
-          hintStyle: TextStyle(color: AppTheme.white.withValues(alpha: 0.3)),
+          hintStyle: TextStyle(color: AppTheme.grey.withValues(alpha: 0.5)),
           border: InputBorder.none,
         ),
       ),
@@ -767,12 +730,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppTheme.info.withValues(alpha: 0.15),
-            AppTheme.info.withValues(alpha: 0.05),
-          ],
-        ),
+        color: AppTheme.info.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppTheme.info.withValues(alpha: 0.3)),
       ),
@@ -786,7 +744,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
               const Text(
                 'Pickup & Delivery',
                 style: TextStyle(
-                  color: AppTheme.white,
+                  color: AppTheme.primaryDark,
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),
@@ -797,7 +755,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
           Text(
             'We\'ll arrange pickup from your location. Our team will contact you within 24 hours.',
             style: TextStyle(
-              color: AppTheme.white.withValues(alpha: 0.7),
+              color: AppTheme.primaryDark.withValues(alpha: 0.7),
               fontSize: 13,
               height: 1.4,
             ),
@@ -811,14 +769,15 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppTheme.donorColor.withValues(alpha: 0.2),
-            AppTheme.donorColor.withValues(alpha: 0.1),
-          ],
-        ),
+        color: AppTheme.donorColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.donorColor.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.donorColor.withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -925,16 +884,9 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.75,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppTheme.primaryDark,
-              AppTheme.primaryDark.withValues(alpha: 0.95),
-            ],
-          ),
+          color: AppTheme.white,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-          border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
+          border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
         ),
         child: Column(
           children: [
@@ -944,7 +896,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
               width: 50,
               height: 5,
               decoration: BoxDecoration(
-                color: AppTheme.white.withValues(alpha: 0.3),
+                color: AppTheme.grey.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
@@ -962,16 +914,11 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                           width: 70,
                           height: 70,
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                (ngo['color'] as Color).withValues(alpha: 0.3),
-                                (ngo['color'] as Color).withValues(alpha: 0.15),
-                              ],
-                            ),
+                            color: (ngo['color'] as Color).withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(18),
                             border: Border.all(
                               color: (ngo['color'] as Color).withValues(
-                                alpha: 0.4,
+                                alpha: 0.3,
                               ),
                             ),
                           ),
@@ -989,7 +936,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                               Text(
                                 ngo['name'] as String,
                                 style: const TextStyle(
-                                  color: AppTheme.white,
+                                  color: AppTheme.primaryDark,
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -1025,10 +972,10 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppTheme.white.withValues(alpha: 0.05),
+                        color: AppTheme.white,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: AppTheme.white.withValues(alpha: 0.1),
+                          color: AppTheme.grey.withValues(alpha: 0.1),
                         ),
                       ),
                       child: Row(
@@ -1047,7 +994,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                                 const Text(
                                   'Address',
                                   style: TextStyle(
-                                    color: AppTheme.white,
+                                    color: AppTheme.primaryDark,
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -1057,7 +1004,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                                   ngo['fullAddress'] as String? ??
                                       ngo['location'] as String,
                                   style: TextStyle(
-                                    color: AppTheme.white.withValues(
+                                    color: AppTheme.primaryDark.withValues(
                                       alpha: 0.7,
                                     ),
                                     fontSize: 13,
@@ -1076,12 +1023,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            (ngo['color'] as Color).withValues(alpha: 0.15),
-                            (ngo['color'] as Color).withValues(alpha: 0.05),
-                          ],
-                        ),
+                        color: (ngo['color'] as Color).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: (ngo['color'] as Color).withValues(alpha: 0.3),
@@ -1099,7 +1041,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                           Container(
                             width: 1,
                             height: 40,
-                            color: AppTheme.white.withValues(alpha: 0.2),
+                            color: AppTheme.grey.withValues(alpha: 0.2),
                           ),
                           _buildModalStat(
                             Icons.people,
@@ -1110,7 +1052,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                           Container(
                             width: 1,
                             height: 40,
-                            color: AppTheme.white.withValues(alpha: 0.2),
+                            color: AppTheme.grey.withValues(alpha: 0.2),
                           ),
                           _buildModalStat(
                             Icons.volunteer_activism,
@@ -1159,7 +1101,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                                     Text(
                                       'Deadline: ${ngo['deadline']}',
                                       style: TextStyle(
-                                        color: AppTheme.white.withValues(
+                                        color: AppTheme.grey.withValues(
                                           alpha: 0.7,
                                         ),
                                         fontSize: 12,
@@ -1178,7 +1120,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                     const Text(
                       'About This Cause',
                       style: TextStyle(
-                        color: AppTheme.white,
+                        color: AppTheme.primaryDark,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1187,7 +1129,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                     Text(
                       ngo['fullDescription'] as String,
                       style: TextStyle(
-                        color: AppTheme.white.withValues(alpha: 0.7),
+                        color: AppTheme.primaryDark.withValues(alpha: 0.7),
                         fontSize: 14,
                         height: 1.6,
                       ),
@@ -1198,7 +1140,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                     const Text(
                       'Accepted Donations',
                       style: TextStyle(
-                        color: AppTheme.white,
+                        color: AppTheme.primaryDark,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),

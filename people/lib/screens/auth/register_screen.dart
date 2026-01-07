@@ -368,12 +368,15 @@ class _RegisterScreenState extends State<RegisterScreen>
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppTheme.primaryDark, AppTheme.primaryMedium],
-            ),
+            color: AppTheme.white,
             borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
             border: Border.all(color: _roleColor.withValues(alpha: 0.5)),
           ),
           child: Column(
@@ -395,8 +398,8 @@ class _RegisterScreenState extends State<RegisterScreen>
               const SizedBox(height: 20),
               const Text(
                 'Registration Successful!',
-                style: TextStyle(
-                  color: AppTheme.white,
+                style: const TextStyle(
+                  color: AppTheme.primaryDark,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
@@ -407,10 +410,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 widget.selectedRole == UserRole.volunteer
                     ? 'Your account is pending admin approval. You will be notified once approved.'
                     : 'Your account has been created successfully. You can now login.',
-                style: TextStyle(
-                  color: AppTheme.white.withValues(alpha: 0.7),
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: AppTheme.grey, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
               if (widget.selectedRole == UserRole.volunteer) ...[
@@ -479,7 +479,7 @@ class _RegisterScreenState extends State<RegisterScreen>
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
+        color: AppTheme.white, // Replaced gradient with solid white
         child: SafeArea(
           child: FadeTransition(
             opacity: _fadeAnimation,
@@ -519,12 +519,12 @@ class _RegisterScreenState extends State<RegisterScreen>
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppTheme.white.withValues(alpha: 0.1),
+                color: AppTheme.primaryDark.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
                 Icons.arrow_back_ios_new_rounded,
-                color: AppTheme.white,
+                color: AppTheme.primaryDark,
                 size: 18,
               ),
             ),
@@ -535,9 +535,7 @@ class _RegisterScreenState extends State<RegisterScreen>
             height: 45,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [_roleColor, _roleColor.withValues(alpha: 0.6)],
-              ),
+              color: _roleColor,
             ),
             child: Icon(_roleIcon, color: AppTheme.white, size: 22),
           ),
@@ -549,17 +547,14 @@ class _RegisterScreenState extends State<RegisterScreen>
                 Text(
                   'Register as $_roleTitle',
                   style: const TextStyle(
-                    color: AppTheme.white,
+                    color: AppTheme.primaryDark,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
                   'Step ${_currentStep + 1} of $_totalSteps: ${_stepTitles[_currentStep]}',
-                  style: TextStyle(
-                    color: AppTheme.white.withValues(alpha: 0.6),
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: AppTheme.grey, fontSize: 12),
                 ),
               ],
             ),
@@ -584,7 +579,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 borderRadius: BorderRadius.circular(2),
                 color: isCompleted || isCurrent
                     ? _roleColor
-                    : AppTheme.white.withValues(alpha: 0.2),
+                    : AppTheme.grey.withValues(alpha: 0.2),
               ),
             ),
           );
@@ -1186,7 +1181,7 @@ class _RegisterScreenState extends State<RegisterScreen>
   }) {
     return Container(
       padding: const EdgeInsets.all(24),
-      decoration: AppTheme.glassDecoration,
+      decoration: AppTheme.cleanCardDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

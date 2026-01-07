@@ -187,7 +187,7 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
         elevation: 0,
         title: Text(
           _viewingAsPublic ? 'Public Profile' : 'My Profile',
-          style: const TextStyle(color: AppTheme.white),
+          style: const TextStyle(color: AppTheme.primaryDark),
         ),
         actions: [
           // Toggle between private and public view
@@ -301,14 +301,10 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
                             fit: BoxFit.cover,
                           )
                         : null,
-                    color: AppTheme.white.withValues(alpha: 0.1),
+                    color: AppTheme.primaryDark.withValues(alpha: 0.05),
                   ),
                   child: _currentUser!.profileImageUrl == null
-                      ? const Icon(
-                          Icons.person,
-                          size: 50,
-                          color: AppTheme.white,
-                        )
+                      ? const Icon(Icons.person, size: 50, color: AppTheme.grey)
                       : null,
                 ),
                 // Loading overlay
@@ -371,7 +367,7 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
                 const SizedBox(height: 8),
                 Text(
                   _maskEmail(_currentUser!.email),
-                  style: AppTheme.bodySmall.copyWith(color: Colors.white70),
+                  style: AppTheme.bodySmall.copyWith(color: AppTheme.grey),
                 ),
                 const SizedBox(height: 8),
                 Container(
@@ -430,13 +426,13 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
               decoration: InputDecoration(
                 hintText: 'Write your bio...',
                 hintStyle: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.3),
+                  color: AppTheme.primaryDark.withValues(alpha: 0.3),
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
                 filled: true,
-                fillColor: Colors.white.withValues(alpha: 0.05),
+                fillColor: AppTheme.grey.withValues(alpha: 0.05),
               ),
             )
           else
@@ -445,7 +441,7 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
               children: [
                 Text(
                   bioText,
-                  style: AppTheme.bodyMedium.copyWith(color: Colors.white70),
+                  style: AppTheme.bodyMedium,
                   maxLines: _isBioExpanded ? null : 3,
                   overflow: _isBioExpanded ? null : TextOverflow.ellipsis,
                 ),
@@ -475,7 +471,7 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
               Icon(
                 Icons.school,
                 size: 16,
-                color: Colors.white.withValues(alpha: 0.7),
+                color: AppTheme.primaryDark.withValues(alpha: 0.7),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -616,16 +612,16 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppTheme.white.withValues(alpha: 0.03),
+              color: AppTheme.grey.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
+              border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
             ),
             child: Center(
               child: Column(
                 children: [
                   Icon(
                     Icons.description_outlined,
-                    color: AppTheme.white.withValues(alpha: 0.3),
+                    color: AppTheme.grey.withValues(alpha: 0.3),
                     size: 40,
                   ),
                   const SizedBox(height: 8),
@@ -681,7 +677,7 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
                 const Text(
                   'Donation Memories',
                   style: TextStyle(
-                    color: AppTheme.white,
+                    color: AppTheme.primaryDark,
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                   ),
@@ -728,32 +724,29 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppTheme.white.withValues(alpha: 0.03),
+              color: AppTheme.grey.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
+              border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
             ),
             child: Center(
               child: Column(
                 children: [
                   Icon(
                     Icons.photo_camera_outlined,
-                    color: AppTheme.white.withValues(alpha: 0.3),
+                    color: AppTheme.grey.withValues(alpha: 0.3),
                     size: 40,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'No memories yet',
-                    style: TextStyle(
-                      color: AppTheme.white.withValues(alpha: 0.6),
-                      fontSize: 13,
-                    ),
+                    style: TextStyle(color: AppTheme.grey, fontSize: 13),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Photos and memories will appear here',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: AppTheme.white.withValues(alpha: 0.4),
+                      color: AppTheme.grey.withValues(alpha: 0.6),
                       fontSize: 11,
                     ),
                   ),
@@ -1643,12 +1636,7 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppTheme.donorColor.withValues(alpha: 0.2),
-                  AppTheme.donorColor.withValues(alpha: 0.1),
-                ],
-              ),
+              color: AppTheme.donorColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: AppTheme.donorColor.withValues(alpha: 0.3),

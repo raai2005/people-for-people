@@ -213,7 +213,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
           ),
           title: const Text(
             'Choose Image Source',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: AppTheme.primaryDark),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -222,7 +222,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                 leading: const Icon(Icons.camera_alt, color: AppTheme.ngoColor),
                 title: const Text(
                   'Camera',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: AppTheme.primaryDark),
                 ),
                 onTap: () => Navigator.pop(context, ImageSource.camera),
               ),
@@ -233,7 +233,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                 ),
                 title: const Text(
                   'Gallery',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: AppTheme.primaryDark),
                 ),
                 onTap: () => Navigator.pop(context, ImageSource.gallery),
               ),
@@ -421,7 +421,10 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                 ),
               ),
               const SizedBox(width: 12),
-              const Text('Verify Email', style: TextStyle(color: Colors.white)),
+              const Text(
+                'Verify Email',
+                style: TextStyle(color: AppTheme.primaryDark),
+              ),
             ],
           ),
           content: Column(
@@ -430,13 +433,13 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
             children: [
               const Text(
                 'A verification link has been sent to:',
-                style: TextStyle(color: Colors.white70, fontSize: 14),
+                style: TextStyle(color: AppTheme.grey, fontSize: 14),
               ),
               const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppTheme.white.withValues(alpha: 0.05),
+                  color: AppTheme.ngoColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: AppTheme.ngoColor.withValues(alpha: 0.3),
@@ -450,7 +453,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                       child: Text(
                         user.email ?? '',
                         style: const TextStyle(
-                          color: AppTheme.white,
+                          color: AppTheme.primaryDark,
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
                         ),
@@ -463,7 +466,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
               const Text(
                 'Please check your inbox and click the verification link. After verifying, click "Check Status" below.',
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: AppTheme.grey,
                   fontSize: 13,
                   height: 1.4,
                 ),
@@ -473,7 +476,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('OK', style: TextStyle(color: Colors.white70)),
+              child: const Text('OK', style: TextStyle(color: AppTheme.grey)),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -561,7 +564,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
         elevation: 0,
         title: Text(
           _viewingAsPublic ? 'Organisation Profile' : 'My Profile',
-          style: const TextStyle(color: AppTheme.white),
+          style: const TextStyle(color: AppTheme.primaryDark),
         ),
         actions: [
           // Toggle between private and public view
@@ -634,11 +637,11 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
               backgroundColor: AppTheme.ngoColor,
               icon: Icon(
                 _isEditing ? Icons.check : Icons.edit,
-                color: Colors.white,
+                color: AppTheme.white,
               ),
               label: Text(
                 _isEditing ? 'Save Changes' : 'Edit Profile',
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppTheme.white),
               ),
             )
           : null,
@@ -670,13 +673,13 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                             fit: BoxFit.cover,
                           )
                         : null,
-                    color: AppTheme.white.withValues(alpha: 0.1),
+                    color: AppTheme.primaryDark.withValues(alpha: 0.05),
                   ),
                   child: _currentUser!.profileImageUrl == null
                       ? const Icon(
                           Icons.business,
                           size: 50,
-                          color: AppTheme.white,
+                          color: AppTheme.grey,
                         )
                       : null,
                 ),
@@ -727,7 +730,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                     style: AppTheme.headingSmall,
                     decoration: const InputDecoration(
                       hintText: 'Organization Name',
-                      hintStyle: TextStyle(color: Colors.white54),
+                      hintStyle: TextStyle(color: AppTheme.grey),
                       border: UnderlineInputBorder(),
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
@@ -741,7 +744,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                 const SizedBox(height: 8),
                 Text(
                   _maskEmail(_currentUser!.organizationEmail),
-                  style: AppTheme.bodySmall.copyWith(color: Colors.white70),
+                  style: AppTheme.bodySmall.copyWith(color: AppTheme.grey),
                 ),
                 const SizedBox(height: 8),
                 Container(
@@ -814,13 +817,13 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
               decoration: InputDecoration(
                 hintText: 'Write about your organization...',
                 hintStyle: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.3),
+                  color: AppTheme.primaryDark.withValues(alpha: 0.3),
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
                 filled: true,
-                fillColor: Colors.white.withValues(alpha: 0.05),
+                fillColor: AppTheme.grey.withValues(alpha: 0.05),
               ),
             )
           else
@@ -828,13 +831,13 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
               _currentUser!.bio?.isNotEmpty == true
                   ? _currentUser!.bio!
                   : 'No bio added yet.',
-              style: AppTheme.bodyMedium.copyWith(color: Colors.white70),
+              style: AppTheme.bodyMedium,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
 
           const SizedBox(height: 16),
-          const Divider(color: Colors.white10),
+          Divider(color: AppTheme.grey.withValues(alpha: 0.2)),
           const SizedBox(height: 16),
 
           // Plan of Action
@@ -856,13 +859,13 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                 hintText:
                     'Describe your organization\'s plan of action in brief...',
                 hintStyle: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.3),
+                  color: AppTheme.grey.withValues(alpha: 0.5),
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
                 filled: true,
-                fillColor: Colors.white.withValues(alpha: 0.05),
+                fillColor: AppTheme.lightGrey,
               ),
             )
           else
@@ -870,13 +873,13 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
               _currentUser!.ngoProfile.planOfAction.isNotEmpty
                   ? _currentUser!.ngoProfile.planOfAction
                   : 'No plan of action added yet.',
-              style: AppTheme.bodyMedium.copyWith(color: Colors.white70),
+              style: AppTheme.bodyMedium,
               maxLines: 4,
               overflow: TextOverflow.ellipsis,
             ),
 
           const SizedBox(height: 16),
-          const Divider(color: Colors.white10),
+          Divider(color: AppTheme.grey.withValues(alpha: 0.1)),
           const SizedBox(height: 12),
 
           // Contact Info
@@ -899,12 +902,12 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.white.withValues(alpha: 0.7)),
+        Icon(icon, size: 16, color: AppTheme.grey),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             '$label: $value',
-            style: AppTheme.bodySmall.copyWith(color: Colors.white70),
+            style: AppTheme.bodySmall,
           ),
         ),
       ],
@@ -929,14 +932,14 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
               decoration: InputDecoration(
                 labelText: 'Name',
                 labelStyle: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: AppTheme.grey,
                 ),
                 prefixIcon: const Icon(Icons.person, color: AppTheme.ngoColor),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
                 filled: true,
-                fillColor: Colors.white.withValues(alpha: 0.05),
+                fillColor: AppTheme.lightGrey,
               ),
             ),
             const SizedBox(height: 12),
@@ -946,14 +949,14 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
               decoration: InputDecoration(
                 labelText: 'Email',
                 labelStyle: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: AppTheme.grey,
                 ),
                 prefixIcon: const Icon(Icons.email, color: AppTheme.ngoColor),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
                 filled: true,
-                fillColor: Colors.white.withValues(alpha: 0.05),
+                fillColor: AppTheme.lightGrey,
               ),
             ),
             const SizedBox(height: 12),
@@ -963,14 +966,14 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
               decoration: InputDecoration(
                 labelText: 'Phone',
                 labelStyle: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: AppTheme.grey,
                 ),
                 prefixIcon: const Icon(Icons.phone, color: AppTheme.ngoColor),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
                 filled: true,
-                fillColor: Colors.white.withValues(alpha: 0.05),
+                fillColor: AppTheme.lightGrey,
               ),
             ),
           ] else ...[
@@ -1031,7 +1034,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                     CircularProgressIndicator(
                       value: completion,
                       strokeWidth: 8,
-                      backgroundColor: Colors.white10,
+                      backgroundColor: AppTheme.grey.withValues(alpha: 0.2),
                       color: completion >= 0.7
                           ? AppTheme.success
                           : AppTheme.warning,
@@ -1040,7 +1043,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                       child: Text(
                         '${(completion * 100).toInt()}%',
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.primaryDark,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -1104,7 +1107,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(color: Colors.white70, fontSize: 13),
+              style: const TextStyle(color: AppTheme.primaryDark, fontSize: 13),
             ),
           ),
           if (onVerify != null)
@@ -1145,7 +1148,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
           const SizedBox(width: 8),
           Text(
             label,
-            style: const TextStyle(color: Colors.white70, fontSize: 13),
+            style: const TextStyle(color: AppTheme.primaryDark, fontSize: 13),
           ),
         ],
       ),
@@ -1221,7 +1224,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
           Text(
             value,
             style: const TextStyle(
-              color: Colors.white,
+              color: AppTheme.primaryDark,
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
@@ -1229,7 +1232,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
           const SizedBox(height: 4),
           Text(
             label,
-            style: AppTheme.bodySmall.copyWith(color: Colors.white70),
+            style: AppTheme.bodySmall,
           ),
         ],
       ),
@@ -1272,19 +1275,19 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
         decoration: BoxDecoration(
           color: hasDocument
               ? AppTheme.ngoColor.withValues(alpha: 0.1)
-              : Colors.white.withValues(alpha: 0.05),
+              : AppTheme.lightGrey,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: hasDocument
                 ? AppTheme.ngoColor.withValues(alpha: 0.3)
-                : Colors.white.withValues(alpha: 0.1),
+                : AppTheme.grey.withValues(alpha: 0.2),
           ),
         ),
         child: Row(
           children: [
             Icon(
               icon,
-              color: hasDocument ? AppTheme.ngoColor : Colors.grey,
+              color: hasDocument ? AppTheme.ngoColor : AppTheme.grey,
               size: 20,
             ),
             const SizedBox(width: 12),
@@ -1295,7 +1298,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                   Text(
                     title,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.primaryDark,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
@@ -1364,13 +1367,13 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                     Icon(
                       Icons.verified_outlined,
                       size: 48,
-                      color: Colors.white.withValues(alpha: 0.3),
+                      color: AppTheme.grey.withValues(alpha: 0.5),
                     ),
                     const SizedBox(height: 12),
                     Text(
                       'No certifications yet',
                       style: AppTheme.bodyMedium.copyWith(
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: AppTheme.grey,
                       ),
                     ),
                   ],
@@ -1452,13 +1455,13 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                     Icon(
                       Icons.photo_library_outlined,
                       size: 48,
-                      color: Colors.white.withValues(alpha: 0.3),
+                      color: AppTheme.grey.withValues(alpha: 0.5),
                     ),
                     const SizedBox(height: 12),
                     Text(
                       'No memories shared yet',
                       style: AppTheme.bodyMedium.copyWith(
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: AppTheme.grey,
                       ),
                     ),
                   ],
@@ -1479,7 +1482,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                 return Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    color: Colors.white.withValues(alpha: 0.1),
+                    color: AppTheme.lightGrey,
                     image: DecorationImage(
                       image: NetworkImage(_memories[index]),
                       fit: BoxFit.cover,
@@ -1500,13 +1503,13 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.primaryDark,
+        backgroundColor: AppTheme.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Row(
           children: [
             Icon(Icons.workspace_premium, color: AppTheme.ngoColor),
             SizedBox(width: 12),
-            Text('Add Certification', style: TextStyle(color: AppTheme.white)),
+            Text('Add Certification', style: TextStyle(color: AppTheme.primaryDark)),
           ],
         ),
         content: Column(
@@ -1515,22 +1518,22 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
           children: [
             const Text(
               'Enter the name of the certification or award.',
-              style: TextStyle(color: Colors.white70, fontSize: 13),
+              style: TextStyle(color: AppTheme.grey, fontSize: 13),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: nameController,
-              style: const TextStyle(color: AppTheme.white),
+              style: const TextStyle(color: AppTheme.primaryDark),
               decoration: InputDecoration(
                 hintText: 'Certification Name',
                 hintStyle: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: AppTheme.grey,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
                 filled: true,
-                fillColor: Colors.white.withValues(alpha: 0.05),
+                fillColor: AppTheme.lightGrey,
               ),
             ),
           ],
@@ -1540,7 +1543,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text(
               'Cancel',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: AppTheme.grey),
             ),
           ),
           ElevatedButton(
@@ -1583,13 +1586,13 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.primaryDark,
+        backgroundColor: AppTheme.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Row(
           children: [
             Icon(Icons.add_photo_alternate, color: AppTheme.accent),
             SizedBox(width: 12),
-            Text('Add Memory', style: TextStyle(color: AppTheme.white)),
+            Text('Add Memory', style: TextStyle(color: AppTheme.primaryDark)),
           ],
         ),
         content: Column(
@@ -1597,7 +1600,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
           children: [
             const Text(
               'Upload a photo from your gallery.',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: AppTheme.grey),
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
@@ -1646,7 +1649,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text(
               'Cancel',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: AppTheme.grey),
             ),
           ),
         ],
@@ -1662,7 +1665,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              backgroundColor: AppTheme.primaryDark,
+              backgroundColor: AppTheme.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -1670,19 +1673,19 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                 children: [
                   Icon(Icons.logout_rounded, color: AppTheme.error),
                   SizedBox(width: 12),
-                  Text('Logout', style: TextStyle(color: AppTheme.white)),
+                  Text('Logout', style: TextStyle(color: AppTheme.primaryDark)),
                 ],
               ),
               content: const Text(
                 'Are you sure you want to logout?',
-                style: TextStyle(color: Colors.white70),
+                style: TextStyle(color: AppTheme.grey),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: const Text(
                     'Cancel',
-                    style: TextStyle(color: Colors.white70),
+                    style: TextStyle(color: AppTheme.grey),
                   ),
                 ),
                 ElevatedButton(

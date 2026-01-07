@@ -10,7 +10,7 @@ class PublicVolunteerProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.primaryDark,
+      backgroundColor: AppTheme.white,
       appBar: AppBar(
         title: const Text('Volunteer Profile'),
         backgroundColor: Colors.transparent,
@@ -28,7 +28,7 @@ class PublicVolunteerProfileScreen extends StatelessWidget {
                     height: 100,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppTheme.volunteerColor.withValues(alpha: 0.2),
+                      color: AppTheme.volunteerColor.withValues(alpha: 0.1),
                       border: Border.all(
                         color: AppTheme.volunteerColor,
                         width: 2,
@@ -135,8 +135,16 @@ class PublicVolunteerProfileScreen extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: AppTheme.white,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,7 +152,7 @@ class PublicVolunteerProfileScreen extends StatelessWidget {
           Text(
             title,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
+              color: AppTheme.grey,
               fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
@@ -154,7 +162,7 @@ class PublicVolunteerProfileScreen extends StatelessWidget {
             Text(
               content,
               style: const TextStyle(
-                color: Colors.white,
+                color: AppTheme.primaryDark,
                 fontSize: 16,
                 height: 1.5,
               ),
@@ -171,19 +179,13 @@ class PublicVolunteerProfileScreen extends StatelessWidget {
         Text(
           value,
           style: const TextStyle(
-            color: Colors.white,
+            color: AppTheme.primaryDark,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.5),
-            fontSize: 12,
-          ),
-        ),
+        Text(label, style: TextStyle(color: AppTheme.grey, fontSize: 12)),
       ],
     );
   }

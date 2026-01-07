@@ -43,7 +43,7 @@ class CustomTextField extends StatelessWidget {
       maxLines: maxLines,
       enabled: enabled,
       onChanged: onChanged,
-      style: const TextStyle(color: AppTheme.white),
+      style: const TextStyle(color: AppTheme.primaryDark),
       cursorColor: AppTheme.accent,
       decoration: AppTheme.inputDecoration(
         label: label,
@@ -80,8 +80,8 @@ class CustomDropdownField<T> extends StatelessWidget {
       items: items,
       onChanged: onChanged,
       validator: validator,
-      dropdownColor: AppTheme.primaryMedium,
-      style: const TextStyle(color: AppTheme.white),
+      dropdownColor: AppTheme.white,
+      style: const TextStyle(color: AppTheme.primaryDark),
       decoration: AppTheme.inputDecoration(label: label, icon: icon),
     );
   }
@@ -111,9 +111,9 @@ class FileUploadField extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppTheme.white.withValues(alpha: 0.1),
+          color: AppTheme.grey.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: AppTheme.white.withValues(alpha: 0.2)),
+          border: Border.all(color: AppTheme.grey.withValues(alpha: 0.2)),
         ),
         child: Row(
           children: [
@@ -125,10 +125,7 @@ class FileUploadField extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: TextStyle(
-                      color: AppTheme.white.withValues(alpha: 0.8),
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: AppTheme.grey, fontSize: 12),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -136,7 +133,7 @@ class FileUploadField extends StatelessWidget {
                     style: TextStyle(
                       color: fileName != null
                           ? AppTheme.success
-                          : AppTheme.white.withValues(alpha: 0.5),
+                          : AppTheme.primaryDark.withValues(alpha: 0.5),
                       fontSize: 14,
                     ),
                     maxLines: 1,

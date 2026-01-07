@@ -18,18 +18,18 @@ class NotificationsScreen extends StatelessWidget {
     final notifications = NotificationService.instance.notifications;
 
     return Scaffold(
-      backgroundColor: AppTheme.primaryDark,
+      backgroundColor: AppTheme.white,
       appBar: AppBar(
         title: const Text('Notifications'),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
         titleTextStyle: const TextStyle(
-          color: AppTheme.white,
+          color: AppTheme.primaryDark,
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
-        iconTheme: const IconThemeData(color: AppTheme.white),
+        iconTheme: const IconThemeData(color: AppTheme.primaryDark),
       ),
       body: notifications.isEmpty
           ? _buildEmptyState()
@@ -56,10 +56,7 @@ class NotificationsScreen extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'No notifications yet',
-            style: TextStyle(
-              color: AppTheme.white.withAlpha(150),
-              fontSize: 16,
-            ),
+            style: TextStyle(color: AppTheme.grey, fontSize: 16),
           ),
         ],
       ),
@@ -72,15 +69,22 @@ class NotificationsScreen extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: notification.isRead
-            ? AppTheme.white.withAlpha(10) // Dim for read
-            : AppTheme.white.withAlpha(25), // Brighter for unread
+            ? AppTheme.white
+            : AppTheme.accent.withValues(alpha: 0.05), // Brighter for unread
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: notification.isRead
-              ? Colors.transparent
-              : AppTheme.accent.withAlpha(100),
+              ? AppTheme.grey.withValues(alpha: 0.1)
+              : AppTheme.accent.withValues(alpha: 0.3),
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,7 +111,7 @@ class NotificationsScreen extends StatelessWidget {
                       child: Text(
                         notification.title,
                         style: TextStyle(
-                          color: AppTheme.white,
+                          color: AppTheme.primaryDark,
                           fontSize: 16,
                           fontWeight: notification.isRead
                               ? FontWeight.w500
@@ -117,10 +121,7 @@ class NotificationsScreen extends StatelessWidget {
                     ),
                     Text(
                       _formatTime(notification.timestamp),
-                      style: TextStyle(
-                        color: AppTheme.white.withAlpha(100),
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: AppTheme.grey, fontSize: 12),
                     ),
                   ],
                 ),
@@ -128,7 +129,7 @@ class NotificationsScreen extends StatelessWidget {
                 Text(
                   notification.body,
                   style: TextStyle(
-                    color: AppTheme.white.withAlpha(180),
+                    color: AppTheme.primaryDark.withValues(alpha: 0.7),
                     fontSize: 14,
                   ),
                 ),

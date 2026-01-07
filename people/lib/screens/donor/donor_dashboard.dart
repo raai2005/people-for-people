@@ -21,7 +21,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
+        color: AppTheme.white, // Solid white background
         child: SafeArea(
           child: Column(
             children: [
@@ -38,40 +38,42 @@ class _DonorDashboardState extends State<DonorDashboard> {
 
   Widget _buildAppBar() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
           Container(
-            width: 50,
-            height: 50,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: AppTheme.donorGradient,
+              color: AppTheme.donorColor.withValues(alpha: 0.1),
             ),
             child: const Icon(
               Icons.volunteer_activism_rounded,
-              color: AppTheme.white,
-              size: 26,
+              color: AppTheme.donorColor,
+              size: 22,
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Hello, Donor!',
+                  'Welcome back',
                   style: TextStyle(
-                    color: AppTheme.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                    color: AppTheme.grey,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
-                Text(
-                  'Make a difference today',
+                const SizedBox(height: 2),
+                const Text(
+                  'Donor Dashboard',
                   style: TextStyle(
-                    color: AppTheme.white.withValues(alpha: 0.6),
-                    fontSize: 13,
+                    color: AppTheme.primaryDark,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -96,12 +98,13 @@ class _DonorDashboardState extends State<DonorDashboard> {
           child: Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppTheme.white.withValues(alpha: 0.1),
+              color: AppTheme.lightGrey,
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppTheme.borderGrey),
             ),
             child: const Icon(
               Icons.notifications_outlined,
-              color: AppTheme.white,
+              color: AppTheme.primaryDark,
               size: 24,
             ),
           ),
@@ -162,14 +165,15 @@ class _DonorDashboardState extends State<DonorDashboard> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppTheme.donorColor.withValues(alpha: 0.3),
-            AppTheme.donorColor.withValues(alpha: 0.1),
-          ],
-        ),
+        color: AppTheme.donorColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.donorColor.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.donorColor.withValues(alpha: 0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,7 +234,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
         const Text(
           'Ways to Help',
           style: TextStyle(
-            color: AppTheme.white,
+            color: AppTheme.primaryDark,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -286,9 +290,16 @@ class _DonorDashboardState extends State<DonorDashboard> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.15),
+          color: AppTheme.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: color.withValues(alpha: 0.3)),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           children: [
@@ -297,7 +308,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
             Text(
               title,
               style: const TextStyle(
-                color: AppTheme.white,
+                color: AppTheme.primaryDark,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
@@ -315,7 +326,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
         const Text(
           'Recent Activity',
           style: TextStyle(
-            color: AppTheme.white,
+            color: AppTheme.primaryDark,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -325,24 +336,29 @@ class _DonorDashboardState extends State<DonorDashboard> {
         Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: AppTheme.white.withValues(alpha: 0.05),
+            color: AppTheme.white,
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 5,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Center(
             child: Column(
               children: [
                 Icon(
                   Icons.history,
-                  color: AppTheme.white.withValues(alpha: 0.3),
+                  color: AppTheme.grey.withValues(alpha: 0.3),
                   size: 48,
                 ),
                 const SizedBox(height: 12),
                 Text(
                   'No recent activity',
-                  style: TextStyle(
-                    color: AppTheme.white.withValues(alpha: 0.6),
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: AppTheme.grey, fontSize: 14),
                 ),
               ],
             ),
@@ -361,9 +377,9 @@ class _DonorDashboardState extends State<DonorDashboard> {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.primaryDark,
+        color: AppTheme.white,
         border: Border(
-          top: BorderSide(color: AppTheme.white.withValues(alpha: 0.1)),
+          top: BorderSide(color: AppTheme.grey.withValues(alpha: 0.1)),
         ),
       ),
       child: SafeArea(
@@ -391,9 +407,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
                     children: [
                       Icon(
                         items[index]['icon'] as IconData,
-                        color: isSelected
-                            ? AppTheme.donorColor
-                            : AppTheme.white.withValues(alpha: 0.5),
+                        color: isSelected ? AppTheme.donorColor : AppTheme.grey,
                         size: 24,
                       ),
                       const SizedBox(height: 4),
@@ -402,7 +416,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
                         style: TextStyle(
                           color: isSelected
                               ? AppTheme.donorColor
-                              : AppTheme.white.withValues(alpha: 0.5),
+                              : AppTheme.grey,
                           fontSize: 10,
                         ),
                       ),

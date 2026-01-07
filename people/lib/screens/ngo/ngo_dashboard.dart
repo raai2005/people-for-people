@@ -18,14 +18,12 @@ class _NGODashboardState extends State<NGODashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true, // Allow body to extend behind the FAB
       resizeToAvoidBottomInset: false,
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
+        color: AppTheme.white,
         child: SafeArea(
-          bottom: false, // Let content go behind bottom bar
           child: Column(
             children: [
               // App Bar
@@ -33,27 +31,10 @@ class _NGODashboardState extends State<NGODashboard> {
 
               // Content
               Expanded(child: _buildContent()),
-
-              // Add padding at the bottom for the BottomAppBar
-              const SizedBox(height: 80),
             ],
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => setState(() => _currentIndex = 2),
-        elevation: 4,
-        backgroundColor: _currentIndex == 2
-            ? AppTheme.ngoColor
-            : AppTheme.primaryDark,
-        shape: const CircleBorder(),
-        child: Icon(
-          Icons.add_circle,
-          size: 30,
-          color: _currentIndex == 2 ? AppTheme.white : AppTheme.ngoColor,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: _buildBottomNav(),
     );
   }
@@ -77,27 +58,20 @@ class _NGODashboardState extends State<NGODashboard> {
 
   Widget _buildAppBar() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
           Container(
-            width: 50,
-            height: 50,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: AppTheme.ngoGradient,
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.ngoColor.withValues(alpha: 0.3),
-                  blurRadius: 15,
-                  spreadRadius: 2,
-                ),
-              ],
+              color: AppTheme.ngoColor.withValues(alpha: 0.1),
             ),
             child: const Icon(
               Icons.business_rounded,
-              color: AppTheme.white,
-              size: 26,
+              color: AppTheme.ngoColor,
+              size: 22,
             ),
           ),
           const SizedBox(width: 16),
@@ -108,17 +82,14 @@ class _NGODashboardState extends State<NGODashboard> {
                 Text(
                   'NGO Dashboard',
                   style: TextStyle(
-                    color: AppTheme.white,
+                    color: AppTheme.primaryDark,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
                   'Welcome back, Organisation',
-                  style: TextStyle(
-                    color: AppTheme.white.withValues(alpha: 0.6),
-                    fontSize: 13,
-                  ),
+                  style: TextStyle(color: AppTheme.grey, fontSize: 13),
                 ),
               ],
             ),
@@ -138,12 +109,12 @@ class _NGODashboardState extends State<NGODashboard> {
                 child: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppTheme.white.withValues(alpha: 0.1),
+                    color: AppTheme.primaryDark.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
                     Icons.notifications_outlined,
-                    color: AppTheme.white,
+                    color: AppTheme.primaryDark,
                     size: 24,
                   ),
                 ),
@@ -297,8 +268,15 @@ class _NGODashboardState extends State<NGODashboard> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
+        color: AppTheme.white,
         borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
@@ -329,19 +307,13 @@ class _NGODashboardState extends State<NGODashboard> {
           Text(
             value,
             style: const TextStyle(
-              color: AppTheme.white,
+              color: AppTheme.primaryDark,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            title,
-            style: TextStyle(
-              color: AppTheme.white.withValues(alpha: 0.6),
-              fontSize: 12,
-            ),
-          ),
+          Text(title, style: TextStyle(color: AppTheme.grey, fontSize: 12)),
         ],
       ),
     );
@@ -354,7 +326,7 @@ class _NGODashboardState extends State<NGODashboard> {
         const Text(
           'Quick Actions',
           style: TextStyle(
-            color: AppTheme.white,
+            color: AppTheme.primaryDark,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -398,9 +370,16 @@ class _NGODashboardState extends State<NGODashboard> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppTheme.white.withValues(alpha: 0.1),
+          color: AppTheme.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
+          border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           children: [
@@ -416,7 +395,7 @@ class _NGODashboardState extends State<NGODashboard> {
             Text(
               title,
               style: TextStyle(
-                color: AppTheme.white.withValues(alpha: 0.9),
+                color: AppTheme.primaryDark,
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
               ),
@@ -438,7 +417,7 @@ class _NGODashboardState extends State<NGODashboard> {
             const Text(
               'Recent Donations',
               style: TextStyle(
-                color: AppTheme.white,
+                color: AppTheme.primaryDark,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -491,9 +470,16 @@ class _NGODashboardState extends State<NGODashboard> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.white.withValues(alpha: 0.05),
+        color: AppTheme.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
+        border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -513,17 +499,14 @@ class _NGODashboardState extends State<NGODashboard> {
                 Text(
                   donor,
                   style: const TextStyle(
-                    color: AppTheme.white,
+                    color: AppTheme.primaryDark,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
                   time,
-                  style: TextStyle(
-                    color: AppTheme.white.withValues(alpha: 0.5),
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: AppTheme.grey, fontSize: 12),
                 ),
               ],
             ),
@@ -557,7 +540,7 @@ class _NGODashboardState extends State<NGODashboard> {
             const Text(
               'Active Campaigns',
               style: TextStyle(
-                color: AppTheme.white,
+                color: AppTheme.primaryDark,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -598,9 +581,16 @@ class _NGODashboardState extends State<NGODashboard> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.white.withValues(alpha: 0.05),
+        color: AppTheme.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.white.withValues(alpha: 0.1)),
+        border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -608,7 +598,7 @@ class _NGODashboardState extends State<NGODashboard> {
           Text(
             title,
             style: const TextStyle(
-              color: AppTheme.white,
+              color: AppTheme.primaryDark,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -616,17 +606,14 @@ class _NGODashboardState extends State<NGODashboard> {
           const SizedBox(height: 4),
           Text(
             description,
-            style: TextStyle(
-              color: AppTheme.white.withValues(alpha: 0.6),
-              fontSize: 12,
-            ),
+            style: TextStyle(color: AppTheme.grey, fontSize: 12),
           ),
           const SizedBox(height: 16),
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: progress,
-              backgroundColor: AppTheme.white.withValues(alpha: 0.1),
+              backgroundColor: AppTheme.grey.withValues(alpha: 0.1),
               valueColor: AlwaysStoppedAnimation<Color>(AppTheme.ngoColor),
               minHeight: 8,
             ),
@@ -638,7 +625,7 @@ class _NGODashboardState extends State<NGODashboard> {
               Text(
                 amount,
                 style: TextStyle(
-                  color: AppTheme.white.withValues(alpha: 0.8),
+                  color: AppTheme.grey,
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                 ),
@@ -675,7 +662,7 @@ class _NGODashboardState extends State<NGODashboard> {
           Text(
             title,
             style: const TextStyle(
-              color: AppTheme.white,
+              color: AppTheme.primaryDark,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -683,10 +670,7 @@ class _NGODashboardState extends State<NGODashboard> {
           const SizedBox(height: 8),
           Text(
             'Coming Soon',
-            style: TextStyle(
-              color: AppTheme.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
+            style: TextStyle(color: AppTheme.grey, fontSize: 16),
           ),
         ],
       ),
@@ -694,22 +678,25 @@ class _NGODashboardState extends State<NGODashboard> {
   }
 
   Widget _buildBottomNav() {
-    return BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 8.0,
-      color: AppTheme.primaryDark,
-      child: Container(
-        height: 60,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildNavItem(0, Icons.home_rounded, 'Home'),
-            _buildNavItem(1, Icons.volunteer_activism_rounded, 'Donate'),
-            const SizedBox(width: 48), // Space for FAB
-            _buildNavItem(3, Icons.receipt_long_rounded, 'Transactions'),
-            _buildNavItem(4, Icons.person_rounded, 'Profile'),
-          ],
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.white,
+        border: Border(
+          top: BorderSide(color: AppTheme.grey.withValues(alpha: 0.1)),
+        ),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Row(
+            children: [
+              Expanded(child: _buildNavItem(0, Icons.home_rounded, 'Home')),
+              Expanded(child: _buildNavItem(1, Icons.volunteer_activism_rounded, 'Donate')),
+              Expanded(child: _buildNavItem(2, Icons.add_circle_rounded, '')),
+              Expanded(child: _buildNavItem(3, Icons.receipt_long_rounded, 'Activity')),
+              Expanded(child: _buildNavItem(4, Icons.person_rounded, 'Profile')),
+            ],
+          ),
         ),
       ),
     );
@@ -728,22 +715,20 @@ class _NGODashboardState extends State<NGODashboard> {
           children: [
             Icon(
               icon,
-              color: isSelected
-                  ? AppTheme.ngoColor
-                  : AppTheme.white.withValues(alpha: 0.5),
-              size: 24,
+              color: isSelected ? AppTheme.ngoColor : AppTheme.grey,
+              size: label.isEmpty ? 28 : 24,
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected
-                    ? AppTheme.ngoColor
-                    : AppTheme.white.withValues(alpha: 0.5),
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            if (label.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? AppTheme.ngoColor : AppTheme.grey,
+                  fontSize: 10,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),
