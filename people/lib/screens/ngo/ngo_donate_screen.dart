@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../theme/app_theme.dart';
 import '../../models/donation_request.dart';
+import 'create_donation_request_screen.dart';
 
 class NGODonateScreen extends StatefulWidget {
   const NGODonateScreen({super.key});
@@ -148,6 +149,19 @@ class _NGODonateScreenState extends State<NGODonateScreen>
     return query.orderBy('createdAt', descending: true).snapshots();
   }
 
+  void _navigateToCreateRequest() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CreateDonationRequestScreen(),
+      ),
+    );
+    // If a request was created, refresh (setState will trigger rebuild)
+    if (result == true) {
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -200,6 +214,18 @@ class _NGODonateScreenState extends State<NGODonateScreen>
                   style: TextStyle(color: AppTheme.grey, fontSize: 13),
                 ),
               ],
+            ),
+          ),
+          // Create Request Button
+          GestureDetector(
+            onTap: _navigateToCreateRequest,
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppTheme.ngoColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.add, color: Colors.white, size: 22),
             ),
           ),
         ],

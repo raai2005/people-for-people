@@ -7,6 +7,7 @@ import '../../models/user_models.dart';
 import 'ngo_transactions_screen.dart';
 import '../common/notifications_screen.dart';
 import 'ngo_donate_screen.dart';
+import 'create_donation_request_screen.dart';
 
 class NGODashboard extends StatefulWidget {
   const NGODashboard({super.key});
@@ -46,7 +47,8 @@ class _NGODashboardState extends State<NGODashboard> {
     return percent;
   }
 
-  bool get _isVerified => true; // TEMP: Enabled for preview
+  bool get _isVerified =>
+      _completionPercent >= 70; // Requires 70% profile completion
 
   void _showVerificationRequiredModal() {
     showDialog(
@@ -338,10 +340,7 @@ class _NGODashboardState extends State<NGODashboard> {
           });
           return _buildDashboardHome();
         }
-        return _buildPlaceholder(
-          'Create Donation Request',
-          Icons.add_circle_rounded,
-        );
+        return const CreateDonationRequestScreen();
       case 3:
         return const NGOTransactionsScreen();
       case 4:
