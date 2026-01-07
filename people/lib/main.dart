@@ -75,9 +75,7 @@ class PeopleForPeopleApp extends StatelessWidget {
           ),
         ),
         textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            foregroundColor: const Color(0xFF1E293B),
-          ),
+          style: TextButton.styleFrom(foregroundColor: const Color(0xFF1E293B)),
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
@@ -86,12 +84,12 @@ class PeopleForPeopleApp extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
         ),
-        cardTheme: const CardThemeData(
-          color: Colors.white,
-          elevation: 0,
-        ),
+        cardTheme: const CardThemeData(color: Colors.white, elevation: 0),
         dividerTheme: const DividerThemeData(
           color: Color(0xFFE2E8F0),
           thickness: 1,

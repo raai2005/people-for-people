@@ -904,12 +904,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
       children: [
         Icon(icon, size: 16, color: AppTheme.grey),
         const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            '$label: $value',
-            style: AppTheme.bodySmall,
-          ),
-        ),
+        Expanded(child: Text('$label: $value', style: AppTheme.bodySmall)),
       ],
     );
   }
@@ -931,9 +926,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
               style: AppTheme.bodyMedium,
               decoration: InputDecoration(
                 labelText: 'Name',
-                labelStyle: TextStyle(
-                  color: AppTheme.grey,
-                ),
+                labelStyle: TextStyle(color: AppTheme.grey),
                 prefixIcon: const Icon(Icons.person, color: AppTheme.ngoColor),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -948,9 +941,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
               style: AppTheme.bodyMedium,
               decoration: InputDecoration(
                 labelText: 'Email',
-                labelStyle: TextStyle(
-                  color: AppTheme.grey,
-                ),
+                labelStyle: TextStyle(color: AppTheme.grey),
                 prefixIcon: const Icon(Icons.email, color: AppTheme.ngoColor),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -965,9 +956,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
               style: AppTheme.bodyMedium,
               decoration: InputDecoration(
                 labelText: 'Phone',
-                labelStyle: TextStyle(
-                  color: AppTheme.grey,
-                ),
+                labelStyle: TextStyle(color: AppTheme.grey),
                 prefixIcon: const Icon(Icons.phone, color: AppTheme.ngoColor),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -1230,10 +1219,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            label,
-            style: AppTheme.bodySmall,
-          ),
+          Text(label, style: AppTheme.bodySmall),
         ],
       ),
     );
@@ -1372,9 +1358,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                     const SizedBox(height: 12),
                     Text(
                       'No certifications yet',
-                      style: AppTheme.bodyMedium.copyWith(
-                        color: AppTheme.grey,
-                      ),
+                      style: AppTheme.bodyMedium.copyWith(color: AppTheme.grey),
                     ),
                   ],
                 ),
@@ -1460,9 +1444,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                     const SizedBox(height: 12),
                     Text(
                       'No memories shared yet',
-                      style: AppTheme.bodyMedium.copyWith(
-                        color: AppTheme.grey,
-                      ),
+                      style: AppTheme.bodyMedium.copyWith(color: AppTheme.grey),
                     ),
                   ],
                 ),
@@ -1509,7 +1491,10 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
           children: [
             Icon(Icons.workspace_premium, color: AppTheme.ngoColor),
             SizedBox(width: 12),
-            Text('Add Certification', style: TextStyle(color: AppTheme.primaryDark)),
+            Text(
+              'Add Certification',
+              style: TextStyle(color: AppTheme.primaryDark),
+            ),
           ],
         ),
         content: Column(
@@ -1526,9 +1511,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
               style: const TextStyle(color: AppTheme.primaryDark),
               decoration: InputDecoration(
                 hintText: 'Certification Name',
-                hintStyle: TextStyle(
-                  color: AppTheme.grey,
-                ),
+                hintStyle: TextStyle(color: AppTheme.grey),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -1541,10 +1524,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: AppTheme.grey),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: AppTheme.grey)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -1647,10 +1627,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: AppTheme.grey),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: AppTheme.grey)),
           ),
         ],
       ),

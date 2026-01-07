@@ -2,33 +2,35 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   // Professional Color Palette
-  static const Color primaryDark = Color(0xFF1E293B);  // Slate 800
+  static const Color primaryDark = Color(0xFF1E293B); // Slate 800
   static const Color primaryMedium = Color(0xFF334155); // Slate 700
-  static const Color primaryLight = Color(0xFF475569);  // Slate 600
-  static const Color accent = Color(0xFFE11D48);        // Rose 600 - vibrant but professional
-  static const Color accentLight = Color(0xFFFB7185);   // Rose 400
-  static const Color gold = Color(0xFFF59E0B);          // Amber 500
-  static const Color purple = Color(0xFF7C3AED);        // Violet 600
+  static const Color primaryLight = Color(0xFF475569); // Slate 600
+  static const Color accent = Color(
+    0xFFE11D48,
+  ); // Rose 600 - vibrant but professional
+  static const Color accentLight = Color(0xFFFB7185); // Rose 400
+  static const Color gold = Color(0xFFF59E0B); // Amber 500
+  static const Color purple = Color(0xFF7C3AED); // Violet 600
 
   // Role Colors - Refined and cohesive
-  static const Color ngoColor = Color(0xFF0D9488);      // Teal 600
-  static const Color donorColor = Color(0xFFDC2626);    // Red 600
+  static const Color ngoColor = Color(0xFF0D9488); // Teal 600
+  static const Color donorColor = Color(0xFFDC2626); // Red 600
   static const Color volunteerColor = Color(0xFF7C3AED); // Violet 600
 
   // Neutral Colors - Professional greys
   static const Color white = Color(0xFFFFFFFF);
-  static const Color offWhite = Color(0xFFFAFAFA);      // Very light grey
-  static const Color black = Color(0xFF0F172A);         // Slate 900
-  static const Color grey = Color(0xFF64748B);          // Slate 500
-  static const Color lightGrey = Color(0xFFF1F5F9);     // Slate 100
-  static const Color darkGrey = Color(0xFF475569);      // Slate 600
-  static const Color borderGrey = Color(0xFFE2E8F0);    // Slate 200
+  static const Color offWhite = Color(0xFFFAFAFA); // Very light grey
+  static const Color black = Color(0xFF0F172A); // Slate 900
+  static const Color grey = Color(0xFF64748B); // Slate 500
+  static const Color lightGrey = Color(0xFFF1F5F9); // Slate 100
+  static const Color darkGrey = Color(0xFF475569); // Slate 600
+  static const Color borderGrey = Color(0xFFE2E8F0); // Slate 200
 
   // Status Colors - Refined
-  static const Color success = Color(0xFF059669);       // Emerald 600
-  static const Color warning = Color(0xFFD97706);       // Amber 600
-  static const Color error = Color(0xFFDC2626);         // Red 600
-  static const Color info = Color(0xFF0284C7);          // Sky 600
+  static const Color success = Color(0xFF059669); // Emerald 600
+  static const Color warning = Color(0xFFD97706); // Amber 600
+  static const Color error = Color(0xFFDC2626); // Red 600
+  static const Color info = Color(0xFF0284C7); // Sky 600
 
   // Solid colors - No gradients for clean white theme
   // Role colors are used as solid backgrounds for icons and accents
@@ -101,7 +103,11 @@ class AppTheme {
       hintText: hint,
       prefixIcon: Icon(icon, color: grey, size: 20),
       suffixIcon: suffixIcon,
-      labelStyle: const TextStyle(color: grey, fontSize: 14, fontWeight: FontWeight.w500),
+      labelStyle: const TextStyle(
+        color: grey,
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+      ),
       hintStyle: TextStyle(color: grey.withValues(alpha: 0.7), fontSize: 14),
       filled: true,
       fillColor: lightGrey,

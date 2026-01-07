@@ -914,7 +914,9 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                           width: 70,
                           height: 70,
                           decoration: BoxDecoration(
-                            color: (ngo['color'] as Color).withValues(alpha: 0.15),
+                            color: (ngo['color'] as Color).withValues(
+                              alpha: 0.15,
+                            ),
                             borderRadius: BorderRadius.circular(18),
                             border: Border.all(
                               color: (ngo['color'] as Color).withValues(

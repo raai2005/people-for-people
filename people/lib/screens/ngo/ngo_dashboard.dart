@@ -691,10 +691,20 @@ class _NGODashboardState extends State<NGODashboard> {
           child: Row(
             children: [
               Expanded(child: _buildNavItem(0, Icons.home_rounded, 'Home')),
-              Expanded(child: _buildNavItem(1, Icons.volunteer_activism_rounded, 'Donate')),
+              Expanded(
+                child: _buildNavItem(
+                  1,
+                  Icons.volunteer_activism_rounded,
+                  'Donate',
+                ),
+              ),
               Expanded(child: _buildNavItem(2, Icons.add_circle_rounded, '')),
-              Expanded(child: _buildNavItem(3, Icons.receipt_long_rounded, 'Activity')),
-              Expanded(child: _buildNavItem(4, Icons.person_rounded, 'Profile')),
+              Expanded(
+                child: _buildNavItem(3, Icons.receipt_long_rounded, 'Activity'),
+              ),
+              Expanded(
+                child: _buildNavItem(4, Icons.person_rounded, 'Profile'),
+              ),
             ],
           ),
         ),

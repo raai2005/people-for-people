@@ -217,10 +217,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
             decoration: BoxDecoration(
               color: AppTheme.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppTheme.borderGrey,
-                width: 1,
-              ),
+              border: Border.all(color: AppTheme.borderGrey, width: 1),
             ),
             child: Row(
               children: [
