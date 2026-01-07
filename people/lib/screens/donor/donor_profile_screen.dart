@@ -265,11 +265,11 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
               backgroundColor: AppTheme.donorColor,
               icon: Icon(
                 _isEditing ? Icons.check : Icons.edit,
-                color: Colors.white,
+                color: AppTheme.white,
               ),
               label: Text(
                 _isEditing ? 'Save Changes' : 'Edit Profile',
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppTheme.white),
               ),
             )
           : null,
@@ -337,7 +337,7 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
                       child: const Icon(
                         Icons.camera_alt,
                         size: 16,
-                        color: Colors.white,
+                        color: AppTheme.white,
                       ),
                     ),
                   ),
@@ -356,7 +356,7 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
                     style: AppTheme.headingSmall,
                     decoration: const InputDecoration(
                       hintText: 'Your Name',
-                      hintStyle: TextStyle(color: Colors.white54),
+                      hintStyle: TextStyle(color: AppTheme.grey),
                       border: UnderlineInputBorder(),
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
@@ -464,7 +464,7 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
               ],
             ),
           const SizedBox(height: 12),
-          const Divider(color: Colors.white10),
+          const Divider(color: AppTheme.borderGrey),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -565,7 +565,7 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
                 const Text(
                   'Donation Certificates',
                   style: TextStyle(
-                    color: AppTheme.white,
+                    color: AppTheme.primaryDark,
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                   ),
@@ -627,17 +627,14 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
                   const SizedBox(height: 8),
                   Text(
                     'No certificates yet',
-                    style: TextStyle(
-                      color: AppTheme.white.withValues(alpha: 0.6),
-                      fontSize: 13,
-                    ),
+                    style: TextStyle(color: AppTheme.grey, fontSize: 13),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Certificates will appear here after donations',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: AppTheme.white.withValues(alpha: 0.4),
+                      color: AppTheme.grey.withValues(alpha: 0.7),
                       fontSize: 11,
                     ),
                   ),
@@ -805,7 +802,7 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
                     CircularProgressIndicator(
                       value: completion,
                       strokeWidth: 8,
-                      backgroundColor: Colors.white10,
+                      backgroundColor: AppTheme.grey.withValues(alpha: 0.2),
                       color: completion >= 0.7
                           ? AppTheme.success
                           : AppTheme.warning,
@@ -814,7 +811,7 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
                       child: Text(
                         '${(completion * 100).toInt()}%',
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.primaryDark,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -877,7 +874,7 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(color: Colors.white70, fontSize: 13),
+              style: const TextStyle(color: AppTheme.primaryDark, fontSize: 13),
             ),
           ),
           if (onVerify != null)
@@ -918,7 +915,7 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
           const SizedBox(width: 8),
           Text(
             label,
-            style: const TextStyle(color: Colors.white70, fontSize: 13),
+            style: const TextStyle(color: AppTheme.primaryDark, fontSize: 13),
           ),
         ],
       ),

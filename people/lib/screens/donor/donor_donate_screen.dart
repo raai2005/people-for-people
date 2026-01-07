@@ -55,18 +55,18 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppTheme.donorColor,
+              color: AppTheme.donorColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
               Icons.volunteer_activism_rounded,
-              color: AppTheme.white,
+              color: AppTheme.donorColor,
               size: 24,
             ),
           ),
@@ -79,11 +79,11 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
                   'Make a Donation',
                   style: TextStyle(
                     color: AppTheme.primaryDark,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(height: 4),
+                SizedBox(height: 2),
                 Text(
                   'Support causes you care about',
                   style: TextStyle(color: AppTheme.grey, fontSize: 13),
@@ -101,27 +101,20 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppTheme.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
+        color: AppTheme.lightGrey,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
           color: AppTheme.donorColor,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.donorColor.withValues(alpha: 0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(10),
         ),
-        labelColor: AppTheme.white, // Keep white for selected tab (gradient bg)
+        labelColor: AppTheme.white,
         unselectedLabelColor: AppTheme.grey,
-        labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         dividerColor: Colors.transparent,
+        indicatorSize: TabBarIndicatorSize.tab,
         tabs: const [
           Tab(text: 'Discover NGOs'),
           Tab(text: 'Quick Donate'),
@@ -141,17 +134,19 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: AppTheme.white,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
+            color: AppTheme.lightGrey,
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             children: [
-              Icon(Icons.search_rounded, color: AppTheme.grey, size: 22),
+              Icon(Icons.search_rounded, color: AppTheme.grey, size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: TextField(
-                  style: const TextStyle(color: AppTheme.primaryDark),
+                  style: const TextStyle(
+                    color: AppTheme.primaryDark,
+                    fontSize: 14,
+                  ),
                   decoration: InputDecoration(
                     hintText: 'Search NGOs by name or cause...',
                     hintStyle: TextStyle(color: AppTheme.grey, fontSize: 14),
@@ -170,9 +165,9 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
         const SizedBox(height: 24),
         // Empty State
         Container(
-          padding: const EdgeInsets.all(40),
+          padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
-            color: AppTheme.white.withValues(alpha: 0.05),
+            color: AppTheme.lightGrey,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Center(
@@ -180,23 +175,23 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
               children: [
                 Icon(
                   Icons.volunteer_activism_outlined,
-                  color: AppTheme.white.withValues(alpha: 0.3),
-                  size: 64,
+                  color: AppTheme.grey.withValues(alpha: 0.5),
+                  size: 56,
                 ),
                 const SizedBox(height: 16),
                 const Text(
                   'No NGOs Available',
                   style: TextStyle(
                     color: AppTheme.primaryDark,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   'NGOs will appear here once added to the platform',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: AppTheme.grey, fontSize: 14),
+                  style: TextStyle(color: AppTheme.grey, fontSize: 13),
                 ),
               ],
             ),
@@ -225,16 +220,20 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
           'Categories',
           style: TextStyle(
             color: AppTheme.primaryDark,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 12),
         Row(
-          children: categories.map((cat) {
+          children: categories.asMap().entries.map((entry) {
+            final index = entry.key;
+            final cat = entry.value;
             return Expanded(
               child: Container(
-                margin: const EdgeInsets.only(right: 8),
+                margin: EdgeInsets.only(
+                  right: index < categories.length - 1 ? 10 : 0,
+                ),
                 child: _buildCategoryChip(
                   cat['name'] as String,
                   cat['icon'] as IconData,
@@ -250,23 +249,24 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
 
   Widget _buildCategoryChip(String name, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 24),
+          Icon(icon, color: color, size: 22),
           const SizedBox(height: 6),
           Text(
             name,
             style: TextStyle(
               color: color,
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
