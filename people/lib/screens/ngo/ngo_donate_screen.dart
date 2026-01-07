@@ -608,7 +608,7 @@ class _NGODonateScreenState extends State<NGODonateScreen>
               ),
             ),
             const SizedBox(height: 14),
-            // Footer: Deadline + Donate Button
+            // Footer: Deadline
             Row(
               children: [
                 Icon(Icons.access_time, size: 14, color: AppTheme.grey),
@@ -618,37 +618,6 @@ class _NGODonateScreenState extends State<NGODonateScreen>
                       ? '${request.deadline!.difference(DateTime.now()).inDays} days left'
                       : 'No deadline',
                   style: TextStyle(color: AppTheme.grey, fontSize: 12),
-                ),
-                const Spacer(),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _selectedRequest = request;
-                      _selectedDonationType =
-                          request.category == DonationCategory.money
-                          ? 'Money'
-                          : request.category.name;
-                      _tabController.animateTo(1);
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.ngoColor,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Text(
-                    'Donate',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
                 ),
               ],
             ),
@@ -1009,10 +978,10 @@ class _NGODonateScreenState extends State<NGODonateScreen>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
-                    Icon(Icons.volunteer_activism, color: Colors.white),
+                    Icon(Icons.send_rounded, color: Colors.white),
                     SizedBox(width: 10),
                     Text(
-                      'Donate to this Request',
+                      'Request to Contribute',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
