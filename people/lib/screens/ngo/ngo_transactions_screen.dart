@@ -41,19 +41,25 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
       children: [
         // Custom Tab Bar
         Container(
-          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: AppTheme.primaryDark,
+            color: AppTheme.lightGrey,
             borderRadius: BorderRadius.circular(12),
           ),
           child: TabBar(
             controller: _tabController,
             indicator: BoxDecoration(
               color: AppTheme.ngoColor,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
             ),
             labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
+            unselectedLabelColor: AppTheme.grey,
+            labelStyle: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+            indicatorSize: TabBarIndicatorSize.tab,
             tabs: const [
               Tab(text: 'Incoming'),
               Tab(text: 'Pending'),

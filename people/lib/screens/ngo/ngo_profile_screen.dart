@@ -658,7 +658,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
         children: [
           // Profile Image
           GestureDetector(
-            onTap: _isEditing ? _pickAndUploadImage : null,
+            onTap: _pickAndUploadImage,
             child: Stack(
               children: [
                 Container(
@@ -698,7 +698,7 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                       ),
                     ),
                   ),
-                if (_isEditing && !_isUploadingImage)
+                if (!_isUploadingImage)
                   Positioned(
                     bottom: 0,
                     right: 0,

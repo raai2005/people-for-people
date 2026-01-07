@@ -366,40 +366,40 @@ class _NGODashboardState extends State<NGODashboard> {
   Widget _buildActionCard(String title, IconData icon, Color color) {
     return InkWell(
       onTap: () {},
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         decoration: BoxDecoration(
           color: AppTheme.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppTheme.borderGrey),
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.2),
+                color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 24),
+              child: Icon(icon, color: color, size: 22),
             ),
             const SizedBox(height: 10),
-            Text(
-              title,
-              style: TextStyle(
-                color: AppTheme.primaryDark,
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
+            SizedBox(
+              height: 28,
+              child: Center(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppTheme.primaryDark,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                ),
               ),
-              textAlign: TextAlign.center,
             ),
           ],
         ),
