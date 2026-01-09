@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../models/transaction_model.dart';
 import '../../theme/app_theme.dart';
@@ -211,12 +212,11 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.pop(context);
-                        _updateStatus(
-                          t,
-                          t.isDonorDelivering
-                              ? TransactionStatus.pendingDelivery
-                              : TransactionStatus.needsVolunteer,
-                        );
+                        if (t.isDonorDelivering) {
+                          _approveWithVerificationCode(t);
+                        } else {
+                          _updateStatus(t, TransactionStatus.needsVolunteer);
+                        }
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Donation Accepted')),
                         );
@@ -327,6 +327,59 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
         );
       },
     );
+  }
+
+  /// Generates a verification code like "JD-4827"
+  /// Format: [First letter of first name][First letter of last name]-[4 random digits]
+  String _generateVerificationCode(String donorName) {
+    final random = Random();
+    final parts = donorName.trim().split(' ');
+
+    // Get initials (first letter of first name + first letter of last name if exists)
+    String initials;
+    if (parts.length >= 2) {
+      initials = '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    } else if (parts.isNotEmpty && parts[0].length >= 2) {
+      initials = parts[0].substring(0, 2).toUpperCase();
+    } else {
+      initials = 'VR'; // Fallback
+    }
+
+    // Generate 4 random digits
+    final digits = (1000 + random.nextInt(9000)).toString();
+
+    return '$initials-$digits';
+  }
+
+  /// Approves a transaction and generates a verification code for donor delivery
+  void _approveWithVerificationCode(Transaction t) {
+    final verificationCode = _generateVerificationCode(t.donorName);
+
+    setState(() {
+      final index = _transactions.indexWhere((tr) => tr.id == t.id);
+      if (index != -1) {
+        _transactions[index] = Transaction(
+          id: t.id,
+          donorId: t.donorId,
+          donorName: t.donorName,
+          itemName: t.itemName,
+          quantity: t.quantity,
+          status: TransactionStatus.pendingDelivery,
+          isDonorDelivering: t.isDonorDelivering,
+          volunteerId: t.volunteerId,
+          volunteerName: t.volunteerName,
+          verificationCode: verificationCode,
+          date: t.date,
+        );
+      }
+    });
+
+    // TODO: Save to Firestore with the generated verification code
+    // FirebaseFirestore.instance.collection('transactions').doc(t.id).update({
+    //   'status': 'pendingDelivery',
+    //   'verificationCode': verificationCode,
+    //   'approvedAt': FieldValue.serverTimestamp(),
+    // });
   }
 
   void _updateStatus(Transaction t, TransactionStatus newStatus) {
