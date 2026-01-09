@@ -358,7 +358,9 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Row(
             children: [
               Icon(Icons.verified_user, color: AppTheme.gold),
@@ -386,7 +388,9 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
                 textAlign: TextAlign.center,
                 decoration: InputDecoration(
                   hintText: 'XX-0000',
-                  hintStyle: TextStyle(color: AppTheme.grey.withValues(alpha: 0.4)),
+                  hintStyle: TextStyle(
+                    color: AppTheme.grey.withValues(alpha: 0.4),
+                  ),
                   errorText: errorText,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -431,12 +435,12 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
               onPressed: () {
                 final enteredCode = codeController.text.trim().toUpperCase();
                 final expectedCode = t.verificationCode?.toUpperCase() ?? '';
-                
+
                 if (enteredCode.isEmpty) {
                   setDialogState(() => errorText = 'Please enter a code');
                   return;
                 }
-                
+
                 if (enteredCode == expectedCode || expectedCode.isEmpty) {
                   Navigator.pop(context);
                   _updateStatus(t, TransactionStatus.completed);
@@ -453,7 +457,9 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
                     ),
                   );
                 } else {
-                  setDialogState(() => errorText = 'Invalid code. Please try again.');
+                  setDialogState(
+                    () => errorText = 'Invalid code. Please try again.',
+                  );
                 }
               },
               style: ElevatedButton.styleFrom(

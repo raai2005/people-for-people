@@ -14,7 +14,7 @@ class DonorDeliveriesScreen extends StatefulWidget {
 class _DonorDeliveriesScreenState extends State<DonorDeliveriesScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  
+
   // Toggle for dummy data vs Firestore
   final bool _useDummyData = true;
 
@@ -65,8 +65,12 @@ class _DonorDeliveriesScreenState extends State<DonorDeliveriesScreen>
           child: TabBarView(
             controller: _tabController,
             children: [
-              _useDummyData ? _buildDummyPendingList() : _buildFirestorePendingList(),
-              _useDummyData ? _buildDummyCompletedList() : _buildFirestoreCompletedList(),
+              _useDummyData
+                  ? _buildDummyPendingList()
+                  : _buildFirestorePendingList(),
+              _useDummyData
+                  ? _buildDummyCompletedList()
+                  : _buildFirestoreCompletedList(),
             ],
           ),
         ),
@@ -131,7 +135,7 @@ class _DonorDeliveriesScreenState extends State<DonorDeliveriesScreen>
   Widget _buildDummyPendingList() {
     final pending = _getDummyPendingDeliveries();
     if (pending.isEmpty) return _buildEmptyState('No pending deliveries');
-    
+
     return ListView.builder(
       padding: const EdgeInsets.all(20),
       itemCount: pending.length,
@@ -142,7 +146,7 @@ class _DonorDeliveriesScreenState extends State<DonorDeliveriesScreen>
   Widget _buildDummyCompletedList() {
     final completed = _getDummyCompletedDeliveries();
     if (completed.isEmpty) return _buildEmptyState('No completed deliveries');
-    
+
     return ListView.builder(
       padding: const EdgeInsets.all(20),
       itemCount: completed.length,
@@ -309,7 +313,9 @@ class _DonorDeliveriesScreenState extends State<DonorDeliveriesScreen>
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: _getStatusColor(delivery.status).withValues(alpha: 0.1),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
             ),
             child: Row(
               children: [
@@ -330,7 +336,10 @@ class _DonorDeliveriesScreenState extends State<DonorDeliveriesScreen>
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: _getStatusColor(delivery.status),
                     borderRadius: BorderRadius.circular(20),
@@ -365,16 +374,19 @@ class _DonorDeliveriesScreenState extends State<DonorDeliveriesScreen>
                   ],
                 ),
                 const SizedBox(height: 16),
-                
+
                 // NGO Info
                 GestureDetector(
-                  onTap: () => _navigateToNGOProfile(delivery.ngoId, delivery.ngoName),
+                  onTap: () =>
+                      _navigateToNGOProfile(delivery.ngoId, delivery.ngoName),
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: AppTheme.ngoColor.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppTheme.ngoColor.withValues(alpha: 0.2)),
+                      border: Border.all(
+                        color: AppTheme.ngoColor.withValues(alpha: 0.2),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -391,7 +403,11 @@ class _DonorDeliveriesScreenState extends State<DonorDeliveriesScreen>
                               ),
                             ),
                             const Spacer(),
-                            Icon(Icons.open_in_new, color: AppTheme.ngoColor, size: 14),
+                            Icon(
+                              Icons.open_in_new,
+                              color: AppTheme.ngoColor,
+                              size: 14,
+                            ),
                           ],
                         ),
                         const SizedBox(height: 6),
@@ -406,12 +422,19 @@ class _DonorDeliveriesScreenState extends State<DonorDeliveriesScreen>
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            Icon(Icons.location_on, color: AppTheme.grey, size: 14),
+                            Icon(
+                              Icons.location_on,
+                              color: AppTheme.grey,
+                              size: 14,
+                            ),
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
                                 delivery.ngoAddress,
-                                style: TextStyle(color: AppTheme.grey, fontSize: 12),
+                                style: TextStyle(
+                                  color: AppTheme.grey,
+                                  fontSize: 12,
+                                ),
                               ),
                             ),
                           ],
@@ -424,7 +447,10 @@ class _DonorDeliveriesScreenState extends State<DonorDeliveriesScreen>
                               const SizedBox(width: 4),
                               Text(
                                 delivery.ngoPhone,
-                                style: TextStyle(color: AppTheme.grey, fontSize: 12),
+                                style: TextStyle(
+                                  color: AppTheme.grey,
+                                  fontSize: 12,
+                                ),
                               ),
                             ],
                           ),
@@ -433,25 +459,30 @@ class _DonorDeliveriesScreenState extends State<DonorDeliveriesScreen>
                     ),
                   ),
                 ),
-                
+
                 // Verification Code (for pending deliveries)
                 if (delivery.status != DeliveryStatus.completed) ...[
                   const SizedBox(height: 16),
                   _buildVerificationCodeSection(delivery),
                 ],
-                
+
                 // Action buttons (for pending deliveries)
                 if (delivery.status != DeliveryStatus.completed) ...[
                   const SizedBox(height: 16),
                   _buildActionButtons(delivery),
                 ],
-                
+
                 // Completed info
-                if (delivery.status == DeliveryStatus.completed && delivery.completedAt != null) ...[
+                if (delivery.status == DeliveryStatus.completed &&
+                    delivery.completedAt != null) ...[
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Icon(Icons.check_circle, color: AppTheme.success, size: 16),
+                      Icon(
+                        Icons.check_circle,
+                        color: AppTheme.success,
+                        size: 16,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'Delivered on ${_formatDate(delivery.completedAt!)}',
@@ -525,7 +556,9 @@ class _DonorDeliveriesScreenState extends State<DonorDeliveriesScreen>
               const SizedBox(width: 12),
               IconButton(
                 onPressed: () {
-                  Clipboard.setData(ClipboardData(text: delivery.verificationCode));
+                  Clipboard.setData(
+                    ClipboardData(text: delivery.verificationCode),
+                  );
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Code copied to clipboard'),
@@ -631,10 +664,8 @@ class _DonorDeliveriesScreenState extends State<DonorDeliveriesScreen>
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PublicNGOProfileScreen(
-          ngoId: ngoId,
-          ngoName: ngoName,
-        ),
+        builder: (context) =>
+            PublicNGOProfileScreen(ngoId: ngoId, ngoName: ngoName),
       ),
     );
   }
@@ -706,23 +737,23 @@ class _DonorDeliveriesScreenState extends State<DonorDeliveriesScreen>
         ],
       ),
     );
-    
+
     // Update local state for dummy data
     setState(() {});
   }
 
   void _openMaps(String address) {
     // TODO: Open maps app with address
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Opening maps for: $address')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Opening maps for: $address')));
   }
 
   void _callNGO(String phone) {
     // TODO: Open phone dialer
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Calling: $phone')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Calling: $phone')));
   }
 
   Color _getStatusColor(DeliveryStatus status) {
@@ -784,9 +815,9 @@ class _DonorDeliveriesScreenState extends State<DonorDeliveriesScreen>
 
 // Delivery status enum
 enum DeliveryStatus {
-  approved,   // NGO approved, ready for donor to deliver
-  onTheWay,   // Donor marked they're delivering
-  completed,  // NGO confirmed receipt
+  approved, // NGO approved, ready for donor to deliver
+  onTheWay, // Donor marked they're delivering
+  completed, // NGO confirmed receipt
 }
 
 // Model for donor deliveries

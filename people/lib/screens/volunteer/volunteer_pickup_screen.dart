@@ -37,16 +37,15 @@ class _VolunteerPickupScreenState extends State<VolunteerPickupScreen> {
               const SizedBox(height: 4),
               Text(
                 'Help deliver donations to NGOs',
-                style: TextStyle(
-                  color: AppTheme.grey,
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: AppTheme.grey, fontSize: 14),
               ),
             ],
           ),
         ),
         Expanded(
-          child: _useDummyData ? _buildDummyContent() : _buildFirestoreContent(),
+          child: _useDummyData
+              ? _buildDummyContent()
+              : _buildFirestoreContent(),
         ),
       ],
     );
@@ -256,7 +255,9 @@ class _VolunteerPickupScreenState extends State<VolunteerPickupScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: _getCategoryColor(pickup.category).withValues(alpha: 0.1),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
             ),
             child: Row(
               children: [
@@ -276,7 +277,10 @@ class _VolunteerPickupScreenState extends State<VolunteerPickupScreen> {
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: _getUrgencyColor(pickup.urgency),
                     borderRadius: BorderRadius.circular(20),
@@ -312,7 +316,11 @@ class _VolunteerPickupScreenState extends State<VolunteerPickupScreen> {
                     if (pickup.distance > 0)
                       Row(
                         children: [
-                          Icon(Icons.navigation, color: AppTheme.volunteerColor, size: 14),
+                          Icon(
+                            Icons.navigation,
+                            color: AppTheme.volunteerColor,
+                            size: 14,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             '${pickup.distance.toStringAsFixed(1)} km',
@@ -334,7 +342,8 @@ class _VolunteerPickupScreenState extends State<VolunteerPickupScreen> {
                   label: 'PICKUP FROM',
                   name: pickup.donorName,
                   address: pickup.donorAddress,
-                  onTap: () => _navigateToDonorProfile(pickup.donorId, pickup.donorName),
+                  onTap: () =>
+                      _navigateToDonorProfile(pickup.donorId, pickup.donorName),
                 ),
                 const SizedBox(height: 12),
                 // Dotted line
@@ -342,12 +351,15 @@ class _VolunteerPickupScreenState extends State<VolunteerPickupScreen> {
                   children: [
                     const SizedBox(width: 10),
                     Column(
-                      children: List.generate(3, (i) => Container(
-                        width: 2,
-                        height: 4,
-                        margin: const EdgeInsets.symmetric(vertical: 2),
-                        color: AppTheme.grey.withValues(alpha: 0.3),
-                      )),
+                      children: List.generate(
+                        3,
+                        (i) => Container(
+                          width: 2,
+                          height: 4,
+                          margin: const EdgeInsets.symmetric(vertical: 2),
+                          color: AppTheme.grey.withValues(alpha: 0.3),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -359,7 +371,8 @@ class _VolunteerPickupScreenState extends State<VolunteerPickupScreen> {
                   label: 'DELIVER TO',
                   name: pickup.ngoName,
                   address: pickup.ngoAddress,
-                  onTap: () => _navigateToNGOProfile(pickup.ngoId, pickup.ngoName),
+                  onTap: () =>
+                      _navigateToNGOProfile(pickup.ngoId, pickup.ngoName),
                 ),
                 const SizedBox(height: 20),
                 // Action buttons
@@ -372,7 +385,9 @@ class _VolunteerPickupScreenState extends State<VolunteerPickupScreen> {
                         label: const Text('Details'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppTheme.volunteerColor,
-                          side: const BorderSide(color: AppTheme.volunteerColor),
+                          side: const BorderSide(
+                            color: AppTheme.volunteerColor,
+                          ),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -516,10 +531,8 @@ class _VolunteerPickupScreenState extends State<VolunteerPickupScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PublicDonorProfileScreen(
-          donorId: donorId,
-          donorName: donorName,
-        ),
+        builder: (context) =>
+            PublicDonorProfileScreen(donorId: donorId, donorName: donorName),
       ),
     );
   }
@@ -528,10 +541,8 @@ class _VolunteerPickupScreenState extends State<VolunteerPickupScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PublicNGOProfileScreen(
-          ngoId: ngoId,
-          ngoName: ngoName,
-        ),
+        builder: (context) =>
+            PublicNGOProfileScreen(ngoId: ngoId, ngoName: ngoName),
       ),
     );
   }
@@ -567,7 +578,9 @@ class _VolunteerPickupScreenState extends State<VolunteerPickupScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: _getCategoryColor(pickup.category).withValues(alpha: 0.1),
+                      color: _getCategoryColor(
+                        pickup.category,
+                      ).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
@@ -613,7 +626,10 @@ class _VolunteerPickupScreenState extends State<VolunteerPickupScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildDetailSection('Category', pickup.category),
-                    _buildDetailSection('Posted', _formatDate(pickup.createdAt)),
+                    _buildDetailSection(
+                      'Posted',
+                      _formatDate(pickup.createdAt),
+                    ),
                     const SizedBox(height: 20),
                     const Text(
                       'Pickup Location',
@@ -630,7 +646,10 @@ class _VolunteerPickupScreenState extends State<VolunteerPickupScreen> {
                       color: AppTheme.success,
                       onTap: () {
                         Navigator.pop(context);
-                        _navigateToDonorProfile(pickup.donorId, pickup.donorName);
+                        _navigateToDonorProfile(
+                          pickup.donorId,
+                          pickup.donorName,
+                        );
                       },
                     ),
                     const SizedBox(height: 20),
