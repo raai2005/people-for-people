@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/transaction_model.dart';
 import '../../theme/app_theme.dart';
+import '../common/public_donor_profile_screen.dart';
 import '../common/public_volunteer_profile_screen.dart';
 
 class NGOTransactionsScreen extends StatefulWidget {
@@ -162,12 +163,14 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
                 width: double.infinity,
                 child: OutlinedButton.icon(
                   onPressed: () {
-                    // Navigate to donor profile
-                    // For now, showing a snackbar as placeholder or simple dialog
-                    // In real app: Navigator.push(context, MaterialPageRoute(builder: (_) => PublicDonorProfile(name: t.donorName)));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('View Donor Profile coming soon'),
+                    Navigator.pop(context); // Close modal first
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PublicDonorProfileScreen(
+                          donorId: t.donorId,
+                          donorName: t.donorName,
+                        ),
                       ),
                     );
                   },
@@ -332,6 +335,7 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
       if (index != -1) {
         _transactions[index] = Transaction(
           id: t.id,
+          donorId: t.donorId,
           donorName: t.donorName,
           itemName: t.itemName,
           quantity: t.quantity,
@@ -646,6 +650,7 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
       if (index != -1) {
         _transactions[index] = Transaction(
           id: t.id,
+          donorId: t.donorId,
           donorName: t.donorName,
           itemName: t.itemName,
           quantity: t.quantity,

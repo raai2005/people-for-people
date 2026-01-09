@@ -22,6 +22,7 @@ class VolunteerPreview {
 
 class Transaction {
   final String id;
+  final String donorId;
   final String donorName;
   final String itemName;
   final String quantity;
@@ -34,6 +35,7 @@ class Transaction {
 
   Transaction({
     required this.id,
+    required this.donorId,
     required this.donorName,
     required this.itemName,
     required this.quantity,
@@ -50,6 +52,7 @@ class Transaction {
     return [
       Transaction(
         id: '1',
+        donorId: 'donor_001',
         donorName: 'John Doe',
         itemName: 'Winter Jackets',
         quantity: '50 Pcs',
@@ -59,6 +62,7 @@ class Transaction {
       ),
       Transaction(
         id: '2',
+        donorId: 'donor_002',
         donorName: 'Sarah Smith',
         itemName: 'Rice Bags',
         quantity: '100 Kg',
@@ -73,6 +77,7 @@ class Transaction {
       ),
       Transaction(
         id: '3',
+        donorId: 'donor_003',
         donorName: 'Mike Johnson',
         itemName: 'School Books',
         quantity: '200 Sets',
@@ -82,6 +87,7 @@ class Transaction {
       ),
       Transaction(
         id: '4',
+        donorId: 'donor_004',
         donorName: 'Emily Brown',
         itemName: 'Canned Food',
         quantity: '50 Cans',
@@ -91,6 +97,7 @@ class Transaction {
       ),
       Transaction(
         id: '5',
+        donorId: 'donor_005',
         donorName: 'David Lee',
         itemName: 'Blankets',
         quantity: '30 Pcs',

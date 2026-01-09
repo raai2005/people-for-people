@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../theme/app_theme.dart';
 import '../../models/donation_request.dart';
 import 'create_donation_request_screen.dart';
+import '../common/public_ngo_profile_screen.dart';
 
 class NGODonateScreen extends StatefulWidget {
   const NGODonateScreen({super.key});
@@ -1026,11 +1027,11 @@ class _NGODonateScreenState extends State<NGODonateScreen>
 
   void _navigateToNGOProfile(String ngoId, String ngoName) {
     Navigator.pop(context); // Close modal first
-    // TODO: Navigate to NGO profile screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Viewing profile: $ngoName'),
-        backgroundColor: AppTheme.ngoColor,
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            PublicNGOProfileScreen(ngoId: ngoId, ngoName: ngoName),
       ),
     );
   }

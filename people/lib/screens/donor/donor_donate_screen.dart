@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../theme/app_theme.dart';
 import '../../services/donation_service.dart';
+import '../../models/donation_request.dart';
+import '../common/public_ngo_profile_screen.dart';
 
 class DonorDonateScreen extends StatefulWidget {
   const DonorDonateScreen({super.key});
@@ -18,9 +21,64 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
   final _amountController = TextEditingController();
   final _quantityController = TextEditingController();
   final _descriptionController = TextEditingController();
+  String _selectedCategory = 'All';
+  DonationRequest? _selectedRequest;
 
   final DonationService _donationService = DonationService();
   bool _isSubmitting = false;
+  bool _useDummyData = true; // Toggle for dummy data
+
+  // Dummy donation requests for preview
+  final List<DonationRequest> _dummyRequests = [
+    DonationRequest(
+      id: '1',
+      ngoId: 'ngo1',
+      ngoName: 'Green Earth Foundation',
+      title: 'Tree Plantation Drive 2026',
+      description:
+          '📋 Purpose: We are organizing a massive tree plantation drive across Mumbai.\n\n🌍 ENVIRONMENTAL INITIATIVE:\n• Type: Urban Reforestation\n• Goal: Plant 10,000 trees\n\n📝 SPECIFIC ITEMS NEEDED:\n- Tree saplings\n- Gardening tools\n- Volunteers',
+      category: DonationCategory.money,
+      urgency: UrgencyLevel.high,
+      targetAmount: 50000,
+      currentAmount: 0,
+      location: 'Mumbai, India',
+      deadline: DateTime.now().add(const Duration(days: 25)),
+      contactPerson: 'Raj Sharma',
+      contactPhone: '+91 98765 43210',
+    ),
+    DonationRequest(
+      id: '2',
+      ngoId: 'ngo2',
+      ngoName: 'Education For All',
+      title: 'School Supplies for 500 Children',
+      description:
+          '📋 Purpose: Help underprivileged children start their new academic year.\n\n📚 EDUCATION REQUIREMENTS:\n• Type: Stationery\n• Level: Primary School\n\n📝 SPECIFIC ITEMS NEEDED:\n- 500 School bags\n- 1000 Notebooks\n- Geometry boxes',
+      category: DonationCategory.education,
+      urgency: UrgencyLevel.medium,
+      targetQuantity: 500,
+      currentQuantity: 0,
+      location: 'Delhi, India',
+      deadline: DateTime.now().add(const Duration(days: 20)),
+      contactPerson: 'Priya Patel',
+      contactPhone: '+91 87654 32109',
+    ),
+    DonationRequest(
+      id: '3',
+      ngoId: 'ngo3',
+      ngoName: 'Food For Humanity',
+      title: 'Daily Meals for 200 Homeless',
+      description:
+          '📋 Purpose: Provide nutritious meals to homeless individuals.\n\n🍽️ FOOD REQUIREMENTS:\n• Type: Ready-made Meals\n• Dietary: Vegetarian Only\n\n📝 SPECIFIC ITEMS NEEDED:\n- Ready-to-eat meal packets\n- Rice and dal\n- Fresh vegetables',
+      category: DonationCategory.food,
+      urgency: UrgencyLevel.critical,
+      targetQuantity: 6000,
+      currentQuantity: 0,
+      location: 'Kolkata, India',
+      deadline: DateTime.now().add(const Duration(days: 30)),
+      contactPerson: 'Amit Das',
+      contactPhone: '+91 76543 21098',
+    ),
+  ];
 
   @override
   void initState() {
@@ -37,6 +95,22 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
     super.dispose();
   }
 
+  // Get donation requests stream
+  Stream<QuerySnapshot> _getDonationRequestsStream() {
+    Query query = FirebaseFirestore.instance
+        .collection('donation_requests')
+        .where('status', isEqualTo: 'active');
+
+    if (_selectedCategory != 'All') {
+      query = query.where(
+        'category',
+        isEqualTo: _selectedCategory.toLowerCase(),
+      );
+    }
+
+    return query.orderBy('createdAt', descending: true).snapshots();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -46,7 +120,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
         Expanded(
           child: TabBarView(
             controller: _tabController,
-            children: [_buildDiscoverNGOs(), _buildMakeDonation()],
+            children: [_buildDonationRequests(), _buildMakeDonation()],
           ),
         ),
       ],
@@ -116,9 +190,777 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
         dividerColor: Colors.transparent,
         indicatorSize: TabBarIndicatorSize.tab,
         tabs: const [
-          Tab(text: 'Discover NGOs'),
+          Tab(text: 'Donation Requests'),
           Tab(text: 'Quick Donate'),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDonationRequests() {
+    return Column(
+      children: [
+        // Category Filter
+        _buildCategoryFilter(),
+        // Donation Requests List
+        Expanded(
+          child: _useDummyData
+              ? _buildDummyRequestsList()
+              : _buildFirestoreRequestsList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategoryFilter() {
+    final categories = [
+      'All',
+      'Money',
+      'Food',
+      'Clothes',
+      'Medical',
+      'Education',
+    ];
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: categories.map((category) {
+            final isSelected = _selectedCategory == category;
+            return Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: GestureDetector(
+                onTap: () => setState(() => _selectedCategory = category),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppTheme.donorColor
+                        : AppTheme.donorColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    category,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : AppTheme.donorColor,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDummyRequestsList() {
+    final filteredRequests = _selectedCategory == 'All'
+        ? _dummyRequests
+        : _dummyRequests
+              .where(
+                (r) =>
+                    r.category.name.toLowerCase() ==
+                    _selectedCategory.toLowerCase(),
+              )
+              .toList();
+
+    if (filteredRequests.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      itemCount: filteredRequests.length,
+      itemBuilder: (context, index) =>
+          _buildRequestCard(filteredRequests[index]),
+    );
+  }
+
+  Widget _buildFirestoreRequestsList() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: _getDonationRequestsStream(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(color: AppTheme.donorColor),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 48, color: AppTheme.error),
+                const SizedBox(height: 16),
+                Text(
+                  'Error loading requests',
+                  style: TextStyle(color: AppTheme.grey),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final docs = snapshot.data?.docs ?? [];
+        if (docs.isEmpty) {
+          return _buildEmptyState();
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          itemCount: docs.length,
+          itemBuilder: (context, index) {
+            final data = docs[index].data() as Map<String, dynamic>;
+            final request = DonationRequest.fromMap(data);
+            return _buildRequestCard(request);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: AppTheme.lightGrey,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.volunteer_activism_outlined,
+              color: AppTheme.grey.withValues(alpha: 0.5),
+              size: 56,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'No Donation Requests',
+              style: TextStyle(
+                color: AppTheme.primaryDark,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Active donation requests will appear here',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppTheme.grey, fontSize: 13),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRequestCard(DonationRequest request) {
+    final categoryColor = _getCategoryColor(request.category);
+    final urgencyColor = _getUrgencyColor(request.urgency);
+
+    return GestureDetector(
+      onTap: () => _showRequestDetailsModal(request),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppTheme.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.borderGrey),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header: NGO Name + Urgency Badge
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: categoryColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    _getCategoryIcon(request.category),
+                    color: categoryColor,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        request.ngoName,
+                        style: const TextStyle(
+                          color: AppTheme.primaryDark,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            size: 12,
+                            color: AppTheme.grey,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            request.location,
+                            style: TextStyle(
+                              color: AppTheme.grey,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                // Urgency Badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: urgencyColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    request.urgency.name.toUpperCase(),
+                    style: TextStyle(
+                      color: urgencyColor,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            // Title
+            Text(
+              request.title,
+              style: const TextStyle(
+                color: AppTheme.primaryDark,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 14),
+            // Goal section
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: categoryColor.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: categoryColor.withValues(alpha: 0.2)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    request.category == DonationCategory.money
+                        ? Icons.currency_rupee
+                        : Icons.inventory_2_outlined,
+                    color: categoryColor,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    request.category == DonationCategory.money
+                        ? 'Goal: ₹${request.targetAmount?.toStringAsFixed(0) ?? '0'}'
+                        : 'Need: ${request.targetQuantity ?? 0} items',
+                    style: TextStyle(
+                      color: categoryColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            // Footer: Deadline
+            Row(
+              children: [
+                Icon(Icons.access_time, size: 14, color: AppTheme.grey),
+                const SizedBox(width: 4),
+                Text(
+                  request.deadline != null
+                      ? '${request.deadline!.difference(DateTime.now()).inDays} days left'
+                      : 'No deadline',
+                  style: TextStyle(color: AppTheme.grey, fontSize: 12),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _getCategoryColor(DonationCategory category) {
+    switch (category) {
+      case DonationCategory.money:
+        return AppTheme.success;
+      case DonationCategory.food:
+        return AppTheme.gold;
+      case DonationCategory.clothes:
+        return AppTheme.purple;
+      case DonationCategory.medical:
+        return AppTheme.error;
+      case DonationCategory.education:
+        return AppTheme.info;
+      case DonationCategory.other:
+        return AppTheme.grey;
+    }
+  }
+
+  Color _getUrgencyColor(UrgencyLevel urgency) {
+    switch (urgency) {
+      case UrgencyLevel.low:
+        return AppTheme.success;
+      case UrgencyLevel.medium:
+        return AppTheme.warning;
+      case UrgencyLevel.high:
+        return Colors.orange;
+      case UrgencyLevel.critical:
+        return AppTheme.error;
+    }
+  }
+
+  IconData _getCategoryIcon(DonationCategory category) {
+    switch (category) {
+      case DonationCategory.money:
+        return Icons.currency_rupee;
+      case DonationCategory.food:
+        return Icons.restaurant;
+      case DonationCategory.clothes:
+        return Icons.checkroom;
+      case DonationCategory.medical:
+        return Icons.medical_services;
+      case DonationCategory.education:
+        return Icons.school;
+      case DonationCategory.other:
+        return Icons.category;
+    }
+  }
+
+  void _navigateToNGOProfile(String ngoId, String ngoName) {
+    Navigator.pop(context); // Close modal first
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            PublicNGOProfileScreen(ngoId: ngoId, ngoName: ngoName),
+      ),
+    );
+  }
+
+  void _showRequestDetailsModal(DonationRequest request) {
+    final categoryColor = _getCategoryColor(request.category);
+    final urgencyColor = _getUrgencyColor(request.urgency);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.85,
+        decoration: const BoxDecoration(
+          color: AppTheme.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                // Handle bar
+                Container(
+                  margin: const EdgeInsets.only(top: 12),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppTheme.grey.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // NGO Info (Clickable)
+                        GestureDetector(
+                          onTap: () => _navigateToNGOProfile(
+                            request.ngoId,
+                            request.ngoName,
+                          ),
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: AppTheme.lightGrey,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    color: categoryColor.withValues(
+                                      alpha: 0.15,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    Icons.business,
+                                    color: categoryColor,
+                                    size: 24,
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              request.ngoName,
+                                              style: const TextStyle(
+                                                color: AppTheme.primaryDark,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          Icon(
+                                            Icons.arrow_forward_ios,
+                                            size: 14,
+                                            color: AppTheme.grey,
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.location_on,
+                                            size: 12,
+                                            color: AppTheme.grey,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            request.location,
+                                            style: TextStyle(
+                                              color: AppTheme.grey,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        // Urgency + Category Badges
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: urgencyColor.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.priority_high,
+                                    size: 14,
+                                    color: urgencyColor,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${request.urgency.name.toUpperCase()} PRIORITY',
+                                    style: TextStyle(
+                                      color: urgencyColor,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: categoryColor.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    _getCategoryIcon(request.category),
+                                    size: 14,
+                                    color: categoryColor,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    request.category.name.toUpperCase(),
+                                    style: TextStyle(
+                                      color: categoryColor,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        // Title
+                        Text(
+                          request.title,
+                          style: const TextStyle(
+                            color: AppTheme.primaryDark,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        // Goal Card
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: categoryColor.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: categoryColor.withValues(alpha: 0.2),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: categoryColor.withValues(alpha: 0.15),
+                                ),
+                                child: Icon(
+                                  request.category == DonationCategory.money
+                                      ? Icons.currency_rupee
+                                      : Icons.inventory_2_outlined,
+                                  color: categoryColor,
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      request.category == DonationCategory.money
+                                          ? '₹${request.targetAmount?.toStringAsFixed(0) ?? '0'}'
+                                          : '${request.targetQuantity ?? 0} items',
+                                      style: TextStyle(
+                                        color: categoryColor,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      request.category == DonationCategory.money
+                                          ? 'Donation Goal'
+                                          : 'Items Needed',
+                                      style: TextStyle(
+                                        color: AppTheme.grey,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        // Description
+                        const Text(
+                          'About this Request',
+                          style: TextStyle(
+                            color: AppTheme.primaryDark,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          request.description,
+                          style: TextStyle(
+                            color: AppTheme.grey,
+                            fontSize: 14,
+                            height: 1.6,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        // Deadline
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppTheme.lightGrey,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.access_time,
+                                size: 20,
+                                color: AppTheme.grey,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Deadline: ',
+                                style: TextStyle(
+                                  color: AppTheme.grey,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              Text(
+                                request.deadline != null
+                                    ? '${request.deadline!.day}/${request.deadline!.month}/${request.deadline!.year}'
+                                    : 'No deadline',
+                                style: const TextStyle(
+                                  color: AppTheme.primaryDark,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const Spacer(),
+                              Text(
+                                request.deadline != null
+                                    ? '${request.deadline!.difference(DateTime.now()).inDays} days left'
+                                    : '',
+                                style: TextStyle(
+                                  color: AppTheme.warning,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 100),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            // Bottom Button
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppTheme.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, -5),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      _selectedRequest = request;
+                      _selectedNGO = request.ngoName;
+                      _selectedNGOId = request.ngoId;
+                      _selectedDonationType =
+                          request.category == DonationCategory.money
+                          ? 'Money'
+                          : request.category.name;
+                      _tabController.animateTo(1);
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.donorColor,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.volunteer_activism, color: Colors.white),
+                      SizedBox(width: 10),
+                      Text(
+                        'Donate Now',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
