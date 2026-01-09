@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../theme/app_theme.dart';
 import '../auth/role_selection_screen.dart';
+import 'volunteer_pickup_screen.dart';
 
 class VolunteerDashboard extends StatefulWidget {
   const VolunteerDashboard({super.key});
@@ -233,7 +234,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
       case 1:
         return _buildPlaceholder('Available Tasks', Icons.task_alt);
       case 2:
-        return _buildPlaceholder('Pickup Requests', Icons.local_shipping);
+        return const VolunteerPickupScreen();
       case 3:
         return _buildPlaceholder('My Tasks', Icons.checklist);
       case 4:

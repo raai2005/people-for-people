@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import 'donor_profile_screen.dart';
 import 'donor_donate_screen.dart';
+import 'donor_deliveries_screen.dart';
 import '../../services/notification_service.dart';
 import '../common/notifications_screen.dart';
 
@@ -25,7 +26,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
         child: SafeArea(
           child: Column(
             children: [
-              if (_currentIndex != 2)
+              if (_currentIndex != 3)
                 _buildAppBar(), // Hide app bar for Profile which has its own header
               Expanded(child: _buildContent()),
             ],
@@ -139,6 +140,8 @@ class _DonorDashboardState extends State<DonorDashboard> {
       case 1:
         return const DonorDonateScreen();
       case 2:
+        return const DonorDeliveriesScreen();
+      case 3:
         return const DonorProfileScreen();
       default:
         return _buildDashboardHome();
@@ -372,6 +375,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
     final items = [
       {'icon': Icons.home_rounded, 'label': 'Home'},
       {'icon': Icons.volunteer_activism_rounded, 'label': 'Donate'},
+      {'icon': Icons.local_shipping_rounded, 'label': 'Deliveries'},
       {'icon': Icons.person_rounded, 'label': 'Profile'},
     ];
 

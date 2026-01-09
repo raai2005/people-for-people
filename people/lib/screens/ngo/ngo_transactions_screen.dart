@@ -285,8 +285,8 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
         if (t.status == TransactionStatus.pendingDelivery) {
           statusText = 'Donor Delivering';
           statusColor = AppTheme.gold;
-          actionLabel = 'Mark Received';
-          onAction = () => _updateStatus(t, TransactionStatus.completed);
+          actionLabel = 'Verify & Receive';
+          onAction = () => _showVerificationDialog(t);
         } else if (t.status == TransactionStatus.needsVolunteer) {
           statusText = 'Needs Volunteer';
           statusColor = AppTheme.warning;
@@ -343,10 +343,131 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
           isDonorDelivering: t.isDonorDelivering,
           volunteerId: t.volunteerId,
           volunteerName: t.volunteerName,
+          verificationCode: t.verificationCode,
           date: t.date,
         );
       }
     });
+  }
+
+  void _showVerificationDialog(Transaction t) {
+    final codeController = TextEditingController();
+    String? errorText;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: [
+              Icon(Icons.verified_user, color: AppTheme.gold),
+              const SizedBox(width: 12),
+              const Text('Verify Delivery'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Enter the verification code shown by ${t.donorName}:',
+                style: TextStyle(color: AppTheme.grey, fontSize: 14),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: codeController,
+                textCapitalization: TextCapitalization.characters,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 4,
+                ),
+                textAlign: TextAlign.center,
+                decoration: InputDecoration(
+                  hintText: 'XX-0000',
+                  hintStyle: TextStyle(color: AppTheme.grey.withValues(alpha: 0.4)),
+                  errorText: errorText,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: AppTheme.gold),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: AppTheme.gold, width: 2),
+                  ),
+                  filled: true,
+                  fillColor: AppTheme.gold.withValues(alpha: 0.05),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppTheme.info.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: AppTheme.info, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'The donor should show you this code on their app',
+                        style: TextStyle(color: AppTheme.info, fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel', style: TextStyle(color: AppTheme.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final enteredCode = codeController.text.trim().toUpperCase();
+                final expectedCode = t.verificationCode?.toUpperCase() ?? '';
+                
+                if (enteredCode.isEmpty) {
+                  setDialogState(() => errorText = 'Please enter a code');
+                  return;
+                }
+                
+                if (enteredCode == expectedCode || expectedCode.isEmpty) {
+                  Navigator.pop(context);
+                  _updateStatus(t, TransactionStatus.completed);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Row(
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.white),
+                          const SizedBox(width: 8),
+                          Text('Donation from ${t.donorName} received!'),
+                        ],
+                      ),
+                      backgroundColor: AppTheme.success,
+                    ),
+                  );
+                } else {
+                  setDialogState(() => errorText = 'Invalid code. Please try again.');
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.ngoColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Verify'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildTransactionCard(
@@ -659,6 +780,7 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
           date: t.date,
           volunteerId: vol.id,
           volunteerName: vol.name,
+          verificationCode: t.verificationCode,
           interestedVolunteers: t.interestedVolunteers,
         );
       }

@@ -30,6 +30,7 @@ class Transaction {
   final bool isDonorDelivering;
   final String? volunteerId;
   final String? volunteerName;
+  final String? verificationCode;
   final DateTime date;
   final List<VolunteerPreview> interestedVolunteers;
 
@@ -43,6 +44,7 @@ class Transaction {
     required this.isDonorDelivering,
     this.volunteerId,
     this.volunteerName,
+    this.verificationCode,
     required this.date,
     this.interestedVolunteers = const [],
   });
@@ -83,6 +85,7 @@ class Transaction {
         quantity: '200 Sets',
         status: TransactionStatus.pendingDelivery,
         isDonorDelivering: true,
+        verificationCode: 'MJ-4827',
         date: DateTime.now().subtract(const Duration(hours: 5)),
       ),
       Transaction(
@@ -93,6 +96,7 @@ class Transaction {
         quantity: '50 Cans',
         status: TransactionStatus.completed,
         isDonorDelivering: true,
+        verificationCode: 'EB-9351',
         date: DateTime.now().subtract(const Duration(days: 3)),
       ),
       Transaction(
@@ -105,6 +109,7 @@ class Transaction {
         isDonorDelivering: false,
         volunteerId: 'vol_1',
         volunteerName: 'Alex Volunteer',
+        verificationCode: 'DL-7623',
         date: DateTime.now().subtract(const Duration(hours: 12)),
       ),
     ];
