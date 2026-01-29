@@ -13,7 +13,7 @@ class VolunteerDashboard extends StatefulWidget {
 
 class _VolunteerDashboardState extends State<VolunteerDashboard> {
   int _currentIndex = 0;
-  bool _isApproved = false; // This would come from backend
+  bool _isApproved = true; // Set to true for testing, would come from backend
 
   @override
   Widget build(BuildContext context) {
@@ -25,17 +25,36 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
         child: SafeArea(
           child: Column(
             children: [
-              _buildAppBar(),
-              if (!_isApproved) _buildPendingApprovalBanner(),
-              Expanded(
-                child: _isApproved ? _buildContent() : _buildPendingContent(),
-              ),
+              if (_currentIndex != 4) _buildAppBar(), // Hide for Profile
+              if (!_isApproved && _currentIndex == 0)
+                _buildPendingApprovalBanner(),
+              Expanded(child: _buildContentBasedOnApproval()),
             ],
           ),
         ),
       ),
       bottomNavigationBar: _buildBottomNav(),
     );
+  }
+
+  Widget _buildContentBasedOnApproval() {
+    // Profile is always accessible
+    if (_currentIndex == 4) {
+      return _buildProfileContent();
+    }
+
+    // Home shows pending content if not approved
+    if (_currentIndex == 0 && !_isApproved) {
+      return _buildPendingContent();
+    }
+
+    // If approved, show normal content
+    if (_isApproved) {
+      return _buildContent();
+    }
+
+    // Default to pending content
+    return _buildPendingContent();
   }
 
   Widget _buildAppBar() {
@@ -131,7 +150,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
   }
 
   Widget _buildPendingContent() {
-    return Center(
+    return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(40),
         child: Column(

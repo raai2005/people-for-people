@@ -993,21 +993,18 @@ class _RegisterScreenState extends State<RegisterScreen>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: AppTheme.white.withValues(alpha: 0.1),
+            color: AppTheme.lightGrey,
             borderRadius: BorderRadius.circular(15),
-            border: Border.all(color: AppTheme.white.withValues(alpha: 0.2)),
+            border: Border.all(color: AppTheme.borderGrey),
           ),
           child: Row(
             children: [
-              const Icon(Icons.work_outline, color: AppTheme.accent),
+              Icon(Icons.work_outline, color: _roleColor),
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
                   'Are you working in any NGO?',
-                  style: TextStyle(
-                    color: AppTheme.white.withValues(alpha: 0.9),
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: AppTheme.primaryDark, fontSize: 14),
                 ),
               ),
               Switch(
@@ -1125,7 +1122,7 @@ class _RegisterScreenState extends State<RegisterScreen>
               _obscurePassword
                   ? Icons.visibility_off_outlined
                   : Icons.visibility_outlined,
-              color: AppTheme.white.withValues(alpha: 0.6),
+              color: AppTheme.grey,
             ),
           ),
           validator: (value) {
@@ -1155,7 +1152,7 @@ class _RegisterScreenState extends State<RegisterScreen>
               _obscureConfirmPassword
                   ? Icons.visibility_off_outlined
                   : Icons.visibility_outlined,
-              color: AppTheme.white.withValues(alpha: 0.6),
+              color: AppTheme.grey,
             ),
           ),
           validator: (value) {
@@ -1199,7 +1196,7 @@ class _RegisterScreenState extends State<RegisterScreen>
               Text(
                 title,
                 style: const TextStyle(
-                  color: AppTheme.white,
+                  color: AppTheme.primaryDark,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -1242,12 +1239,12 @@ class _RegisterScreenState extends State<RegisterScreen>
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppTheme.white.withValues(alpha: 0.05),
+          color: AppTheme.lightGrey,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: _agreeToTerms
                 ? _roleColor.withValues(alpha: 0.5)
-                : AppTheme.white.withValues(alpha: 0.2),
+                : AppTheme.borderGrey,
           ),
         ),
         child: Row(
@@ -1259,9 +1256,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 borderRadius: BorderRadius.circular(6),
                 color: _agreeToTerms ? _roleColor : Colors.transparent,
                 border: Border.all(
-                  color: _agreeToTerms
-                      ? _roleColor
-                      : AppTheme.white.withValues(alpha: 0.5),
+                  color: _agreeToTerms ? _roleColor : AppTheme.grey,
                   width: 2,
                 ),
               ),
@@ -1274,10 +1269,7 @@ class _RegisterScreenState extends State<RegisterScreen>
               child: RichText(
                 text: TextSpan(
                   text: 'I agree to the ',
-                  style: TextStyle(
-                    color: AppTheme.white.withValues(alpha: 0.7),
-                    fontSize: 13,
-                  ),
+                  style: TextStyle(color: AppTheme.primaryDark, fontSize: 13),
                   children: [
                     TextSpan(
                       text: 'Terms and Conditions',
@@ -1288,9 +1280,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                     ),
                     TextSpan(
                       text: ' and ',
-                      style: TextStyle(
-                        color: AppTheme.white.withValues(alpha: 0.7),
-                      ),
+                      style: TextStyle(color: AppTheme.primaryDark),
                     ),
                     TextSpan(
                       text: 'Privacy Policy',
