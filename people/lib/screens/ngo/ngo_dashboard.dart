@@ -212,23 +212,6 @@ class _NGODashboardState extends State<NGODashboard> {
     );
   }
 
-  // ... existing app bar methods ...
-
-  // Keep _buildAppBar, _buildNotificationBell, _buildContent, _buildDashboardHome etc. as is.
-  // I will only include the changed methods to avoid context size explosion if I were using replace_file_content on the whole file,
-  // but since I am replacing the whole file content to be safe with the structure changes (adding FAB property to Scaffold), I need to be careful.
-  // Actually, I should probably use `multi_replace_file_content` or targeted `replace_file_content` if possible.
-  // The Scaffold is in `build`. The `_buildBottomNav` is at the end.
-  // Let's rewrite `build` and `_buildBottomNav` and remove `_navItems`.
-
-  // Wait, I can't easily remove `_navItems` field with `replace_file_content` unless I target it specifically.
-  // Let's stick to replacing `build` and `_buildBottomNav` and just ignore `_navItems` or remove it in a separate block if strictly necessary,
-  // but for a clean code I should remove it.
-
-  // Let's try to do it in one go if I can match the blocks.
-  // Or I can just overwrite the file from line 14 down to the end of the class. That's a lot of lines.
-  // Let's try targeted replacements.
-
   Widget _buildAppBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -558,8 +541,6 @@ class _NGODashboardState extends State<NGODashboard> {
       onTap: () {
         if (isLocked) {
           _showVerificationRequiredModal();
-        } else {
-          // TODO: Handle action
         }
       },
       borderRadius: BorderRadius.circular(12),
@@ -604,8 +585,7 @@ class _NGODashboardState extends State<NGODashboard> {
   }
 
   Widget _buildRecentDonations() {
-    // TODO: Replace with actual data from Firestore
-    final List donations = []; // Empty for now
+    final List donations = [];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -668,100 +648,8 @@ class _NGODashboardState extends State<NGODashboard> {
     );
   }
 
-  Widget _buildDonationItem(
-    String donor,
-    String amount,
-    String type,
-    String time,
-  ) {
-    IconData icon;
-    Color color;
-
-    switch (type) {
-      case 'Money':
-        icon = Icons.attach_money;
-        color = AppTheme.success;
-        break;
-      case 'Clothes':
-        icon = Icons.checkroom;
-        color = AppTheme.volunteerColor;
-        break;
-      case 'Food':
-        icon = Icons.restaurant;
-        color = AppTheme.gold;
-        break;
-      default:
-        icon = Icons.inventory_2;
-        color = AppTheme.info;
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  donor,
-                  style: const TextStyle(
-                    color: AppTheme.primaryDark,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  time,
-                  style: TextStyle(color: AppTheme.grey, fontSize: 12),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                amount,
-                style: const TextStyle(
-                  color: AppTheme.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(type, style: TextStyle(color: color, fontSize: 11)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildActiveCampaigns() {
-    // TODO: Replace with actual data from Firestore
-    final List campaigns = []; // Empty for now
+    final List campaigns = [];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -817,112 +705,6 @@ class _NGODashboardState extends State<NGODashboard> {
             ),
           ),
       ],
-    );
-  }
-
-  Widget _buildCampaignCard(
-    String title,
-    String description,
-    double progress,
-    String amount,
-  ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: AppTheme.primaryDark,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            description,
-            style: TextStyle(color: AppTheme.grey, fontSize: 12),
-          ),
-          const SizedBox(height: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: AppTheme.grey.withValues(alpha: 0.1),
-              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.ngoColor),
-              minHeight: 8,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                amount,
-                style: TextStyle(
-                  color: AppTheme.grey,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                '${(progress * 100).toInt()}%',
-                style: const TextStyle(
-                  color: AppTheme.ngoColor,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPlaceholder(String title, IconData icon) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: AppTheme.ngoColor.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: AppTheme.ngoColor, size: 48),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            title,
-            style: const TextStyle(
-              color: AppTheme.primaryDark,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Coming Soon',
-            style: TextStyle(color: AppTheme.grey, fontSize: 16),
-          ),
-        ],
-      ),
     );
   }
 

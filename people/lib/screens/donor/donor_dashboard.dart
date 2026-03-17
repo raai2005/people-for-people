@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
+import '../../models/user_models.dart';
+import '../../services/auth_service.dart';
 import 'donor_profile_screen.dart';
 import 'donor_donate_screen.dart';
 import 'donor_deliveries_screen.dart';
@@ -15,9 +17,44 @@ class DonorDashboard extends StatefulWidget {
 
 class _DonorDashboardState extends State<DonorDashboard> {
   int _currentIndex = 0;
+  DonorUser? _currentUser;
+  bool _isLoadingUser = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final user = await AuthService().getUserProfile();
+    if (mounted) {
+      setState(() {
+        _currentUser = user is DonorUser ? user : null;
+        _isLoadingUser = false;
+      });
+    }
+  }
+
+  int _getProfileCompletion() {
+    if (_currentUser == null) return 0;
+    int steps = 0;
+    if (_currentUser!.verification.email) steps++;
+    if (_currentUser!.verification.phone) steps++;
+    if (_currentUser!.verification.governmentId) steps++;
+    if (_currentUser!.bio?.isNotEmpty == true) steps++;
+    return ((steps / 4) * 100).toInt();
+  }
+
+  bool get _isEligible => _getProfileCompletion() >= 70;
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoadingUser) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator(color: AppTheme.donorColor)),
+      );
+    }
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -138,14 +175,75 @@ class _DonorDashboardState extends State<DonorDashboard> {
       case 0:
         return _buildDashboardHome();
       case 1:
-        return const DonorDonateScreen();
+        return _isEligible
+            ? const DonorDonateScreen()
+            : _buildEligibilityGate();
       case 2:
-        return const DonorDeliveriesScreen();
+        return _isEligible
+            ? const DonorDeliveriesScreen()
+            : _buildEligibilityGate();
       case 3:
         return const DonorProfileScreen();
       default:
         return _buildDashboardHome();
     }
+  }
+
+  Widget _buildEligibilityGate() {
+    final completion = _getProfileCompletion();
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppTheme.warning.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.lock_outline, color: AppTheme.warning, size: 48),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Complete Your Profile',
+              style: TextStyle(
+                color: AppTheme.primaryDark,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'You need at least 70% profile completion to access this feature. Your current completion is $completion%.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppTheme.grey, fontSize: 14, height: 1.5),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Complete: Email verification, Phone verification, Bio, and wait for Govt ID admin approval.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppTheme.grey.withValues(alpha: 0.7), fontSize: 12, height: 1.5),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => setState(() => _currentIndex = 3),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.donorColor,
+                  foregroundColor: AppTheme.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                ),
+                child: const Text('Go to Profile', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildDashboardHome() {
@@ -393,8 +491,13 @@ class _DonorDashboardState extends State<DonorDashboard> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: List.generate(items.length, (index) {
               final isSelected = _currentIndex == index;
+              final isLocked = (index == 1 || index == 2) && !_isEligible;
               return InkWell(
-                onTap: () => setState(() => _currentIndex = index),
+                onTap: () {
+                  setState(() => _currentIndex = index);
+                  // Reload user when leaving profile tab to reflect completion changes
+                  if (_currentIndex != 3) _loadUser();
+                },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -409,18 +512,35 @@ class _DonorDashboardState extends State<DonorDashboard> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        items[index]['icon'] as IconData,
-                        color: isSelected ? AppTheme.donorColor : AppTheme.grey,
-                        size: 24,
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Icon(
+                            items[index]['icon'] as IconData,
+                            color: isLocked
+                                ? AppTheme.grey.withValues(alpha: 0.4)
+                                : isSelected
+                                    ? AppTheme.donorColor
+                                    : AppTheme.grey,
+                            size: 24,
+                          ),
+                          if (isLocked)
+                            Positioned(
+                              right: -4,
+                              top: -4,
+                              child: Icon(Icons.lock, size: 10, color: AppTheme.warning),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 4),
                       Text(
                         items[index]['label'] as String,
                         style: TextStyle(
-                          color: isSelected
-                              ? AppTheme.donorColor
-                              : AppTheme.grey,
+                          color: isLocked
+                              ? AppTheme.grey.withValues(alpha: 0.4)
+                              : isSelected
+                                  ? AppTheme.donorColor
+                                  : AppTheme.grey,
                           fontSize: 10,
                         ),
                       ),

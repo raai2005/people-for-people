@@ -128,9 +128,17 @@ class _LoginScreenState extends State<LoginScreen>
               dashboard = const NGODashboard();
               break;
             case UserRole.donor:
+              // Donors are always approved on registration; volunteers need admin approval
               dashboard = const DonorDashboard();
               break;
             case UserRole.volunteer:
+              if (!user.isApproved) {
+                _showErrorSnackBar(
+                  'Your account is pending admin approval. You will be notified once approved.',
+                );
+                setState(() => _isLoading = false);
+                return;
+              }
               dashboard = const VolunteerDashboard();
               break;
           }

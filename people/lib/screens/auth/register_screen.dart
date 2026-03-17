@@ -313,6 +313,7 @@ class _RegisterScreenState extends State<RegisterScreen>
             location: _locationController.text.trim(),
             verifiedIdUrl: _verifiedIdFile ?? '',
             qualification: _qualificationController.text.trim(),
+            isApproved: true, // Donors are self-approved on registration
           );
           break;
         case UserRole.volunteer:

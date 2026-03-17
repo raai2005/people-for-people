@@ -4,6 +4,7 @@ enum TransactionStatus {
   needsVolunteer, // Needs volunteer pickup
   volunteerAssigned, // Volunteer accepted
   completed, // Donation delivered
+  rejected, // Donation rejected by NGO
 }
 
 class VolunteerPreview {
@@ -48,6 +49,35 @@ class Transaction {
     required this.date,
     this.interestedVolunteers = const [],
   });
+
+  factory Transaction.fromMap(Map<String, dynamic> map, String id) {
+    return Transaction(
+      id: id,
+      donorId: map['donorId'] ?? '',
+      donorName: map['donorName'] ?? '',
+      itemName: map['itemName'] ?? '',
+      quantity: map['quantity'] ?? '',
+      status: TransactionStatus.values.firstWhere(
+        (e) => e.name == map['status'],
+        orElse: () => TransactionStatus.incoming,
+      ),
+      isDonorDelivering: map['isDonorDelivering'] ?? false,
+      volunteerId: map['volunteerId'],
+      volunteerName: map['volunteerName'],
+      verificationCode: map['verificationCode'],
+      date: map['date'] != null
+          ? (map['date'] as dynamic).toDate()
+          : DateTime.now(),
+      interestedVolunteers: (map['interestedVolunteers'] as List<dynamic>? ?? [])
+          .map((v) => VolunteerPreview(
+                id: v['id'] ?? '',
+                name: v['name'] ?? '',
+                rating: (v['rating'] ?? 0.0).toDouble(),
+                profileImage: v['profileImage'],
+              ))
+          .toList(),
+    );
+  }
 
   // Mock data generator
   static List<Transaction> getMockTransactions() {

@@ -1,5 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Transaction;
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../models/transaction_model.dart';
 import '../../theme/app_theme.dart';
 import '../common/public_donor_profile_screen.dart';
@@ -15,20 +17,11 @@ class NGOTransactionsScreen extends StatefulWidget {
 class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  List<Transaction> _transactions = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _loadTransactions();
-  }
-
-  void _loadTransactions() {
-    // Mock data load
-    setState(() {
-      _transactions = Transaction.getMockTransactions();
-    });
   }
 
   @override
@@ -73,21 +66,56 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
 
         // Tab View
         Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              _buildIncomingList(),
-              _buildPendingList(),
-              _buildCompletedList(),
-            ],
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('transactions')
+                .where(
+                  'ngoId',
+                  isEqualTo: FirebaseAuth.instance.currentUser?.uid,
+                )
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(color: AppTheme.ngoColor),
+                );
+              }
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    'Error loading transactions',
+                    style: TextStyle(color: AppTheme.grey),
+                  ),
+                );
+              }
+
+              final transactions =
+                  snapshot.data?.docs.map((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    return Transaction.fromMap(data, doc.id);
+                  }).toList() ??
+                  [];
+
+              // Sort by date descending (newest first)
+              transactions.sort((a, b) => b.date.compareTo(a.date));
+
+              return TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildIncomingList(transactions),
+                  _buildPendingList(transactions),
+                  _buildCompletedList(transactions),
+                ],
+              );
+            },
           ),
         ),
       ],
     );
   }
 
-  Widget _buildIncomingList() {
-    final incoming = _transactions
+  Widget _buildIncomingList(List<Transaction> transactions) {
+    final incoming = transactions
         .where((t) => t.status == TransactionStatus.incoming)
         .toList();
 
@@ -189,12 +217,15 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () {
-                        // Reject logic (remove from list for now)
-                        setState(() {
-                          _transactions.removeWhere((tr) => tr.id == t.id);
-                        });
+                      onPressed: () async {
                         Navigator.pop(context);
+                        await FirebaseFirestore.instance
+                            .collection('transactions')
+                            .doc(t.id)
+                            .update({
+                              'status': TransactionStatus.rejected.name,
+                            });
+                        if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Donation rejected')),
                         );
@@ -210,13 +241,17 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         Navigator.pop(context);
                         if (t.isDonorDelivering) {
-                          _approveWithVerificationCode(t);
+                          await _approveWithVerificationCode(t);
                         } else {
-                          _updateStatus(t, TransactionStatus.needsVolunteer);
+                          await _updateStatus(
+                            t,
+                            TransactionStatus.needsVolunteer,
+                          );
                         }
+                        if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Donation Accepted')),
                         );
@@ -263,8 +298,8 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
     );
   }
 
-  Widget _buildPendingList() {
-    final pending = _transactions.where((t) {
+  Widget _buildPendingList(List<Transaction> transactions) {
+    final pending = transactions.where((t) {
       return t.status == TransactionStatus.pendingDelivery ||
           t.status == TransactionStatus.needsVolunteer ||
           t.status == TransactionStatus.volunteerAssigned;
@@ -310,8 +345,8 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
     );
   }
 
-  Widget _buildCompletedList() {
-    final completed = _transactions
+  Widget _buildCompletedList(List<Transaction> transactions) {
+    final completed = transactions
         .where((t) => t.status == TransactionStatus.completed)
         .toList();
 
@@ -352,55 +387,27 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
   }
 
   /// Approves a transaction and generates a verification code for donor delivery
-  void _approveWithVerificationCode(Transaction t) {
+  Future<void> _approveWithVerificationCode(Transaction t) async {
     final verificationCode = _generateVerificationCode(t.donorName);
 
-    setState(() {
-      final index = _transactions.indexWhere((tr) => tr.id == t.id);
-      if (index != -1) {
-        _transactions[index] = Transaction(
-          id: t.id,
-          donorId: t.donorId,
-          donorName: t.donorName,
-          itemName: t.itemName,
-          quantity: t.quantity,
-          status: TransactionStatus.pendingDelivery,
-          isDonorDelivering: t.isDonorDelivering,
-          volunteerId: t.volunteerId,
-          volunteerName: t.volunteerName,
-          verificationCode: verificationCode,
-          date: t.date,
-        );
-      }
-    });
-
-    // TODO: Save to Firestore with the generated verification code
-    // FirebaseFirestore.instance.collection('transactions').doc(t.id).update({
-    //   'status': 'pendingDelivery',
-    //   'verificationCode': verificationCode,
-    //   'approvedAt': FieldValue.serverTimestamp(),
-    // });
+    await FirebaseFirestore.instance
+        .collection('transactions')
+        .doc(t.id)
+        .update({
+          'status': TransactionStatus.pendingDelivery.name,
+          'verificationCode': verificationCode,
+          'approvedAt': FieldValue.serverTimestamp(),
+        });
   }
 
-  void _updateStatus(Transaction t, TransactionStatus newStatus) {
-    setState(() {
-      final index = _transactions.indexWhere((tr) => tr.id == t.id);
-      if (index != -1) {
-        _transactions[index] = Transaction(
-          id: t.id,
-          donorId: t.donorId,
-          donorName: t.donorName,
-          itemName: t.itemName,
-          quantity: t.quantity,
-          status: newStatus,
-          isDonorDelivering: t.isDonorDelivering,
-          volunteerId: t.volunteerId,
-          volunteerName: t.volunteerName,
-          verificationCode: t.verificationCode,
-          date: t.date,
-        );
-      }
-    });
+  Future<void> _updateStatus(Transaction t, TransactionStatus newStatus) async {
+    await FirebaseFirestore.instance
+        .collection('transactions')
+        .doc(t.id)
+        .update({
+          'status': newStatus.name,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
   }
 
   void _showVerificationDialog(Transaction t) {
@@ -824,31 +831,22 @@ class _NGOTransactionsScreenState extends State<NGOTransactionsScreen>
     );
   }
 
-  void _assignVolunteer(Transaction t, VolunteerPreview vol) {
-    setState(() {
-      final index = _transactions.indexWhere((tr) => tr.id == t.id);
-      if (index != -1) {
-        _transactions[index] = Transaction(
-          id: t.id,
-          donorId: t.donorId,
-          donorName: t.donorName,
-          itemName: t.itemName,
-          quantity: t.quantity,
-          status: TransactionStatus.volunteerAssigned,
-          isDonorDelivering: false,
-          date: t.date,
-          volunteerId: vol.id,
-          volunteerName: vol.name,
-          verificationCode: t.verificationCode,
-          interestedVolunteers: t.interestedVolunteers,
-        );
-      }
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Assigned ${vol.name} to pickup'),
-        backgroundColor: AppTheme.success,
-      ),
-    );
+  void _assignVolunteer(Transaction t, VolunteerPreview vol) async {
+    await FirebaseFirestore.instance
+        .collection('transactions')
+        .doc(t.id)
+        .update({
+          'status': TransactionStatus.volunteerAssigned.name,
+          'volunteerId': vol.id,
+          'volunteerName': vol.name,
+        });
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Assigned ${vol.name} to pickup'),
+          backgroundColor: AppTheme.success,
+        ),
+      );
+    }
   }
 }
