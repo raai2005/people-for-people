@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import '../../services/donation_service.dart';
+import '../../services/receipt_service.dart';
+import 'package:share_plus/share_plus.dart';
 
 class DonorHistoryScreen extends StatefulWidget {
   const DonorHistoryScreen({super.key});
@@ -15,38 +17,12 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
   String _selectedFilter = 'All Time';
 
   final DonationService _donationService = DonationService();
-  List<Map<String, dynamic>> _allDonations = [];
-  Map<String, dynamic> _stats = {};
-  bool _isLoading = true;
+  final ReceiptService _receiptService = ReceiptService();
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    _loadDonations();
-  }
-
-  Future<void> _loadDonations() async {
-    setState(() => _isLoading = true);
-    try {
-      final donations = await _donationService.getUserDonations();
-      final stats = await _donationService.getDonationStats();
-      setState(() {
-        _allDonations = donations;
-        _stats = stats;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() => _isLoading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to load donations: $e'),
-            backgroundColor: AppTheme.error,
-          ),
-        );
-      }
-    }
   }
 
   @override
@@ -133,31 +109,34 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
   }
 
   Widget _buildEnhancedStats() {
-    if (_isLoading) {
-      return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 20),
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: AppTheme.donorColor,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.donorColor.withValues(alpha: 0.3),
-              blurRadius: 15,
-              offset: const Offset(0, 6),
+    return StreamBuilder<Map<String, dynamic>>(
+      stream: _donationService.getDonationStats().asStream(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppTheme.donorColor,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.donorColor.withValues(alpha: 0.3),
+                  blurRadius: 15,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: const Center(
-          child: CircularProgressIndicator(color: AppTheme.white),
-        ),
-      );
-    }
+            child: const Center(
+              child: CircularProgressIndicator(color: AppTheme.white),
+            ),
+          );
+        }
 
-    final totalAmount = _stats['totalAmount'] ?? 0.0;
-    final totalDonations = _stats['totalDonations'] ?? 0;
-    final livesHelped = (totalDonations * 3.5)
-        .round(); // Estimate: 3.5 lives per donation
+        final stats = snapshot.data!;
+        final totalAmount = stats['totalAmount'] ?? 0.0;
+        final totalDonations = stats['totalDonations'] ?? 0;
+        final livesHelped = (totalDonations * 3.5).round();
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -243,6 +222,7 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
           ),
         ],
       ),
+      );
     );
   }
 
@@ -333,20 +313,37 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
   }
 
   Widget _buildDonationsList() {
-    if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppTheme.donorColor),
-      );
-    }
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: _donationService.getUserDonationsStream(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(color: AppTheme.donorColor),
+          );
+        }
 
-    return TabBarView(
-      controller: _tabController,
-      children: [
-        _buildList(_getAllDonations()),
-        _buildList(_getMoneyDonations()),
-        _buildList(_getItemDonations()),
-        _buildList(_getPendingDonations()),
-      ],
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Error loading donations',
+              style: TextStyle(color: AppTheme.grey),
+            ),
+          );
+        }
+
+        final allDonations = snapshot.data ?? [];
+        final filteredDonations = _applyDateFilter(allDonations);
+
+        return TabBarView(
+          controller: _tabController,
+          children: [
+            _buildList(filteredDonations),
+            _buildList(_filterByType(filteredDonations, 'Money')),
+            _buildList(_filterByType(filteredDonations, 'Items')),
+            _buildList(_filterByStatus(filteredDonations)),
+          ],
+        );
+      },
     );
   }
 
@@ -884,7 +881,7 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
-                          onPressed: () {},
+                          onPressed: () => _downloadReceipt(donation['id']),
                           icon: const Icon(Icons.receipt_long_rounded),
                           label: const Text('Download Receipt'),
                           style: ElevatedButton.styleFrom(
@@ -902,7 +899,7 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: () => _shareImpact(donation),
                           icon: const Icon(Icons.share_rounded),
                           label: const Text('Share Impact'),
                           style: OutlinedButton.styleFrom(
@@ -921,7 +918,7 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
-                          onPressed: () {},
+                          onPressed: () => _cancelDonation(donation['id']),
                           icon: const Icon(Icons.cancel_rounded),
                           label: const Text('Cancel Donation'),
                           style: ElevatedButton.styleFrom(
@@ -1031,22 +1028,162 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
     );
   }
 
-  List<Map<String, dynamic>> _getAllDonations() {
-    return _allDonations;
+  List<Map<String, dynamic>> _applyDateFilter(List<Map<String, dynamic>> donations) {
+    if (_selectedFilter == 'All Time') return donations;
+
+    final now = DateTime.now();
+    return donations.where((d) {
+      final dateStr = d['date'] as String;
+      if (dateStr == 'Today' || dateStr == 'Yesterday') return true;
+      if (dateStr.contains('days ago')) {
+        final days = int.tryParse(dateStr.split(' ')[0]) ?? 0;
+        if (_selectedFilter == 'This Month' && days <= 30) return true;
+        if (_selectedFilter == 'Last 3 Months' && days <= 90) return true;
+        if (_selectedFilter == 'This Year' && days <= 365) return true;
+      }
+      return false;
+    }).toList();
   }
 
-  List<Map<String, dynamic>> _getMoneyDonations() {
-    return _allDonations.where((d) => d['type'] == 'Money').toList();
+  List<Map<String, dynamic>> _filterByType(List<Map<String, dynamic>> donations, String type) {
+    if (type == 'Money') return donations.where((d) => d['type'] == 'Money').toList();
+    return donations.where((d) => d['type'] != 'Money').toList();
   }
 
-  List<Map<String, dynamic>> _getItemDonations() {
-    return _allDonations.where((d) => d['type'] != 'Money').toList();
+  List<Map<String, dynamic>> _filterByStatus(List<Map<String, dynamic>> donations) {
+    return donations.where((d) => d['status'] == 'Pending' || d['status'] == 'In Progress').toList();
   }
 
-  List<Map<String, dynamic>> _getPendingDonations() {
-    return _allDonations
-        .where((d) => d['status'] == 'Pending' || d['status'] == 'In Progress')
-        .toList();
+  Future<void> _cancelDonation(String donationId) async {
+    try {
+      await _donationService.cancelDonation(donationId);
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Donation cancelled successfully'),
+            backgroundColor: AppTheme.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to cancel: $e'),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _downloadReceipt(String donationId) async {
+    try {
+      // Show loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => Center(
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryDark,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(color: AppTheme.white),
+                const SizedBox(height: 16),
+                Text(
+                  'Generating receipt...',
+                  style: TextStyle(color: AppTheme.white),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Check if receipt already exists
+      var receipt = await _receiptService.getReceiptByDonationId(donationId);
+      
+      // Generate receipt if it doesn't exist
+      if (receipt == null) {
+        receipt = await _receiptService.generateReceipt(donationId);
+      }
+
+      // Generate PDF
+      final pdfFile = await _receiptService.generatePDF(receipt);
+
+      // Close loading dialog
+      if (mounted) Navigator.pop(context);
+
+      // Share PDF file
+      await Share.shareXFiles(
+        [XFile(pdfFile.path)],
+        subject: 'Donation Receipt - ${receipt.receiptNumber}',
+        text: 'Thank you for your donation to ${receipt.ngoName}!',
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Receipt generated successfully!'),
+            backgroundColor: AppTheme.success,
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading dialog if open
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to generate receipt: $e'),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _shareImpact(Map<String, dynamic> donation) async {
+    try {
+      final type = donation['type'] as String;
+      final ngo = donation['ngo'] as String;
+      final amount = donation['amount'] as String?;
+      final quantity = donation['quantity'];
+
+      String message;
+      if (amount != null) {
+        message = '🎉 I just donated $amount to $ngo via People for People!\n\n'
+            'Every contribution makes a difference. Join me in making an impact! 💙\n\n'
+            '#PeopleForPeople #Donation #MakingADifference';
+      } else {
+        message = '🎉 I just donated $quantity $type items to $ngo via People for People!\n\n'
+            'Every contribution makes a difference. Join me in making an impact! 💙\n\n'
+            '#PeopleForPeople #Donation #MakingADifference';
+      }
+
+      await Share.share(
+        message,
+        subject: 'My Donation Impact',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to share: $e'),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+    }
   }
 
   String _formatNumber(num number) {
