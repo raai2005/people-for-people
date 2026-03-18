@@ -7,6 +7,7 @@ import 'auth/role_selection_screen.dart';
 import 'donor/donor_dashboard.dart';
 import 'ngo/ngo_dashboard.dart';
 import 'volunteer/volunteer_dashboard.dart';
+import 'admin/admin_dashboard.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -190,8 +191,10 @@ class _SplashScreenState extends State<SplashScreen>
             case 'volunteer':
               destination = const VolunteerDashboard();
               break;
+            case 'admin':
+              destination = const AdminDashboard();
+              break;
             default:
-              // If role is not set or invalid, go to role selection
               destination = const RoleSelectionScreen();
           }
 

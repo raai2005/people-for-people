@@ -100,6 +100,18 @@ class AuthService {
           return DonorUser.fromMap(data);
         case 'volunteer':
           return VolunteerUser.fromMap(data);
+        case 'admin':
+          // Return a minimal DonorUser shell — admin routing is handled by role field
+          return DonorUser(
+            id: user.uid,
+            name: data['name'] ?? 'Admin',
+            phone: '',
+            email: data['email'] ?? '',
+            location: '',
+            verifiedIdUrl: '',
+            qualification: '',
+            isApproved: true,
+          );
         default:
           throw Exception('Unknown user role found in profile');
       }
@@ -148,6 +160,16 @@ class AuthService {
       );
     }
     return null;
+  }
+
+  // Get raw Firestore data for a user (used for admin role check)
+  Future<Map<String, dynamic>?> getRawUserData(String uid) async {
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      return doc.exists ? doc.data() : null;
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<void> resetPassword(String email) async {

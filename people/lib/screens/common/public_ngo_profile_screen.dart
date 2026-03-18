@@ -26,7 +26,7 @@ class _PublicNGOProfileScreenState extends State<PublicNGOProfileScreen> {
   Future<void> _loadNGOProfile() async {
     try {
       final doc = await FirebaseFirestore.instance
-          .collection('ngos')
+          .collection('users')
           .doc(widget.ngoId)
           .get();
 
@@ -313,15 +313,7 @@ class _PublicNGOProfileScreenState extends State<PublicNGOProfileScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    onPressed: () {
-                      // TODO: Navigate to NGO's active donation requests
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('View active requests coming soon!'),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    },
+                    onPressed: () => _showActiveRequests(),
                     icon: const Icon(
                       Icons.volunteer_activism,
                       color: AppTheme.ngoColor,
@@ -355,6 +347,138 @@ class _PublicNGOProfileScreenState extends State<PublicNGOProfileScreen> {
         color: AppTheme.primaryDark,
         fontSize: 16,
         fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  void _showActiveRequests() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.75,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppTheme.grey.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  const Icon(Icons.volunteer_activism, color: AppTheme.ngoColor),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Active Donation Requests',
+                    style: TextStyle(
+                      color: AppTheme.primaryDark,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('donation_requests')
+                    .where('ngoId', isEqualTo: widget.ngoId)
+                    .where('status', isEqualTo: 'active')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator(color: AppTheme.ngoColor));
+                  }
+                  final docs = snapshot.data?.docs ?? [];
+                  if (docs.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.inbox_outlined, size: 48, color: AppTheme.grey.withValues(alpha: 0.4)),
+                          const SizedBox(height: 12),
+                          Text('No active requests', style: TextStyle(color: AppTheme.grey)),
+                        ],
+                      ),
+                    );
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    itemCount: docs.length,
+                    itemBuilder: (context, index) {
+                      final data = docs[index].data() as Map<String, dynamic>;
+                      final category = data['category'] ?? 'other';
+                      final targetAmount = data['targetAmount'];
+                      final targetQuantity = data['targetQuantity'];
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppTheme.lightGrey,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: AppTheme.borderGrey),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              data['title'] ?? 'Untitled',
+                              style: const TextStyle(
+                                color: AppTheme.primaryDark,
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              data['description'] ?? '',
+                              style: TextStyle(color: AppTheme.grey, fontSize: 13),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.ngoColor.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    category.toString().toUpperCase(),
+                                    style: const TextStyle(color: AppTheme.ngoColor, fontSize: 11, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                const Spacer(),
+                                if (targetAmount != null)
+                                  Text('Goal: ₹$targetAmount', style: const TextStyle(color: AppTheme.success, fontWeight: FontWeight.bold, fontSize: 13))
+                                else if (targetQuantity != null)
+                                  Text('Need: $targetQuantity items', style: const TextStyle(color: AppTheme.info, fontWeight: FontWeight.bold, fontSize: 13)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

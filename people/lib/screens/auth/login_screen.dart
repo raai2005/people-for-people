@@ -7,6 +7,7 @@ import 'register_screen.dart';
 import '../ngo/ngo_dashboard.dart';
 import '../donor/donor_dashboard.dart';
 import '../volunteer/volunteer_dashboard.dart';
+import '../admin/admin_dashboard.dart';
 
 class LoginScreen extends StatefulWidget {
   final UserRole selectedRole;
@@ -107,61 +108,67 @@ class _LoginScreenState extends State<LoginScreen>
       setState(() => _isLoading = true);
 
       try {
-        // Sign in with Firebase
-        BaseUser user = await AuthService().signIn(
+        final authService = AuthService();
+
+        // Sign in — also handles admin role (returns DonorUser shell for admin)
+        final user = await authService.signIn(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
 
-        // Check if role matches selected role (optional, but good for UX)
-        if (user.role != widget.selectedRole) {
-          throw Exception(
-            'Please login as ${user.role.name.toUpperCase()} instead',
-          );
-        }
+        // Fetch raw Firestore doc to check for admin role
+        final rawData = await authService.getRawUserData(user.id);
+        final rawRole = rawData?['role'] ?? user.role.name;
 
-        if (mounted) {
-          // Navigate to appropriate dashboard based on role
-          Widget dashboard;
-          switch (user.role) {
-            case UserRole.ngo:
-              dashboard = const NGODashboard();
-              break;
-            case UserRole.donor:
-              // Donors are always approved on registration; volunteers need admin approval
-              dashboard = const DonorDashboard();
-              break;
-            case UserRole.volunteer:
-              if (!user.isApproved) {
-                _showErrorSnackBar(
-                  'Your account is pending admin approval. You will be notified once approved.',
-                );
-                setState(() => _isLoading = false);
-                return;
-              }
-              dashboard = const VolunteerDashboard();
-              break;
-          }
+        if (!mounted) return;
 
+        if (rawRole == 'admin') {
           Navigator.of(context).pushAndRemoveUntil(
             PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  dashboard,
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
+              pageBuilder: (_, __, ___) => const AdminDashboard(),
+              transitionsBuilder: (_, animation, __, child) => FadeTransition(opacity: animation, child: child),
               transitionDuration: const Duration(milliseconds: 500),
             ),
-            (route) => false, // Remove all previous routes
+            (route) => false,
           );
+          return;
         }
+
+        // Check if role matches selected role
+        if (user.role != widget.selectedRole) {
+          throw Exception('Please login as ${user.role.name.toUpperCase()} instead');
+        }
+
+        Widget dashboard;
+        switch (user.role) {
+          case UserRole.ngo:
+            dashboard = const NGODashboard();
+            break;
+          case UserRole.donor:
+            dashboard = const DonorDashboard();
+            break;
+          case UserRole.volunteer:
+            if (!user.isApproved) {
+              _showErrorSnackBar('Your account is pending admin approval. You will be notified once approved.');
+              setState(() => _isLoading = false);
+              return;
+            }
+            dashboard = const VolunteerDashboard();
+            break;
+        }
+
+        Navigator.of(context).pushAndRemoveUntil(
+          PageRouteBuilder(
+            pageBuilder: (_, __, ___) => dashboard,
+            transitionsBuilder: (_, animation, __, child) => FadeTransition(opacity: animation, child: child),
+            transitionDuration: const Duration(milliseconds: 500),
+          ),
+          (route) => false,
+        );
       } catch (e) {
         _showErrorSnackBar(e.toString().replaceAll('Exception: ', ''));
       } finally {
-        if (mounted) {
-          setState(() => _isLoading = false);
-        }
+        if (mounted) setState(() => _isLoading = false);
       }
     }
   }

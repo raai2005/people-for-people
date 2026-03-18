@@ -136,6 +136,9 @@ class NGOUser extends BaseUser {
   final String?
   headOfOrgEmployeeId; // Optional: No longer collected via text field
   final String? bio;
+  final String? description;
+  final String? category;
+  final bool isVerified;
   final String? profileImageUrl;
   final NGOProfile ngoProfile;
 
@@ -158,6 +161,9 @@ class NGOUser extends BaseUser {
     required this.headOfOrgIdUrl,
     this.headOfOrgEmployeeId,
     this.bio,
+    this.description,
+    this.category,
+    this.isVerified = false,
     this.profileImageUrl,
     super.isApproved,
     super.createdAt,
@@ -177,6 +183,7 @@ class NGOUser extends BaseUser {
       'verifiedIdUrl': verifiedIdUrl,
       'role': 'ngo',
       'isApproved': isApproved,
+      'isVerified': isVerified,
       'createdAt': createdAt.toIso8601String(),
       'profileCompletion': profileCompletion,
       'verification': verification.toMap(),
@@ -192,6 +199,8 @@ class NGOUser extends BaseUser {
       'headOfOrgIdUrl': headOfOrgIdUrl,
       'headOfOrgEmployeeId': headOfOrgEmployeeId,
       'bio': bio,
+      'description': description,
+      'category': category,
       'profileImageUrl': profileImageUrl,
       'ngoProfile': ngoProfile.toMap(),
     };
@@ -226,6 +235,9 @@ class NGOUser extends BaseUser {
       headOfOrgIdUrl: map['headOfOrgIdUrl'] ?? '',
       headOfOrgEmployeeId: map['headOfOrgEmployeeId'] ?? '',
       bio: map['bio'],
+      description: map['description'],
+      category: map['category'],
+      isVerified: map['isVerified'] ?? false,
       profileImageUrl: map['profileImageUrl'],
       isApproved: map['isApproved'] ?? false,
       createdAt: parsedCreatedAt,

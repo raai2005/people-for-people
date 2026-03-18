@@ -4,18 +4,21 @@ import 'package:image_picker/image_picker.dart';
 import '../../models/user_models.dart';
 import '../../services/auth_service.dart';
 import '../../services/cloudinary_service.dart';
+import '../../services/donation_service.dart';
 import '../../theme/app_theme.dart';
 import '../auth/role_selection_screen.dart';
 import 'package:file_picker/file_picker.dart';
 
 class DonorProfileScreen extends StatefulWidget {
-  const DonorProfileScreen({super.key});
+  final VoidCallback? onViewAllDonations;
+  const DonorProfileScreen({super.key, this.onViewAllDonations});
 
   @override
   State<DonorProfileScreen> createState() => _DonorProfileScreenState();
 }
 
 class _DonorProfileScreenState extends State<DonorProfileScreen> {
+  final DonationService _donationService = DonationService();
   final AuthService _authService = AuthService();
   final CloudinaryService _cloudinaryService = CloudinaryService();
   final ImagePicker _imagePicker = ImagePicker();
@@ -1598,84 +1601,90 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
 
   // 5. Donation History & Analytics
   Widget _buildDonationAnalyticsSection() {
-    final recentDonations = _getRecentDonations();
+    return FutureBuilder<List<dynamic>>(
+      future: Future.wait([
+        _donationService.getDonationStats(),
+        _donationService.getUserDonations(),
+      ]),
+      builder: (context, snapshot) {
+        final stats = snapshot.data?[0] as Map<String, dynamic>? ?? {};
+        final allDonations = snapshot.data?[1] as List<Map<String, dynamic>>? ?? [];
+        final recentDonations = allDonations.take(3).toList();
+        final totalAmount = stats['totalAmount'] ?? 0.0;
+        final totalDonations = stats['totalDonations'] ?? 0;
+        final livesHelped = ((totalDonations as int) * 3.5).round();
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: AppTheme.cardDecoration,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: AppTheme.cardDecoration,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Donation History', style: AppTheme.headingSmall),
-              TextButton(
-                onPressed: _showAllDonations,
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Donation History', style: AppTheme.headingSmall),
+                  TextButton(
+                    onPressed: _onViewAllDonations,
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Text(
+                      'View All',
+                      style: TextStyle(
+                        color: AppTheme.accent,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.donorColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.donorColor.withValues(alpha: 0.3)),
                 ),
-                child: const Text(
-                  'View All',
-                  style: TextStyle(
-                    color: AppTheme.accent,
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildCompactStat('₹${_formatCompact(totalAmount)}', 'Total', Icons.attach_money),
+                    Container(width: 1, height: 40, color: AppTheme.white.withValues(alpha: 0.2)),
+                    _buildCompactStat('$totalDonations', 'Donations', Icons.card_giftcard),
+                    Container(width: 1, height: 40, color: AppTheme.white.withValues(alpha: 0.2)),
+                    _buildCompactStat(livesHelped > 0 ? '$livesHelped+' : '0', 'Lives', Icons.favorite),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (recentDonations.isEmpty)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text('No donations yet', style: TextStyle(color: AppTheme.grey, fontSize: 13)),
+                  ),
+                )
+              else
+                ...recentDonations.map(
+                  (donation) => _buildDonationHistoryItem(
+                    donation['title'] as String,
+                    donation['ngo'] as String,
+                    donation['type'] as String,
+                    donation['amount'] as String?,
+                    donation['quantity'] as int?,
+                    donation['date'] as String,
+                    donation['status'] as String,
                   ),
                 ),
-              ),
             ],
           ),
-          const SizedBox(height: 16),
-          // Summary Stats
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppTheme.donorColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppTheme.donorColor.withValues(alpha: 0.3),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                // TODO: Fetch from Firestore - user's total donated
-                _buildCompactStat('₹0', 'Total', Icons.attach_money),
-                Container(
-                  width: 1,
-                  height: 40,
-                  color: AppTheme.white.withValues(alpha: 0.2),
-                ),
-                // TODO: Fetch from Firestore - user's donation count
-                _buildCompactStat('0', 'Donations', Icons.card_giftcard),
-                Container(
-                  width: 1,
-                  height: 40,
-                  color: AppTheme.white.withValues(alpha: 0.2),
-                ),
-                // TODO: Fetch from Firestore - calculated impact
-                _buildCompactStat('0', 'Lives', Icons.favorite),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Recent Donations List
-          ...recentDonations.map(
-            (donation) => _buildDonationHistoryItem(
-              donation['title'] as String,
-              donation['ngo'] as String,
-              donation['type'] as String,
-              donation['amount'] as String?,
-              donation['quantity'] as int?,
-              donation['date'] as String,
-              donation['status'] as String,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -1885,26 +1894,14 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
     }
   }
 
-  List<Map<String, dynamic>> _getRecentDonations() {
-    // TODO: Fetch from Firestore
-    // return await FirebaseFirestore.instance
-    //   .collection('donations')
-    //   .where('donorId', '==', currentUser.uid)
-    //   .orderBy('createdAt', descending: true)
-    //   .limit(3)
-    //   .get();
-
-    return []; // Empty - no mock data
+  String _formatCompact(num number) {
+    if (number >= 100000) return '${(number / 100000).toStringAsFixed(1)}L';
+    if (number >= 1000) return '${(number / 1000).toStringAsFixed(1)}K';
+    return number.toStringAsFixed(0);
   }
 
-  void _showAllDonations() {
-    // TODO: Navigate to full donation history or show modal
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Full donation history coming soon!'),
-        backgroundColor: AppTheme.info,
-      ),
-    );
+  void _onViewAllDonations() {
+    widget.onViewAllDonations?.call();
   }
 
   // Image Upload Method

@@ -34,6 +34,8 @@ class _RegisterScreenState extends State<RegisterScreen>
   final _locationController = TextEditingController();
 
   // NGO Specific Controllers
+  final _descriptionController = TextEditingController();
+  String _selectedNGOCategory = 'education';
   final _orgNameController = TextEditingController();
   final _orgPhoneController = TextEditingController();
   final _orgEmailController = TextEditingController();
@@ -85,6 +87,7 @@ class _RegisterScreenState extends State<RegisterScreen>
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _locationController.dispose();
+    _descriptionController.dispose();
     _orgNameController.dispose();
     _orgPhoneController.dispose();
     _orgEmailController.dispose();
@@ -299,9 +302,11 @@ class _RegisterScreenState extends State<RegisterScreen>
             headOfOrgName: _headOfOrgNameController.text.trim(),
             headOfOrgEmail: _headOfOrgEmailController.text.trim(),
             headOfOrgPhone: _headOfOrgPhoneController.text.trim(),
-            headOfOrgId: '', // No longer collected via text field
+            headOfOrgId: '',
             headOfOrgIdUrl: _headIdFile ?? '',
-            headOfOrgEmployeeId: '', // No longer collected via text field
+            headOfOrgEmployeeId: '',
+            description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
+            category: _selectedNGOCategory,
           );
           break;
         case UserRole.donor:
@@ -807,11 +812,50 @@ class _RegisterScreenState extends State<RegisterScreen>
             return null;
           },
         ),
+        const SizedBox(height: 16),
+        CustomTextField(
+          controller: _descriptionController,
+          label: 'Description',
+          icon: Icons.description_outlined,
+          hint: 'Brief description of your NGO\'s work',
+          maxLines: 3,
+        ),
+        const SizedBox(height: 16),
+        _buildCategoryDropdown(),
       ],
     );
   }
 
-  // NGO Head of Organisation Step
+  Widget _buildCategoryDropdown() {
+    final categories = ['education', 'health', 'environment', 'animals', 'poverty', 'disaster', 'other'];
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppTheme.lightGrey,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: AppTheme.borderGrey),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedNGOCategory,
+          isExpanded: true,
+          icon: const Icon(Icons.arrow_drop_down, color: AppTheme.ngoColor),
+          items: categories.map((c) => DropdownMenuItem(
+            value: c,
+            child: Row(
+              children: [
+                const Icon(Icons.category_outlined, size: 18, color: AppTheme.grey),
+                const SizedBox(width: 12),
+                Text(c[0].toUpperCase() + c.substring(1), style: const TextStyle(color: AppTheme.primaryDark)),
+              ],
+            ),
+          )).toList(),
+          onChanged: (v) => setState(() => _selectedNGOCategory = v!),
+        ),
+      ),
+    );
+  }
+
   Widget _buildNGOHeadOfOrgStep() {
     return _buildFormCard(
       title: 'Head of Organisation Details',

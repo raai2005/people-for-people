@@ -7,6 +7,8 @@ import '../../services/donation_service.dart';
 import 'donor_profile_screen.dart';
 import 'donor_donate_screen.dart';
 import 'donor_deliveries_screen.dart';
+import 'donor_discover_screen.dart';
+import 'donor_history_screen.dart';
 import '../../services/notification_service.dart';
 import '../common/notifications_screen.dart';
 
@@ -65,7 +67,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
         child: SafeArea(
           child: Column(
             children: [
-              if (_currentIndex != 3)
+              if (_currentIndex != 4)
                 _buildAppBar(), // Hide app bar for Profile which has its own header
               Expanded(child: _buildContent()),
             ],
@@ -177,15 +179,19 @@ class _DonorDashboardState extends State<DonorDashboard> {
       case 0:
         return _buildDashboardHome();
       case 1:
+        return const DonorDiscoverScreen();
+      case 2:
         return _isEligible
             ? const DonorDonateScreen()
             : _buildEligibilityGate();
-      case 2:
-        return _isEligible
-            ? const DonorDeliveriesScreen()
-            : _buildEligibilityGate();
       case 3:
-        return const DonorProfileScreen();
+        return _isEligible
+            ? const DonorHistoryScreen()
+            : _buildEligibilityGate();
+      case 4:
+        return DonorProfileScreen(
+          onViewAllDonations: () => setState(() => _currentIndex = 3),
+        );
       default:
         return _buildDashboardHome();
     }
@@ -232,7 +238,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => setState(() => _currentIndex = 3),
+                onPressed: () => setState(() => _currentIndex = 4),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.donorColor,
                   foregroundColor: AppTheme.white,
@@ -385,7 +391,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
           children: categories.map((c) {
             final color = c['color'] as Color;
             return InkWell(
-              onTap: () => setState(() => _currentIndex = 1),
+              onTap: () => setState(() => _currentIndex = 2),
               borderRadius: BorderRadius.circular(16),
               child: Container(
                 decoration: BoxDecoration(
@@ -440,7 +446,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
             ),
             if (donations.isNotEmpty)
               TextButton(
-                onPressed: () => setState(() => _currentIndex = 1),
+                onPressed: () => setState(() => _currentIndex = 3),
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.zero,
                   minimumSize: Size.zero,
@@ -607,8 +613,9 @@ class _DonorDashboardState extends State<DonorDashboard> {
   Widget _buildBottomNav() {
     final items = [
       {'icon': Icons.home_rounded, 'label': 'Home'},
+      {'icon': Icons.explore_rounded, 'label': 'Discover'},
       {'icon': Icons.volunteer_activism_rounded, 'label': 'Donate'},
-      {'icon': Icons.local_shipping_rounded, 'label': 'Deliveries'},
+      {'icon': Icons.history_rounded, 'label': 'History'},
       {'icon': Icons.person_rounded, 'label': 'Profile'},
     ];
 
@@ -626,12 +633,13 @@ class _DonorDashboardState extends State<DonorDashboard> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: List.generate(items.length, (index) {
               final isSelected = _currentIndex == index;
-              final isLocked = (index == 1 || index == 2) && !_isEligible;
+              final isLocked = (index == 2 || index == 3) && !_isEligible;
               return InkWell(
                 onTap: () {
+                  final previous = _currentIndex;
                   setState(() => _currentIndex = index);
-                  // Reload user when leaving profile tab to reflect completion changes
-                  if (_currentIndex != 3) _loadUser();
+                  // Reload user only when leaving profile tab
+                  if (previous == 4 && index != 4) _loadUser();
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(

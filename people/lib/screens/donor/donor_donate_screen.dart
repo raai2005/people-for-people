@@ -1252,7 +1252,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
         controller: _amountController,
         keyboardType: TextInputType.number,
         style: const TextStyle(
-          color: AppTheme.white,
+          color: AppTheme.primaryDark,
           fontSize: 18,
           fontWeight: FontWeight.bold,
         ),
@@ -1309,7 +1309,7 @@ class _DonorDonateScreenState extends State<DonorDonateScreen>
         controller: _quantityController,
         keyboardType: TextInputType.number,
         style: const TextStyle(
-          color: AppTheme.white,
+          color: AppTheme.primaryDark,
           fontSize: 18,
           fontWeight: FontWeight.bold,
         ),

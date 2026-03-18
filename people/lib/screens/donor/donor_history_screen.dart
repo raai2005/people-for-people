@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../theme/app_theme.dart';
 import '../../services/donation_service.dart';
 import '../../services/receipt_service.dart';
@@ -109,120 +110,99 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
   }
 
   Widget _buildEnhancedStats() {
-    return StreamBuilder<Map<String, dynamic>>(
-      stream: _donationService.getDonationStats().asStream(),
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _donationService.getDonationStats(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 20),
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: AppTheme.donorColor,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.donorColor.withValues(alpha: 0.3),
-                  blurRadius: 15,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: const Center(
-              child: CircularProgressIndicator(color: AppTheme.white),
-            ),
-          );
-        }
-
-        final stats = snapshot.data!;
+        final stats = snapshot.data ?? {};
         final totalAmount = stats['totalAmount'] ?? 0.0;
         final totalDonations = stats['totalDonations'] ?? 0;
         final livesHelped = (totalDonations * 3.5).round();
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppTheme.donorColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.donorColor.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppTheme.white.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.trending_up_rounded,
-                  color: AppTheme.white,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                'Your Impact Summary',
-                style: TextStyle(
-                  color: AppTheme.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: AppTheme.donorColor,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.donorColor.withValues(alpha: 0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          Row(
+          child: Column(
             children: [
-              Expanded(
-                child: _buildEnhancedStatItem(
-                  'Total Donated',
-                  '₹${_formatNumber(totalAmount)}',
-                  Icons.account_balance_wallet_rounded,
-                  AppTheme.success,
-                ),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppTheme.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.trending_up_rounded,
+                      color: AppTheme.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Your Impact Summary',
+                    style: TextStyle(
+                      color: AppTheme.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
-              Container(
-                width: 1,
-                height: 60,
-                margin: const EdgeInsets.symmetric(horizontal: 12),
-                color: AppTheme.white.withValues(alpha: 0.3),
-              ),
-              Expanded(
-                child: _buildEnhancedStatItem(
-                  'Donations',
-                  '$totalDonations',
-                  Icons.volunteer_activism_rounded,
-                  AppTheme.gold,
-                ),
-              ),
-              Container(
-                width: 1,
-                height: 60,
-                margin: const EdgeInsets.symmetric(horizontal: 12),
-                color: AppTheme.white.withValues(alpha: 0.3),
-              ),
-              Expanded(
-                child: _buildEnhancedStatItem(
-                  'Lives Helped',
-                  livesHelped > 0 ? '$livesHelped+' : '0',
-                  Icons.favorite_rounded,
-                  AppTheme.accent,
-                ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildEnhancedStatItem(
+                      'Total Donated',
+                      '₹${_formatNumber(totalAmount)}',
+                      Icons.account_balance_wallet_rounded,
+                      AppTheme.success,
+                    ),
+                  ),
+                  Container(
+                    width: 1,
+                    height: 60,
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    color: AppTheme.white.withValues(alpha: 0.3),
+                  ),
+                  Expanded(
+                    child: _buildEnhancedStatItem(
+                      'Donations',
+                      '$totalDonations',
+                      Icons.volunteer_activism_rounded,
+                      AppTheme.gold,
+                    ),
+                  ),
+                  Container(
+                    width: 1,
+                    height: 60,
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    color: AppTheme.white.withValues(alpha: 0.3),
+                  ),
+                  Expanded(
+                    child: _buildEnhancedStatItem(
+                      'Lives Helped',
+                      livesHelped > 0 ? '$livesHelped+' : '0',
+                      Icons.favorite_rounded,
+                      AppTheme.accent,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
-      );
+        );
+      },
     );
   }
 
@@ -1033,14 +1013,14 @@ class _DonorHistoryScreenState extends State<DonorHistoryScreen>
 
     final now = DateTime.now();
     return donations.where((d) {
-      final dateStr = d['date'] as String;
-      if (dateStr == 'Today' || dateStr == 'Yesterday') return true;
-      if (dateStr.contains('days ago')) {
-        final days = int.tryParse(dateStr.split(' ')[0]) ?? 0;
-        if (_selectedFilter == 'This Month' && days <= 30) return true;
-        if (_selectedFilter == 'Last 3 Months' && days <= 90) return true;
-        if (_selectedFilter == 'This Year' && days <= 365) return true;
-      }
+      final ts = d['createdAt'];
+      if (ts == null) return false;
+      final date = ts is Timestamp ? ts.toDate() : (ts is DateTime ? ts : null);
+      if (date == null) return false;
+      final days = now.difference(date).inDays;
+      if (_selectedFilter == 'This Month') return days <= 30;
+      if (_selectedFilter == 'Last 3 Months') return days <= 90;
+      if (_selectedFilter == 'This Year') return days <= 365;
       return false;
     }).toList();
   }
