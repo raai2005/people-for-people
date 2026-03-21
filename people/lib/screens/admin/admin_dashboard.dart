@@ -15,7 +15,7 @@ class AdminDashboard extends StatefulWidget {
 class _AdminDashboardState extends State<AdminDashboard> {
   int _currentIndex = 0;
 
-  final _tabs = const ['Overview', 'Pending NGOs', 'All Users'];
+  final _tabs = const ['Overview', 'Pending', 'All Users'];
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +102,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         final donors = docs.where((d) => d['role'] == 'donor').length;
         final volunteers = docs.where((d) => d['role'] == 'volunteer').length;
         final pendingNGOs = docs.where((d) => d['role'] == 'ngo' && (d['isApproved'] == false || d['isApproved'] == null)).length;
+        final pendingVolunteers = docs.where((d) => d['role'] == 'volunteer' && (d['isApproved'] == false || d['isApproved'] == null)).length;
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -131,6 +132,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   Icons.pending_actions_rounded,
                   AppTheme.warning,
                   onTap: () => setState(() => _currentIndex = 1),
+                ),
+              if (pendingVolunteers > 0)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: _alertCard(
+                    '$pendingVolunteers Volunteer${pendingVolunteers > 1 ? 's' : ''} pending approval',
+                    Icons.person_search_rounded,
+                    AppTheme.volunteerColor,
+                    onTap: () => setState(() => _currentIndex = 1),
+                  ),
                 ),
               const SizedBox(height: 16),
               _buildDonationStats(),
@@ -219,13 +230,43 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  // ── PENDING NGOs ──────────────────────────────────────────────────────────
+  // ── PENDING (NGOs + Volunteers) ──────────────────────────────────────────
 
   Widget _buildPendingNGOs() {
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          Container(
+            color: AppTheme.white,
+            child: TabBar(
+              labelColor: AppTheme.primaryDark,
+              unselectedLabelColor: AppTheme.grey,
+              indicatorColor: AppTheme.accent,
+              tabs: const [
+                Tab(text: 'NGOs'),
+                Tab(text: 'Volunteers'),
+              ],
+            ),
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                _buildPendingList('ngo'),
+                _buildPendingList('volunteer'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPendingList(String role) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('users')
-          .where('role', isEqualTo: 'ngo')
+          .where('role', isEqualTo: role)
           .where('isApproved', isEqualTo: false)
           .snapshots(),
       builder: (context, snap) {
@@ -241,7 +282,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 const SizedBox(height: 12),
                 const Text('No pending approvals', style: AppTheme.headingSmall),
                 const SizedBox(height: 4),
-                const Text('All NGOs have been reviewed', style: TextStyle(color: AppTheme.grey)),
+                Text('All ${role == 'ngo' ? 'NGOs' : 'Volunteers'} have been reviewed',
+                    style: const TextStyle(color: AppTheme.grey)),
               ],
             ),
           );
@@ -251,9 +293,120 @@ class _AdminDashboardState extends State<AdminDashboard> {
           padding: const EdgeInsets.all(16),
           itemCount: docs.length,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, i) => _buildNGOCard(docs[i]),
+          itemBuilder: (context, i) => role == 'ngo'
+              ? _buildNGOCard(docs[i])
+              : _buildVolunteerCard(docs[i]),
         );
       },
+    );
+  }
+
+  Widget _buildVolunteerCard(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    final name = data['name'] ?? 'Unknown';
+    final email = data['email'] ?? '';
+    final location = data['location'] ?? '';
+    final qualification = data['qualification'] ?? '';
+    final isWorkingInNGO = data['isWorkingInNGO'] ?? false;
+    final ngoName = data['ngoName'] ?? '';
+
+    return Container(
+      decoration: AppTheme.cardDecoration,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.volunteerColor.withValues(alpha: 0.05),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: AppTheme.volunteerColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.handshake_rounded, color: AppTheme.white, size: 24),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.primaryDark)),
+                      Text(email, style: AppTheme.bodySmall),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppTheme.warning.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text('Pending', style: TextStyle(color: AppTheme.warning, fontSize: 12, fontWeight: FontWeight.w600)),
+                ),
+              ],
+            ),
+          ),
+          // Details
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (location.isNotEmpty) _infoRow(Icons.location_on_outlined, 'Location', location),
+                if (qualification.isNotEmpty) _infoRow(Icons.school_outlined, 'Qualification', qualification),
+                if (isWorkingInNGO && ngoName.isNotEmpty)
+                  _infoRow(Icons.business_outlined, 'Works at NGO', ngoName),
+                if (!isWorkingInNGO)
+                  _infoRow(Icons.person_outline, 'Type', 'Independent Volunteer'),
+              ],
+            ),
+          ),
+          // Action Buttons
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _rejectNGO(doc.id, name),
+                    icon: const Icon(Icons.close_rounded, size: 18),
+                    label: const Text('Reject'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.error,
+                      side: const BorderSide(color: AppTheme.error),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _approveNGO(doc.id, name),
+                    icon: const Icon(Icons.check_rounded, size: 18),
+                    label: const Text('Approve'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.success,
+                      foregroundColor: AppTheme.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      elevation: 0,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

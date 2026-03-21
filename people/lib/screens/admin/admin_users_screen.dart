@@ -129,7 +129,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               children: [
                 _roleBadge(role, color),
                 const SizedBox(width: 6),
-                if (role == 'ngo')
+                if (role == 'ngo' || role == 'volunteer')
                   _statusBadge(isApproved),
               ],
             ),
@@ -139,9 +139,9 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
           icon: const Icon(Icons.more_vert, color: AppTheme.grey),
           onSelected: (action) => _handleUserAction(action, doc.id, name, role, isApproved),
           itemBuilder: (_) => [
-            if (role == 'ngo' && !isApproved)
+            if ((role == 'ngo' || role == 'volunteer') && !isApproved)
               const PopupMenuItem(value: 'approve', child: Row(children: [Icon(Icons.check, color: AppTheme.success, size: 18), SizedBox(width: 8), Text('Approve')])),
-            if (role == 'ngo' && isApproved)
+            if ((role == 'ngo' || role == 'volunteer') && isApproved)
               const PopupMenuItem(value: 'revoke', child: Row(children: [Icon(Icons.block, color: AppTheme.warning, size: 18), SizedBox(width: 8), Text('Revoke Approval')])),
             const PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete_outline, color: AppTheme.error, size: 18), SizedBox(width: 8), Text('Delete User')])),
           ],
