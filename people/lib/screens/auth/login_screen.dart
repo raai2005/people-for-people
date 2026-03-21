@@ -8,6 +8,7 @@ import '../ngo/ngo_dashboard.dart';
 import '../donor/donor_dashboard.dart';
 import '../volunteer/volunteer_dashboard.dart';
 import '../admin/admin_dashboard.dart';
+import '../common/pending_approval_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   final UserRole selectedRole;
@@ -142,18 +143,17 @@ class _LoginScreenState extends State<LoginScreen>
         Widget dashboard;
         switch (user.role) {
           case UserRole.ngo:
-            dashboard = const NGODashboard();
+            dashboard = user.isApproved
+                ? const NGODashboard()
+                : const PendingApprovalScreen(role: 'ngo');
             break;
           case UserRole.donor:
             dashboard = const DonorDashboard();
             break;
           case UserRole.volunteer:
-            if (!user.isApproved) {
-              _showErrorSnackBar('Your account is pending admin approval. You will be notified once approved.');
-              setState(() => _isLoading = false);
-              return;
-            }
-            dashboard = const VolunteerDashboard();
+            dashboard = user.isApproved
+                ? const VolunteerDashboard()
+                : const PendingApprovalScreen(role: 'volunteer');
             break;
         }
 

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../theme/app_theme.dart';
 import '../../models/user_models.dart';
 import 'login_screen.dart';
+import '../admin/admin_dashboard.dart';
 
 class RoleSelectionScreen extends StatefulWidget {
   const RoleSelectionScreen({super.key});
@@ -16,6 +19,10 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
   late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
   late List<Animation<Offset>> _slideAnimations;
+
+  // Secret admin tap
+  int _tapCount = 0;
+  DateTime? _lastTap;
 
   final List<Map<String, dynamic>> _roles = [
     {
@@ -90,6 +97,149 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
     super.dispose();
   }
 
+  void _onLogoTap() {
+    final now = DateTime.now();
+    if (_lastTap != null &&
+        now.difference(_lastTap!) > const Duration(seconds: 3)) {
+      _tapCount = 0;
+    }
+    _lastTap = now;
+    _tapCount++;
+    if (_tapCount >= 5) {
+      _tapCount = 0;
+      _showAdminLoginDialog();
+    }
+  }
+
+  void _showAdminLoginDialog() {
+    final emailCtrl = TextEditingController();
+    final passCtrl = TextEditingController();
+    bool obscure = true;
+    bool loading = false;
+    String? error;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Row(
+            children: [
+              Icon(Icons.shield_rounded, color: AppTheme.primaryDark, size: 22),
+              SizedBox(width: 8),
+              Text('Restricted Access',
+                  style:
+                      TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: emailCtrl,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: Icon(Icons.email_outlined),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: passCtrl,
+                obscureText: obscure,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(obscure
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined),
+                    onPressed: () =>
+                        setDialogState(() => obscure = !obscure),
+                  ),
+                ),
+              ),
+              if (error != null) ...[
+                const SizedBox(height: 10),
+                Text(error!,
+                    style: const TextStyle(
+                        color: AppTheme.error, fontSize: 13)),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: loading ? null : () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryDark,
+                foregroundColor: AppTheme.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: loading
+                  ? null
+                  : () async {
+                      setDialogState(() {
+                        loading = true;
+                        error = null;
+                      });
+                      try {
+                        final cred = await FirebaseAuth.instance
+                            .signInWithEmailAndPassword(
+                          email: emailCtrl.text.trim(),
+                          password: passCtrl.text.trim(),
+                        );
+                        final doc = await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(cred.user!.uid)
+                            .get()
+                            .timeout(
+                              const Duration(seconds: 10),
+                              onTimeout: () => throw Exception('timeout'),
+                            );
+                        final role = doc.data()?['role'];
+                        if (role != 'admin') {
+                          await FirebaseAuth.instance.signOut();
+                          setDialogState(() {
+                            error = 'Access denied.';
+                            loading = false;
+                          });
+                          return;
+                        }
+                        if (ctx.mounted) Navigator.pop(ctx);
+                        if (mounted) {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                                builder: (_) => const AdminDashboard()),
+                            (route) => false,
+                          );
+                        }
+                      } catch (e) {
+                        setDialogState(() {
+                          error = e.toString().replaceAll('Exception: ', '');
+                          loading = false;
+                        });
+                      }
+                    },
+              child: loading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: AppTheme.white))
+                  : const Text('Enter'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _onRoleSelected(UserRole role) {
     Navigator.of(context).push(
       PageRouteBuilder(
@@ -97,16 +247,15 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
             LoginScreen(selectedRole: role),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return SlideTransition(
-            position:
-                Tween<Offset>(
-                  begin: const Offset(1.0, 0.0),
-                  end: Offset.zero,
-                ).animate(
-                  CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeOutCubic,
-                  ),
-                ),
+            position: Tween<Offset>(
+              begin: const Offset(1.0, 0.0),
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+              ),
+            ),
             child: child,
           );
         },
@@ -118,34 +267,28 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.white, // Explicit white background
+      backgroundColor: AppTheme.white,
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        // decoration: const BoxDecoration(gradient: AppTheme.primaryGradient), // Removed gradient
         child: SafeArea(
           child: FadeTransition(
             opacity: _fadeAnimation,
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Header
                   _buildHeader(),
                   const SizedBox(height: 50),
-
-                  // Role Cards
                   ...List.generate(_roles.length, (index) {
                     return SlideTransition(
                       position: _slideAnimations[index],
-                      child: _buildRoleCard(_roles[index], index),
+                      child: _buildRoleCard(_roles[index]),
                     );
                   }),
-
                   const SizedBox(height: 30),
-
-                  // Footer
                   _buildFooter(),
                 ],
               ),
@@ -159,30 +302,31 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
   Widget _buildHeader() {
     return Column(
       children: [
-        // Logo
-        Container(
-          width: 72,
-          height: 72,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppTheme.primaryDark,
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.primaryDark.withValues(alpha: 0.15),
-                blurRadius: 16,
-                spreadRadius: 2,
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.favorite_rounded,
-            size: 32,
-            color: AppTheme.white,
+        // Logo — secret 5-tap admin trigger
+        GestureDetector(
+          onTap: _onLogoTap,
+          child: Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppTheme.primaryDark,
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryDark.withValues(alpha: 0.15),
+                  blurRadius: 16,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.favorite_rounded,
+              size: 32,
+              color: AppTheme.white,
+            ),
           ),
         ),
         const SizedBox(height: 24),
-
-        // Title
         const Text(
           'People for People',
           style: TextStyle(
@@ -193,8 +337,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
           ),
         ),
         const SizedBox(height: 8),
-
-        // Subtitle
         Text(
           'How would you like to contribute?',
           style: TextStyle(fontSize: 15, color: AppTheme.grey),
@@ -203,7 +345,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
     );
   }
 
-  Widget _buildRoleCard(Map<String, dynamic> roleData, int index) {
+  Widget _buildRoleCard(Map<String, dynamic> roleData) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Material(
@@ -221,13 +363,13 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
             ),
             child: Row(
               children: [
-                // Icon Container
                 Container(
                   width: 52,
                   height: 52,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: (roleData['color'] as Color).withValues(alpha: 0.1),
+                    color:
+                        (roleData['color'] as Color).withValues(alpha: 0.1),
                   ),
                   child: Icon(
                     roleData['icon'],
@@ -236,8 +378,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
                   ),
                 ),
                 const SizedBox(width: 16),
-
-                // Text Content
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,8 +398,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
                     ],
                   ),
                 ),
-
-                // Arrow
                 Icon(
                   Icons.arrow_forward_rounded,
                   size: 20,

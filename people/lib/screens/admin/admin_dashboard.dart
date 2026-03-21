@@ -354,6 +354,20 @@ class _AdminDashboardState extends State<AdminDashboard> {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
+                    onPressed: () => _showDetailsDialog(data),
+                    icon: const Icon(Icons.info_outline_rounded, size: 18),
+                    label: const Text('Details'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.info,
+                      side: const BorderSide(color: AppTheme.info),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
                     onPressed: () => _rejectNGO(doc.id, orgName),
                     icon: const Icon(Icons.close_rounded, size: 18),
                     label: const Text('Reject'),
@@ -365,7 +379,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () => _approveNGO(doc.id, orgName),
@@ -424,19 +438,113 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
+  void _showDetailsDialog(Map<String, dynamic> data) {
+    final fields = [
+      ['Organisation Name', data['organizationName']],
+      ['Organisation Email', data['organizationEmail']],
+      ['Organisation Phone', data['organizationPhone']],
+      ['Address', data['address']],
+      ['Location', data['location']],
+      ['Category', data['category']],
+      ['Description', data['description']],
+      ['Head of Org Name', data['headOfOrgName']],
+      ['Head of Org Email', data['headOfOrgEmail']],
+      ['Head of Org Phone', data['headOfOrgPhone']],
+      ['Registered Email', data['email']],
+      ['Registered On', data['createdAt']?.toString()],
+    ];
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.business_rounded, color: AppTheme.ngoColor, size: 20),
+            const SizedBox(width: 8),
+            Expanded(child: Text(data['organizationName'] ?? 'NGO Details', style: const TextStyle(fontSize: 16))),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ...fields.where((f) => f[1] != null && f[1].toString().isNotEmpty).map((f) =>
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(f[0].toString(), style: AppTheme.labelMedium),
+                        const SizedBox(height: 2),
+                        Text(f[1].toString(), style: AppTheme.bodyMedium),
+                        const Divider(height: 16),
+                      ],
+                    ),
+                  ),
+                ),
+                if ((data['govtVerifiedDocUrl'] ?? '').isNotEmpty) ...[
+                  Text('Govt Document', style: AppTheme.labelMedium),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      data['govtVerifiedDocUrl'],
+                      fit: BoxFit.contain,
+                      loadingBuilder: (_, child, progress) => progress == null ? child : const Center(child: CircularProgressIndicator()),
+                      errorBuilder: (_, __, ___) => const Text('Could not load image', style: TextStyle(color: AppTheme.grey)),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                if ((data['headOfOrgIdUrl'] ?? '').isNotEmpty) ...[
+                  Text('Head of Org ID', style: AppTheme.labelMedium),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      data['headOfOrgIdUrl'],
+                      fit: BoxFit.contain,
+                      loadingBuilder: (_, child, progress) => progress == null ? child : const Center(child: CircularProgressIndicator()),
+                      errorBuilder: (_, __, ___) => const Text('Could not load image', style: TextStyle(color: AppTheme.grey)),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Close')),
+        ],
+      ),
+    );
+  }
+
   void _showDocumentDialog(String label, String url) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(label),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Document URL:', style: AppTheme.labelMedium),
-            const SizedBox(height: 8),
-            SelectableText(url, style: AppTheme.bodySmall),
-          ],
+        content: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.network(
+            url,
+            fit: BoxFit.contain,
+            loadingBuilder: (_, child, progress) => progress == null
+                ? child
+                : const Center(child: CircularProgressIndicator()),
+            errorBuilder: (_, __, ___) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.broken_image_outlined, size: 48, color: AppTheme.grey),
+                const SizedBox(height: 8),
+                SelectableText(url, style: AppTheme.bodySmall),
+              ],
+            ),
+          ),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Close')),

@@ -8,6 +8,7 @@ import 'donor/donor_dashboard.dart';
 import 'ngo/ngo_dashboard.dart';
 import 'volunteer/volunteer_dashboard.dart';
 import 'admin/admin_dashboard.dart';
+import 'common/pending_approval_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -186,10 +187,16 @@ class _SplashScreenState extends State<SplashScreen>
               destination = const DonorDashboard();
               break;
             case 'ngo':
-              destination = const NGODashboard();
+              final isApproved = userDoc.data()?['isApproved'] ?? false;
+              destination = isApproved
+                  ? const NGODashboard()
+                  : const PendingApprovalScreen(role: 'ngo');
               break;
             case 'volunteer':
-              destination = const VolunteerDashboard();
+              final isApproved = userDoc.data()?['isApproved'] ?? false;
+              destination = isApproved
+                  ? const VolunteerDashboard()
+                  : const PendingApprovalScreen(role: 'volunteer');
               break;
             case 'admin':
               destination = const AdminDashboard();
