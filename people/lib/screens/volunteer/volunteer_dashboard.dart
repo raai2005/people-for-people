@@ -46,12 +46,12 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
       int hours = 0;
 
       for (var doc in transactionsSnapshot.docs) {
-        final transaction = models.Transaction.fromFirestore(doc);
+        final transaction = models.Transaction.fromMap(doc.data() as Map<String, dynamic>, doc.id);
         if (transaction.status == models.TransactionStatus.completed) {
           completed++;
           deliveries++;
           hours += 2; // Estimate 2 hours per delivery
-        } else if (transaction.status == TransactionStatus.volunteerAssigned) {
+        } else if (transaction.status == models.TransactionStatus.volunteerAssigned) {
           deliveries++;
         }
       }
