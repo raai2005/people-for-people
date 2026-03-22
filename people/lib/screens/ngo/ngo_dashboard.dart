@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../theme/app_theme.dart';
 import 'ngo_profile_screen.dart';
 import '../../services/notification_service.dart';
@@ -21,11 +23,54 @@ class _NGODashboardState extends State<NGODashboard> {
   final AuthService _authService = AuthService();
   NGOUser? _currentUser;
   int _completionPercent = 0;
+  double _totalDonations = 0;
+  int _activeVolunteers = 0;
+  int _totalCampaigns = 0;
+  int _activeCampaigns = 0;
+  bool _isLoadingStats = true;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _loadStats();
+  }
+
+  Future<void> _loadStats() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    try {
+      final transactionsSnapshot = await FirebaseFirestore.instance
+          .collection('transactions')
+          .where('ngoId', isEqualTo: uid)
+          .get();
+
+      double total = 0;
+      Set<String> volunteers = {};
+
+      for (var doc in transactionsSnapshot.docs) {
+        final data = doc.data();
+        if (data['status'] == 'completed') {
+          total += (data['amount'] ?? 0).toDouble();
+        }
+        if (data['volunteerId'] != null) {
+          volunteers.add(data['volunteerId']);
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _totalDonations = total;
+          _activeVolunteers = volunteers.length;
+          _isLoadingStats = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoadingStats = false);
+      }
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -359,6 +404,10 @@ class _NGODashboardState extends State<NGODashboard> {
   }
 
   Widget _buildStatsSection() {
+    if (_isLoadingStats) {
+      return const Center(child: CircularProgressIndicator(color: AppTheme.ngoColor));
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -376,7 +425,7 @@ class _NGODashboardState extends State<NGODashboard> {
             Expanded(
               child: _buildStatCard(
                 'Total Donations',
-                '₹0',
+                '₹${_totalDonations.toStringAsFixed(0)}',
                 Icons.attach_money,
                 AppTheme.success,
                 '--',
@@ -386,7 +435,7 @@ class _NGODashboardState extends State<NGODashboard> {
             Expanded(
               child: _buildStatCard(
                 'Active Volunteers',
-                '0',
+                '$_activeVolunteers',
                 Icons.people_alt_rounded,
                 AppTheme.volunteerColor,
                 '--',
@@ -400,10 +449,10 @@ class _NGODashboardState extends State<NGODashboard> {
             Expanded(
               child: _buildStatCard(
                 'Campaigns',
-                '0',
+                '$_totalCampaigns',
                 Icons.campaign_rounded,
                 AppTheme.gold,
-                '0 Active',
+                '$_activeCampaigns Active',
               ),
             ),
             const SizedBox(width: 12),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../theme/app_theme.dart';
+import '../../services/email_service.dart';
+import '../../services/notification_service.dart';
 
 class AdminUsersScreen extends StatefulWidget {
   const AdminUsersScreen({super.key});
@@ -185,15 +187,41 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   Future<void> _handleUserAction(String action, String docId, String name, String role, bool isApproved) async {
     switch (action) {
       case 'approve':
+        final userDoc = await FirebaseFirestore.instance.collection('users').doc(docId).get();
+        final userData = userDoc.data();
+        final email = userData?['email'] ?? userData?['organizationEmail'] ?? '';
+
         await FirebaseFirestore.instance.collection('users').doc(docId).update({
           'isApproved': true,
           'isVerified': true,
           'approvedAt': FieldValue.serverTimestamp(),
         });
+
+        await EmailService.sendApprovalEmail(
+          toEmail: email,
+          userName: name,
+          role: role,
+        );
+
+        await NotificationService.instance.sendNotification(
+          userId: docId,
+          title: 'Account Approved! 🎉',
+          message: 'Your account has been approved. You can now access all features.',
+          type: 'approval',
+        );
+
         _showSnack('$name approved', AppTheme.success);
         break;
       case 'revoke':
         await FirebaseFirestore.instance.collection('users').doc(docId).update({'isApproved': false});
+
+        await NotificationService.instance.sendNotification(
+          userId: docId,
+          title: 'Account Status Update',
+          message: 'Your account approval has been revoked. Please contact support.',
+          type: 'revoke',
+        );
+
         _showSnack('Approval revoked for $name', AppTheme.warning);
         break;
       case 'delete':

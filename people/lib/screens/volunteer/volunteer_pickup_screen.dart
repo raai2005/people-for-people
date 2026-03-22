@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../theme/app_theme.dart';
 import '../../models/transaction_model.dart';
 import '../common/public_ngo_profile_screen.dart';
@@ -13,8 +14,7 @@ class VolunteerPickupScreen extends StatefulWidget {
 }
 
 class _VolunteerPickupScreenState extends State<VolunteerPickupScreen> {
-  // Toggle for dummy data vs Firestore
-  final bool _useDummyData = true;
+  final bool _useDummyData = false;
 
   @override
   Widget build(BuildContext context) {
@@ -788,47 +788,69 @@ class _VolunteerPickupScreenState extends State<VolunteerPickupScreen> {
     return '${date.day}/${date.month}/${date.year}';
   }
 
-  void _acceptPickup(PickupRequest pickup) {
-    // TODO: Update Firestore to assign this volunteer
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Icon(Icons.check_circle, color: AppTheme.success),
-            const SizedBox(width: 12),
-            const Text('Pickup Accepted!'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('You have accepted to pickup:'),
-            const SizedBox(height: 8),
-            Text(
-              pickup.itemName,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+  Future<void> _acceptPickup(PickupRequest pickup) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    try {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      final userName = userDoc.data()?['name'] ?? 'Volunteer';
+
+      await FirebaseFirestore.instance.collection('transactions').doc(pickup.id).update({
+        'status': 'volunteerAssigned',
+        'volunteerId': uid,
+        'volunteerName': userName,
+        'volunteerAssignedAt': FieldValue.serverTimestamp(),
+      });
+
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: Row(
+              children: [
+                Icon(Icons.check_circle, color: AppTheme.success),
+                const SizedBox(width: 12),
+                const Text('Pickup Accepted!'),
+              ],
             ),
-            Text('From: ${pickup.donorName}'),
-            Text('To: ${pickup.ngoName}'),
-          ],
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.volunteerColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('You have accepted to pickup:'),
+                const SizedBox(height: 8),
+                Text(
+                  pickup.itemName,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text('From: ${pickup.donorName}'),
+                Text('To: ${pickup.ngoName}'),
+              ],
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.volunteerColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text('Got it!'),
               ),
-            ),
-            child: const Text('Got it!'),
+            ],
           ),
-        ],
-      ),
-    );
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error accepting pickup: $e')),
+        );
+      }
+    }
   }
 }
 

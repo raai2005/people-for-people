@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../theme/app_theme.dart';
 import '../../services/auth_service.dart';
+import '../../services/email_service.dart';
+import '../../services/notification_service.dart';
 import '../../screens/auth/role_selection_screen.dart';
 import 'admin_users_screen.dart';
 
@@ -485,16 +487,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   const SizedBox(height: 12),
                   const Text('Documents', style: AppTheme.labelMedium),
                   const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      if (govtDoc.isNotEmpty)
-                        _docChip('Govt Doc', govtDoc),
-                      if (govtDoc.isNotEmpty && headIdUrl.isNotEmpty)
-                        const SizedBox(width: 8),
-                      if (headIdUrl.isNotEmpty)
-                        _docChip('Head ID', headIdUrl),
-                    ],
-                  ),
+                  if (govtDoc.isNotEmpty)
+                    _buildDocumentRow('Govt Document', govtDoc, doc.id, 'govtVerifiedDoc', data),
+                  if (headIdUrl.isNotEmpty)
+                    _buildDocumentRow('Head of Org ID', headIdUrl, doc.id, 'headOfOrgId', data),
                 ],
               ],
             ),
@@ -503,49 +499,72 @@ class _AdminDashboardState extends State<AdminDashboard> {
           // Action Buttons
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Row(
+            child: Column(
               children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _showDetailsDialog(data),
-                    icon: const Icon(Icons.info_outline_rounded, size: 18),
-                    label: const Text('Details'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.info,
-                      side: const BorderSide(color: AppTheme.info),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _showDetailsDialog(data),
+                        icon: const Icon(Icons.info_outline_rounded, size: 18),
+                        label: const Text('Details'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppTheme.info,
+                          side: const BorderSide(color: AppTheme.info),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => _sendDocumentNotification(doc.id, orgName, data),
+                        icon: const Icon(Icons.notifications_active, size: 18),
+                        label: const Text('Notify'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.gold,
+                          foregroundColor: AppTheme.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          elevation: 0,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _rejectNGO(doc.id, orgName),
-                    icon: const Icon(Icons.close_rounded, size: 18),
-                    label: const Text('Reject'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.error,
-                      side: const BorderSide(color: AppTheme.error),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _rejectNGO(doc.id, orgName),
+                        icon: const Icon(Icons.close_rounded, size: 18),
+                        label: const Text('Reject'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppTheme.error,
+                          side: const BorderSide(color: AppTheme.error),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => _approveNGO(doc.id, orgName),
-                    icon: const Icon(Icons.check_rounded, size: 18),
-                    label: const Text('Approve'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.success,
-                      foregroundColor: AppTheme.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      elevation: 0,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => _approveNGO(doc.id, orgName),
+                        icon: const Icon(Icons.check_rounded, size: 18),
+                        label: const Text('Approve'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.success,
+                          foregroundColor: AppTheme.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          elevation: 0,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
@@ -569,26 +588,102 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  Widget _docChip(String label, String url) {
-    return GestureDetector(
-      onTap: () => _showDocumentDialog(label, url),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: AppTheme.info.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppTheme.info.withValues(alpha: 0.3)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.description_outlined, size: 14, color: AppTheme.info),
-            const SizedBox(width: 4),
-            Text(label, style: const TextStyle(color: AppTheme.info, fontSize: 12, fontWeight: FontWeight.w500)),
-          ],
-        ),
+  Widget _buildDocumentRow(String label, String url, String userId, String docField, Map<String, dynamic> userData) {
+    final verificationField = '${docField}Verified';
+    final isVerified = userData[verificationField];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppTheme.lightGrey,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppTheme.grey.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _showDocumentDialog(label, url),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.description_outlined, size: 16, color: AppTheme.info),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          label,
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      const Icon(Icons.open_in_new, size: 14, color: AppTheme.grey),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _markDocumentStatus(userId, verificationField, false, userData),
+                  icon: Icon(
+                    isVerified == false ? Icons.check_circle : Icons.cancel,
+                    size: 16,
+                  ),
+                  label: const Text('Rejected', style: TextStyle(fontSize: 12)),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: isVerified == false ? AppTheme.error : AppTheme.grey,
+                    side: BorderSide(
+                      color: isVerified == false ? AppTheme.error : AppTheme.grey.withValues(alpha: 0.3),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    backgroundColor: isVerified == false ? AppTheme.error.withValues(alpha: 0.1) : null,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => _markDocumentStatus(userId, verificationField, true, userData),
+                  icon: Icon(
+                    isVerified == true ? Icons.check_circle : Icons.verified,
+                    size: 16,
+                  ),
+                  label: const Text('Verified', style: TextStyle(fontSize: 12)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isVerified == true ? AppTheme.success : AppTheme.grey.withValues(alpha: 0.2),
+                    foregroundColor: isVerified == true ? AppTheme.white : AppTheme.primaryDark,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
+  }
+
+  Future<void> _markDocumentStatus(String userId, String field, bool isVerified, Map<String, dynamic> userData) async {
+    await FirebaseFirestore.instance.collection('users').doc(userId).update({
+      field: isVerified,
+    });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Document marked as ${isVerified ? "verified" : "rejected"}'),
+          backgroundColor: isVerified ? AppTheme.success : AppTheme.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   void _showDetailsDialog(Map<String, dynamic> data) {
@@ -708,18 +803,36 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   Future<void> _approveNGO(String docId, String orgName) async {
     final confirm = await _showConfirmDialog(
-      'Approve NGO',
-      'Approve "$orgName"? They will be visible to donors immediately.',
+      'Approve Account',
+      'Approve "$orgName"? They will be notified via email.',
       AppTheme.success,
       'Approve',
     );
     if (!confirm) return;
+
+    final userDoc = await FirebaseFirestore.instance.collection('users').doc(docId).get();
+    final userData = userDoc.data();
+    final email = userData?['email'] ?? userData?['organizationEmail'] ?? '';
+    final role = userData?['role'] ?? 'user';
 
     await FirebaseFirestore.instance.collection('users').doc(docId).update({
       'isApproved': true,
       'isVerified': true,
       'approvedAt': FieldValue.serverTimestamp(),
     });
+
+    await EmailService.sendApprovalEmail(
+      toEmail: email,
+      userName: orgName,
+      role: role,
+    );
+
+    await NotificationService.instance.sendNotification(
+      userId: docId,
+      title: 'Account Approved! 🎉',
+      message: 'Your account has been approved. You can now access all features.',
+      type: 'approval',
+    );
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -733,13 +846,58 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Future<void> _rejectNGO(String docId, String orgName) async {
-    final confirm = await _showConfirmDialog(
-      'Reject NGO',
-      'Reject "$orgName"? This will delete their registration.',
-      AppTheme.error,
-      'Reject',
+    final reasonController = TextEditingController();
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Reject Account'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Provide a reason for rejecting "$orgName":'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: reasonController,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                hintText: 'e.g., Invalid documents, incomplete information...',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, reasonController.text),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.error),
+            child: const Text('Reject'),
+          ),
+        ],
+      ),
     );
-    if (!confirm) return;
+
+    if (reason == null || reason.isEmpty) return;
+
+    final userDoc = await FirebaseFirestore.instance.collection('users').doc(docId).get();
+    final userData = userDoc.data();
+    final email = userData?['email'] ?? userData?['organizationEmail'] ?? '';
+    final role = userData?['role'] ?? 'user';
+
+    await EmailService.sendRejectionEmail(
+      toEmail: email,
+      userName: orgName,
+      role: role,
+      reason: reason,
+    );
+
+    await NotificationService.instance.sendNotification(
+      userId: docId,
+      title: 'Account Application Update',
+      message: 'Your application was not approved. Reason: $reason',
+      type: 'rejection',
+    );
 
     await FirebaseFirestore.instance.collection('users').doc(docId).delete();
 
@@ -771,6 +929,63 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
         ) ??
         false;
+  }
+
+  Future<void> _sendDocumentNotification(String userId, String userName, Map<String, dynamic> userData) async {
+    final govtDocVerified = userData['govtVerifiedDocVerified'];
+    final headIdVerified = userData['headOfOrgIdVerified'];
+
+    final documentStatus = <String, bool>{};
+    if (govtDocVerified != null) {
+      documentStatus['Government Document'] = govtDocVerified;
+    }
+    if (headIdVerified != null) {
+      documentStatus['Head of Organization ID'] = headIdVerified;
+    }
+
+    if (documentStatus.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please verify documents first'),
+          backgroundColor: AppTheme.warning,
+        ),
+      );
+      return;
+    }
+
+    final hasRejected = documentStatus.values.any((v) => v == false);
+    final email = userData['email'] ?? userData['organizationEmail'] ?? '';
+
+    await EmailService.sendDocumentVerificationEmail(
+      toEmail: email,
+      userName: userName,
+      documentStatus: documentStatus,
+    );
+
+    String notifMessage = '';
+    if (hasRejected) {
+      final rejectedDocs = documentStatus.entries.where((e) => e.value == false).map((e) => e.key).join(', ');
+      notifMessage = 'Some documents were rejected: $rejectedDocs. Please re-upload correct documents.';
+    } else {
+      notifMessage = 'All your documents have been verified successfully!';
+    }
+
+    await NotificationService.instance.sendNotification(
+      userId: userId,
+      title: 'Document Verification Update',
+      message: notifMessage,
+      type: 'document_verification',
+    );
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Notification sent to $userName'),
+          backgroundColor: AppTheme.success,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   void _onLogout() async {

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../theme/app_theme.dart';
 import '../auth/role_selection_screen.dart';
 import 'volunteer_pickup_screen.dart';
+import 'volunteer_profile_screen.dart';
+import '../../models/transaction_model.dart';
 
 class VolunteerDashboard extends StatefulWidget {
   const VolunteerDashboard({super.key});
@@ -13,19 +16,79 @@ class VolunteerDashboard extends StatefulWidget {
 
 class _VolunteerDashboardState extends State<VolunteerDashboard> {
   int _currentIndex = 0;
-  bool _isApproved = true; // Set to true for testing, would come from backend
+  bool _isApproved = false;
+  int _completedTasks = 0;
+  int _totalDeliveries = 0;
+  int _totalHours = 0;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVolunteerData();
+  }
+
+  Future<void> _loadVolunteerData() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    try {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      final userData = userDoc.data();
+      
+      final transactionsSnapshot = await FirebaseFirestore.instance
+          .collection('transactions')
+          .where('volunteerId', isEqualTo: uid)
+          .get();
+
+      int completed = 0;
+      int deliveries = 0;
+      int hours = 0;
+
+      for (var doc in transactionsSnapshot.docs) {
+        final transaction = Transaction.fromFirestore(doc);
+        if (transaction.status == TransactionStatus.completed) {
+          completed++;
+          deliveries++;
+          hours += 2; // Estimate 2 hours per delivery
+        } else if (transaction.status == TransactionStatus.volunteerAssigned) {
+          deliveries++;
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _isApproved = userData?['isApproved'] ?? false;
+          _completedTasks = completed;
+          _totalDeliveries = deliveries;
+          _totalHours = hours;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator(color: AppTheme.volunteerColor)),
+      );
+    }
+
     return Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        color: AppTheme.white, // Solid white background
+        color: AppTheme.white,
         child: SafeArea(
           child: Column(
             children: [
-              if (_currentIndex != 4) _buildAppBar(), // Hide for Profile
+              if (_currentIndex != 4) _buildAppBar(),
               if (!_isApproved && _currentIndex == 0)
                 _buildPendingApprovalBanner(),
               Expanded(child: _buildContentBasedOnApproval()),
@@ -38,22 +101,18 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
   }
 
   Widget _buildContentBasedOnApproval() {
-    // Profile is always accessible
     if (_currentIndex == 4) {
-      return _buildProfileContent();
+      return const VolunteerProfileScreen();
     }
 
-    // Home shows pending content if not approved
     if (_currentIndex == 0 && !_isApproved) {
       return _buildPendingContent();
     }
 
-    // If approved, show normal content
     if (_isApproved) {
       return _buildContent();
     }
 
-    // Default to pending content
     return _buildPendingContent();
   }
 
@@ -99,13 +158,6 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                 ),
               ],
             ),
-          ),
-          // Toggle for demo
-          Switch(
-            value: _isApproved,
-            onChanged: (val) => setState(() => _isApproved = val),
-            activeTrackColor: AppTheme.volunteerColor,
-            activeThumbColor: AppTheme.white,
           ),
         ],
       ),
@@ -257,7 +309,7 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
       case 3:
         return _buildPlaceholder('My Tasks', Icons.checklist);
       case 4:
-        return _buildProfileContent();
+        return const VolunteerProfileScreen();
       default:
         return _buildDashboardHome();
     }
@@ -311,9 +363,9 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildStat('15', 'Tasks Done', Icons.task_alt),
-              _buildStat('8', 'Deliveries', Icons.local_shipping),
-              _buildStat('45', 'Hours', Icons.schedule),
+              _buildStat('$_completedTasks', 'Tasks Done', Icons.task_alt),
+              _buildStat('$_totalDeliveries', 'Deliveries', Icons.local_shipping),
+              _buildStat('$_totalHours', 'Hours', Icons.schedule),
             ],
           ),
         ],
@@ -639,158 +691,6 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
                 ),
               );
             }),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProfileContent() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(30),
-            decoration: BoxDecoration(
-              color: AppTheme.volunteerColor.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppTheme.volunteerColor.withValues(alpha: 0.5),
-                width: 2,
-              ),
-            ),
-            child: const Icon(
-              Icons.person_rounded,
-              color: AppTheme.volunteerColor,
-              size: 60,
-            ),
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'Volunteer Profile',
-            style: TextStyle(
-              color: AppTheme.primaryDark,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          if (!_isApproved) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppTheme.warning.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppTheme.warning),
-              ),
-              child: const Text(
-                'Pending Approval',
-                style: TextStyle(
-                  color: AppTheme.warning,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-          const SizedBox(height: 40),
-          // Statistics Summary
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppTheme.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppTheme.grey.withValues(alpha: 0.1)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildStat('15', 'Tasks', Icons.task_alt),
-                _buildStat('45h', 'Time', Icons.schedule),
-                _buildStat('4.8', 'Rating', Icons.star),
-              ],
-            ),
-          ),
-          const SizedBox(height: 40),
-          _buildLogoutButton(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLogoutButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              backgroundColor: AppTheme.primaryDark,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              title: const Row(
-                children: [
-                  Icon(Icons.logout_rounded, color: AppTheme.error),
-                  SizedBox(width: 12),
-                  Text('Logout', style: TextStyle(color: AppTheme.white)),
-                ],
-              ),
-              content: const Text(
-                'Are you sure you want to logout?',
-                style: TextStyle(color: Colors.white70),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    Navigator.pop(context);
-                    await FirebaseAuth.instance.signOut();
-                    if (mounted) {
-                      Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(
-                          builder: (context) => const RoleSelectionScreen(),
-                        ),
-                        (route) => false,
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.error,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text('Logout'),
-                ),
-              ],
-            ),
-          );
-        },
-        icon: const Icon(Icons.logout_rounded),
-        label: const Text('Logout'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppTheme.error,
-          foregroundColor: AppTheme.white,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
           ),
         ),
       ),
