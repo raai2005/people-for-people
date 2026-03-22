@@ -6,7 +6,6 @@ import '../../services/auth_service.dart';
 import '../../services/donation_service.dart';
 import 'donor_profile_screen.dart';
 import 'donor_donate_screen.dart';
-import 'donor_deliveries_screen.dart';
 import 'donor_discover_screen.dart';
 import 'donor_history_screen.dart';
 import '../../services/notification_service.dart';

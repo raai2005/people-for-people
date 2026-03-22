@@ -198,6 +198,11 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
   }
 
   Widget _buildInfoSection() {
+    final qualification = _user?.qualification ?? '';
+    final isWorkingInNGO = _user?.isWorkingInNGO ?? false;
+    final ngoName = _user?.ngoName ?? '';
+    final employeeId = _user?.employeeId ?? '';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -211,13 +216,12 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
         ),
         const SizedBox(height: 16),
         _buildInfoCard('Phone', _user?.phone ?? 'Not provided', Icons.phone),
-        if (_user?.qualification != null && _user!.qualification!.isNotEmpty)
-          _buildInfoCard('Qualification', _user!.qualification!, Icons.school),
-        if (_user?.isWorkingInNGO == true) ...[
-          _buildInfoCard('NGO', _user?.ngoName ?? 'N/A', Icons.business),
-          if (_user?.employeeId != null && _user!.employeeId!.isNotEmpty)
-            _buildInfoCard('Employee ID', _user!.employeeId!, Icons.badge),
-        ],
+        if (qualification.isNotEmpty)
+          _buildInfoCard('Qualification', qualification, Icons.school),
+        if (isWorkingInNGO && ngoName.isNotEmpty)
+          _buildInfoCard('NGO', ngoName, Icons.business),
+        if (employeeId.isNotEmpty)
+          _buildInfoCard('Employee ID', employeeId, Icons.badge),
       ],
     );
   }
@@ -300,10 +304,11 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    Navigator.pop(context);
+                    final navigator = Navigator.of(context);
+                    navigator.pop();
                     await FirebaseAuth.instance.signOut();
                     if (mounted) {
-                      Navigator.of(context).pushAndRemoveUntil(
+                      navigator.pushAndRemoveUntil(
                         MaterialPageRoute(
                           builder: (context) => const RoleSelectionScreen(),
                         ),

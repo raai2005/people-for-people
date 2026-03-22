@@ -5,7 +5,7 @@ import '../../theme/app_theme.dart';
 import '../auth/role_selection_screen.dart';
 import 'volunteer_pickup_screen.dart';
 import 'volunteer_profile_screen.dart';
-import '../../models/transaction_model.dart';
+import '../../models/transaction_model.dart' as models;
 
 class VolunteerDashboard extends StatefulWidget {
   const VolunteerDashboard({super.key});
@@ -46,8 +46,8 @@ class _VolunteerDashboardState extends State<VolunteerDashboard> {
       int hours = 0;
 
       for (var doc in transactionsSnapshot.docs) {
-        final transaction = Transaction.fromFirestore(doc);
-        if (transaction.status == TransactionStatus.completed) {
+        final transaction = models.Transaction.fromFirestore(doc);
+        if (transaction.status == models.TransactionStatus.completed) {
           completed++;
           deliveries++;
           hours += 2; // Estimate 2 hours per delivery

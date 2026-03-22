@@ -510,4 +510,9 @@ class VolunteerUser extends BaseUser {
       volunteerProfile: VolunteerProfile.fromMap(map['volunteerProfile']),
     );
   }
+
+  factory VolunteerUser.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return VolunteerUser.fromMap({...data, 'id': doc.id});
+  }
 }

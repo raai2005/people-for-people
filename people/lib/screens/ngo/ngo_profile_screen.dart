@@ -6,8 +6,6 @@ import '../../services/auth_service.dart';
 import '../../services/cloudinary_service.dart';
 import '../../theme/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'dart:io';
-import 'package:file_picker/file_picker.dart';
 import '../auth/role_selection_screen.dart';
 
 class NGOProfileScreen extends StatefulWidget {
@@ -1614,8 +1612,9 @@ class _NGOProfileScreenState extends State<NGOProfileScreen> {
                   await _loadUserData();
                   if (mounted) Navigator.pop(context);
                 } catch (e) {
-                  if (mounted)
+                  if (mounted) {
                     _showErrorSnackbar('Failed to add certification');
+                  }
                 }
               }
             },
